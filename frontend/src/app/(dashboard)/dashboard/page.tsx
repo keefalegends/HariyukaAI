@@ -2,22 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   FileText,
   ShieldCheck,
   Hash,
   ArrowUpRight,
   Plus,
-  Clock,
-  Sparkles,
-  Zap,
-  Bot,
-  Search,
   BookOpen,
   TrendingUp,
   Layers,
-  CheckCircle2,
   Sliders,
   ChevronRight,
 } from "lucide-react";
@@ -48,7 +41,7 @@ const QUICK_TOPICS = [
     length: "2.000 kata",
   },
   {
-    category: "Perbandingan & Review",
+    category: "Review & Perbandingan",
     title: "10 Tools AI Content Writer Terbaik untuk Blogger Indonesia",
     tag: "Commercial",
     length: "2.500 kata",
@@ -69,7 +62,6 @@ const QUICK_TOPICS = [
 
 export default function DashboardPage() {
   const tk = useTokens();
-  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>({
     total_articles: 0,
     total_words: 0,
@@ -105,7 +97,7 @@ export default function DashboardPage() {
     }[s] ?? "Draft");
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       {/* ─── 1. WELCOME & QUICK ACTION HEADER ─── */}
       <div className={`t-card rounded-2xl p-6 relative overflow-hidden shadow-sm`}>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
@@ -144,8 +136,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ─── 2. KEY METRICS GRID ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      {/* ─── 2. 3-COLUMN METRICS ROW (Clean, No Active Engine) ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         {[
           {
             label: "Total Artikel",
@@ -171,13 +163,6 @@ export default function DashboardPage() {
             icon: ShieldCheck,
             badge: "E-E-A-T",
           },
-          {
-            label: "Active Engine",
-            value: "Claude 4.6",
-            sub: "Gemini 3.7 (SERP/Outline)",
-            icon: Bot,
-            badge: "9Router",
-          },
         ].map((c) => (
           <div key={c.label} className={`t-card rounded-xl p-4.5 space-y-3 shadow-sm hover:border-[#78716c] transition-colors`}>
             <div className="flex items-center justify-between">
@@ -190,7 +175,7 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <div className={`text-xl font-bold tracking-tight ${tk.textPrimary}`}>{c.value}</div>
+              <div className={`text-2xl font-bold tracking-tight ${tk.textPrimary}`}>{c.value}</div>
               <div className={`text-[11px] mt-0.5 ${tk.textMuted} flex items-center justify-between`}>
                 <span>{c.sub}</span>
                 {c.badge && (
@@ -204,110 +189,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* ─── 3. QUICK TOPIC STARTERS / INSPIRASI PENULISAN ─── */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-0.5">
-          <div className="flex items-center gap-2">
-            <TrendingUp className={`w-4 h-4 ${tk.accentText}`} />
-            <h2 className={`text-xs font-semibold uppercase tracking-wider ${tk.textPrimary}`}>
-              Inspirasi Cepat: Topik Siap Tulis
-            </h2>
-          </div>
-          <span className={`text-[11px] ${tk.textFaint}`}>Klik topik untuk langsung masuk ke generator</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {QUICK_TOPICS.map((topic, i) => (
-            <Link
-              key={i}
-              href={`/generator?keyword=${encodeURIComponent(topic.title)}`}
-              className={`t-card rounded-xl p-4 space-y-2.5 shadow-sm hover:border-[#d97757] transition-all group flex flex-col justify-between`}
-            >
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className={`text-[10px] font-semibold uppercase tracking-wider ${tk.accentText}`}>
-                    {topic.category}
-                  </span>
-                  <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${tk.monoBadge}`}>
-                    {topic.tag}
-                  </span>
-                </div>
-                <h3 className={`text-xs font-semibold ${tk.textPrimary} group-hover:${tk.accentText} transition-colors line-clamp-2 leading-snug`}>
-                  {topic.title}
-                </h3>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t t-border text-[10px]">
-                <span className={tk.textFaint}>{topic.length}</span>
-                <span className={`flex items-center gap-1 font-medium ${tk.accentText} group-hover:translate-x-0.5 transition-transform`}>
-                  Mulai <ChevronRight className="w-3 h-3" />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* ─── 4. HOW THE PIPELINE WORKS (VISUAL PIPELINE OVERVIEW) ─── */}
-      <div className={`t-card rounded-2xl p-5 md:p-6 space-y-4 shadow-sm`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg t-bg-tag border t-border flex items-center justify-center">
-              <Layers className={`w-4 h-4 ${tk.accentText}`} />
-            </div>
-            <div>
-              <h3 className={`text-sm font-semibold ${tk.textPrimary}`}>
-                Alur Kerja Multi-Step Agentic SEO Pipeline
-              </h3>
-              <p className={`text-xs ${tk.textMuted}`}>
-                Setiap artikel melewati 4 tahapan AI independen untuk menjamin kualitas peringkat 1 Google.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs pt-1">
-          {[
-            {
-              step: "01",
-              title: "Analisis SERP & Intent",
-              desc: "Ekstraksi LSI keywords, PAA (People Also Ask), dan search intent dari Google.",
-              engine: "Gemini 3.7",
-            },
-            {
-              step: "02",
-              title: "Arsitektur Outline JSON",
-              desc: "Penyusunan hierarki H2/H3 terstruktur dengan alokasi target bobot kata per section.",
-              engine: "Gemini 3.7",
-            },
-            {
-              step: "03",
-              title: "Deep Section Writer",
-              desc: "Penulisan multi-pass bertahap dengan context chaining untuk mencegah repetisi.",
-              engine: "Claude 4.6",
-            },
-            {
-              step: "04",
-              title: "E-E-A-T & SEO Polish",
-              desc: "Penataan bolding penekanan, visual tag placeholders, dan audit skor 100 poin.",
-              engine: "Claude 4.6",
-            },
-          ].map((s) => (
-            <div key={s.step} className={`t-bg-tag border t-border rounded-xl p-3.5 space-y-2`}>
-              <div className="flex items-center justify-between">
-                <span className={`font-mono text-xs font-bold ${tk.accentText}`}>{s.step}</span>
-                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${tk.monoBadge}`}>
-                  {s.engine}
-                </span>
-              </div>
-              <h4 className={`text-xs font-semibold ${tk.textPrimary}`}>{s.title}</h4>
-              <p className={`text-[11px] ${tk.textMuted} leading-relaxed`}>{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ─── 5. RECENT ARTICLES TABLE ─── */}
+      {/* ─── 3. RECENT ARTICLES TABLE ─── */}
       <div className={`t-card rounded-xl overflow-hidden shadow-sm`}>
         <div className="flex items-center justify-between px-5 py-3.5 border-b t-border">
           <div className="flex items-center gap-2">
@@ -336,7 +218,7 @@ export default function DashboardPage() {
             <div>
               <p className={`text-sm font-semibold ${tk.textPrimary}`}>Belum Ada Artikel yang Dibuat</p>
               <p className={`text-xs mt-1 max-w-sm mx-auto ${tk.textMuted}`}>
-                Pilih topik di atas atau masukkan target keyword Anda di Generator Artikel untuk memulai proses penulisan.
+                Pilih topik di bawah atau masukkan target keyword Anda di Generator Artikel untuk memulai proses penulisan.
               </p>
             </div>
             <Link
@@ -414,6 +296,109 @@ export default function DashboardPage() {
             </tbody>
           </table>
         )}
+      </div>
+
+      {/* ─── 4. HOW THE PIPELINE WORKS (VISUAL PIPELINE OVERVIEW) ─── */}
+      <div className={`t-card rounded-2xl p-5 md:p-6 space-y-4 shadow-sm`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg t-bg-tag border t-border flex items-center justify-center">
+              <Layers className={`w-4 h-4 ${tk.accentText}`} />
+            </div>
+            <div>
+              <h3 className={`text-sm font-semibold ${tk.textPrimary}`}>
+                Alur Kerja Multi-Step Agentic SEO Pipeline
+              </h3>
+              <p className={`text-xs ${tk.textMuted}`}>
+                Setiap artikel melewati 4 tahapan AI independen untuk menjamin kualitas peringkat 1 Google.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs pt-1">
+          {[
+            {
+              step: "01",
+              title: "Analisis SERP & Intent",
+              desc: "Ekstraksi LSI keywords, PAA (People Also Ask), dan search intent dari Google.",
+              engine: "Gemini 3.7",
+            },
+            {
+              step: "02",
+              title: "Arsitektur Outline JSON",
+              desc: "Penyusunan hierarki H2/H3 terstruktur dengan alokasi target bobot kata per section.",
+              engine: "Gemini 3.7",
+            },
+            {
+              step: "03",
+              title: "Deep Section Writer",
+              desc: "Penulisan multi-pass bertahap dengan context chaining untuk mencegah repetisi.",
+              engine: "Claude 4.6",
+            },
+            {
+              step: "04",
+              title: "E-E-A-T & SEO Polish",
+              desc: "Penataan bolding penekanan, visual tag placeholders, dan audit skor 100 poin.",
+              engine: "Claude 4.6",
+            },
+          ].map((s) => (
+            <div key={s.step} className={`t-bg-tag border t-border rounded-xl p-3.5 space-y-2`}>
+              <div className="flex items-center justify-between">
+                <span className={`font-mono text-xs font-bold ${tk.accentText}`}>{s.step}</span>
+                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${tk.monoBadge}`}>
+                  {s.engine}
+                </span>
+              </div>
+              <h4 className={`text-xs font-semibold ${tk.textPrimary}`}>{s.title}</h4>
+              <p className={`text-[11px] ${tk.textMuted} leading-relaxed`}>{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ─── 5. QUICK TOPIC STARTERS / INSPIRASI PENULISAN (PALING BAWAH) ─── */}
+      <div className="space-y-3 pt-1">
+        <div className="flex items-center justify-between px-0.5">
+          <div className="flex items-center gap-2">
+            <TrendingUp className={`w-4 h-4 ${tk.accentText}`} />
+            <h2 className={`text-xs font-semibold uppercase tracking-wider ${tk.textPrimary}`}>
+              Inspirasi Cepat: Topik Siap Tulis
+            </h2>
+          </div>
+          <span className={`text-[11px] ${tk.textFaint}`}>Klik topik untuk langsung masuk ke generator</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {QUICK_TOPICS.map((topic, i) => (
+            <Link
+              key={i}
+              href={`/generator?keyword=${encodeURIComponent(topic.title)}`}
+              className={`t-card rounded-xl p-4 space-y-2.5 shadow-sm hover:border-[#d97757] transition-all group flex flex-col justify-between`}
+            >
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className={`text-[10px] font-semibold uppercase tracking-wider ${tk.accentText}`}>
+                    {topic.category}
+                  </span>
+                  <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${tk.monoBadge}`}>
+                    {topic.tag}
+                  </span>
+                </div>
+                <h3 className={`text-xs font-semibold ${tk.textPrimary} group-hover:${tk.accentText} transition-colors line-clamp-2 leading-snug`}>
+                  {topic.title}
+                </h3>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t t-border text-[10px]">
+                <span className={tk.textFaint}>{topic.length}</span>
+                <span className={`flex items-center gap-1 font-medium ${tk.accentText} group-hover:translate-x-0.5 transition-transform`}>
+                  Mulai <ChevronRight className="w-3 h-3" />
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
