@@ -11,7 +11,6 @@ import {
   Clock,
   ArrowRight,
   ChevronRight,
-  Infinity,
   Server,
   Plus,
 } from "lucide-react";
@@ -51,7 +50,6 @@ export default function DashboardPage() {
           const data = await res.json();
           setStats(data);
         } else {
-          // Empty real default
           setStats({
             total_articles: 0,
             total_words: 0,
@@ -61,7 +59,6 @@ export default function DashboardPage() {
           });
         }
       } catch (e) {
-        // Standalone default (0 real data)
         setStats({
           total_articles: 0,
           total_words: 0,
@@ -81,9 +78,9 @@ export default function DashboardPage() {
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950/70 via-purple-950/50 to-slate-900/80 border border-indigo-500/20 p-8 shadow-2xl">
         <div className="relative z-10 max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-            <Infinity className="w-3.5 h-3.5" />
-            <span>Open-Source Self-Hosted Engine • Unlimited AI Generations</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Multi-Step Agentic SEO Pipeline 2.0</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white">
             Selamat Datang di <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">Hariyuka AI</span>
@@ -104,8 +101,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Real Dynamic Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Clean 3-Column Metrics Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Metric 1: Total Articles */}
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
@@ -155,18 +152,6 @@ export default function DashboardPage() {
           <div className="text-[11px] text-emerald-400 font-semibold">
             {stats.average_seo_score >= 80 ? "Rank-ready E-E-A-T" : "Audit Real-Time"}
           </div>
-        </div>
-
-        {/* Metric 4: Quota Status */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>Status Kuota</span>
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
-              <Infinity className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-emerald-400">UNLIMITED</div>
-          <div className="text-[11px] text-slate-400">Self-Hosted 9Router Proxy</div>
         </div>
       </div>
 

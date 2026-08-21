@@ -168,12 +168,8 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-1">
-            <Infinity className="w-3.5 h-3.5" />
-            <span>Open-Source Self-Hosted Settings</span>
-          </div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Pengaturan API & Model AI</h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 mt-1">
             Kelola konfigurasi 9Router Gateway asli, routing model Gemini & Claude, dan koneksi server.
           </p>
         </div>
