@@ -2,21 +2,14 @@
 
 import { useState } from "react";
 import {
-  Sparkles,
   ArrowUp,
   ArrowDown,
   Trash2,
   Plus,
-  Edit2,
-  Check,
-  Tag,
-  HelpCircle,
-  TrendingUp,
-  FileText,
   ChevronRight,
-  BookOpen,
   ArrowLeft,
 } from "lucide-react";
+import { useTokens } from "@/lib/use-tokens";
 
 export interface OutlineSectionItem {
   id: string;
@@ -51,9 +44,9 @@ export function StepOutline({
   onBack,
   isLoading,
 }: StepOutlineProps) {
+  const tk = useTokens();
   const [outline, setOutline] = useState<ArticleOutline>(initialOutline);
   const [title, setTitle] = useState(initialOutline.title || "");
-  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Move Section Up/Down
   const moveSection = (index: number, direction: "up" | "down") => {
@@ -87,7 +80,6 @@ export function StepOutline({
       subsections: [],
     };
     setOutline({ ...outline, sections: [...outline.sections, newSec] });
-    setEditingId(newId);
   };
 
   // Update Section Heading
@@ -111,61 +103,65 @@ export function StepOutline({
   );
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-3xl mx-auto">
       {/* Header */}
       <div className="space-y-1">
-        <div className="flex items-center gap-2 text-[11px] text-[#71717a]">
-          <span className="text-white font-medium">Generator</span>
+        <div className="flex items-center gap-2 text-[11px] t-text-faint">
+          <span className={`font-medium ${tk.textPrimary}`}>Generator</span>
           <span>/</span>
           <span>Outline Review</span>
         </div>
-        <h1 className="text-base font-semibold text-white">Review Kerangka Artikel</h1>
-        <p className="text-xs text-[#71717a]">
-          AI telah menyusun outline berdasarkan analisis SERP. Edit urutan atau konten sebelum memulai penulisan.
+        <h1 className={`text-base font-semibold ${tk.textPrimary}`}>Review Kerangka Artikel</h1>
+        <p className={`text-xs ${tk.textMuted}`}>
+          AI telah menyusun outline berdasarkan analisis SERP. Edit urutan atau bobot kata sebelum memulai penulisan.
         </p>
       </div>
 
       {/* SERP Insights strip */}
       {serpData && (
-        <div className="bg-[#121215] border border-[#27272a] rounded-lg px-5 py-3.5 grid grid-cols-3 gap-3 text-xs">
+        <div className={`t-card rounded-xl px-5 py-3.5 grid grid-cols-3 gap-3 text-xs`}>
           <div>
-            <div className="text-[10px] text-[#52525b] uppercase tracking-wider mb-0.5">Search Intent</div>
-            <div className="text-[#d4d4d8] font-medium">{serpData.search_intent || "Informational"}</div>
+            <div className={`text-[10px] uppercase tracking-wider mb-0.5 ${tk.textFaint}`}>Search Intent</div>
+            <div className={`font-medium ${tk.textSecondary}`}>{serpData.search_intent || "Informational"}</div>
           </div>
           <div>
-            <div className="text-[10px] text-[#52525b] uppercase tracking-wider mb-0.5">LSI Keywords</div>
-            <div className="text-[#d4d4d8] font-medium truncate">{serpData.lsi_keywords?.slice(0, 3).join(", ") || "Terpetakan"}</div>
+            <div className={`text-[10px] uppercase tracking-wider mb-0.5 ${tk.textFaint}`}>LSI Keywords</div>
+            <div className={`font-medium truncate ${tk.textSecondary}`}>
+              {serpData.lsi_keywords?.slice(0, 3).join(", ") || "Terpetakan"}
+            </div>
           </div>
           <div>
-            <div className="text-[10px] text-[#52525b] uppercase tracking-wider mb-0.5">Target Kata</div>
-            <div className="text-[#d4d4d8] font-medium">{totalTargetWords} kata · {outline.sections.length} section</div>
+            <div className={`text-[10px] uppercase tracking-wider mb-0.5 ${tk.textFaint}`}>Target Kata</div>
+            <div className={`font-medium ${tk.textSecondary}`}>
+              {totalTargetWords} kata · {outline.sections.length} section
+            </div>
           </div>
         </div>
       )}
 
       {/* Editable Title */}
       <div className="space-y-1.5">
-        <label className="block text-[11px] font-medium text-[#a1a1aa] uppercase tracking-wider">
+        <label className={`block text-[11px] font-semibold uppercase tracking-wider ${tk.textFaint}`}>
           Judul Artikel
         </label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full bg-[#121215] border border-[#27272a] focus:border-[#3f3f46] rounded-md px-4 py-2.5 text-sm font-semibold text-white focus:outline-none transition-colors"
+          className={`w-full t-input border rounded-lg px-4 py-2.5 text-sm font-semibold t-border-focus transition-colors`}
         />
       </div>
 
       {/* Section List */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-[11px] font-medium text-[#a1a1aa] uppercase tracking-wider">
+          <h3 className={`text-[11px] font-semibold uppercase tracking-wider ${tk.textFaint}`}>
             Struktur Heading ({outline.sections.length})
           </h3>
           <button
             type="button"
             onClick={addH2Section}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#1e1e21] hover:bg-[#27272a] border border-[#27272a] text-[#a1a1aa] hover:text-white text-xs font-medium transition-colors"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${tk.outlineBtn}`}
           >
             <Plus className="w-3.5 h-3.5" /> Tambah H2
           </button>
@@ -174,12 +170,12 @@ export function StepOutline({
         {outline.sections.map((section, idx) => (
           <div
             key={section.id || idx}
-            className="bg-[#121215] border border-[#27272a] hover:border-[#3f3f46] rounded-lg p-4 transition-colors space-y-3 group"
+            className={`t-card rounded-xl p-4 transition-colors space-y-3 group`}
           >
             <div className="flex items-center justify-between gap-3">
               {/* Level & Heading */}
               <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-mono text-[11px] font-bold shrink-0">
+                <span className={`px-2 py-0.5 rounded-md font-mono text-[11px] font-bold shrink-0 ${tk.monoBadge}`}>
                   {section.level.toUpperCase()}
                 </span>
 
@@ -187,13 +183,13 @@ export function StepOutline({
                   type="text"
                   value={section.heading}
                   onChange={(e) => updateSectionHeading(idx, e.target.value)}
-                  className="flex-1 bg-transparent border-b border-transparent focus:border-indigo-500 text-sm font-semibold text-slate-100 focus:outline-none px-1 py-0.5 transition-colors"
+                  className={`flex-1 bg-transparent border-b border-transparent focus:border-[#d97757] text-sm font-semibold ${tk.textPrimary} focus:outline-none px-1 py-0.5 transition-colors`}
                 />
               </div>
 
               {/* Word count target + Reordering & Delete Controls */}
               <div className="flex items-center gap-2 shrink-0">
-                <div className="flex items-center gap-1 text-xs text-slate-400 bg-slate-950/60 px-2 py-1 rounded-lg border border-slate-800">
+                <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded-lg border t-border ${tk.tagBg}`}>
                   <input
                     type="number"
                     min={100}
@@ -201,17 +197,17 @@ export function StepOutline({
                     step={50}
                     value={section.target_word_count}
                     onChange={(e) => updateSectionWordCount(idx, Number(e.target.value))}
-                    className="w-12 bg-transparent text-right font-medium text-slate-200 focus:outline-none"
+                    className={`w-12 bg-transparent text-right font-medium ${tk.textSecondary} focus:outline-none`}
                   />
-                  <span>kata</span>
+                  <span className={tk.textFaint}>kata</span>
                 </div>
 
-                <div className="flex items-center gap-1 border-l border-slate-800 pl-2">
+                <div className="flex items-center gap-1 border-l t-border pl-2">
                   <button
                     type="button"
                     disabled={idx === 0}
                     onClick={() => moveSection(idx, "up")}
-                    className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className={`p-1 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${tk.navInactive}`}
                     title="Pindah ke atas"
                   >
                     <ArrowUp className="w-3.5 h-3.5" />
@@ -220,7 +216,7 @@ export function StepOutline({
                     type="button"
                     disabled={idx === outline.sections.length - 1}
                     onClick={() => moveSection(idx, "down")}
-                    className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className={`p-1 rounded-md transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${tk.navInactive}`}
                     title="Pindah ke bawah"
                   >
                     <ArrowDown className="w-3.5 h-3.5" />
@@ -228,7 +224,7 @@ export function StepOutline({
                   <button
                     type="button"
                     onClick={() => deleteSection(idx)}
-                    className="p-1 rounded-md text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                    className="p-1 rounded-md text-stone-500 hover:text-red-400 transition-colors"
                     title="Hapus section"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -243,7 +239,7 @@ export function StepOutline({
                 {section.key_points.map((pt, pIdx) => (
                   <span
                     key={pIdx}
-                    className="text-[11px] bg-slate-950/80 text-slate-400 px-2 py-0.5 rounded-md border border-slate-800/80"
+                    className={`text-[11px] px-2 py-0.5 rounded-md border ${tk.monoBadge}`}
                   >
                     • {pt}
                   </span>
@@ -255,12 +251,12 @@ export function StepOutline({
       </div>
 
       {/* Action Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-[#27272a]">
+      <div className="flex items-center justify-between pt-4 border-t t-border">
         <button
           type="button"
           onClick={onBack}
           disabled={isLoading}
-          className="px-3.5 py-2 rounded-md border border-[#27272a] text-xs font-medium text-[#71717a] hover:text-white hover:border-[#3f3f46] transition-colors flex items-center gap-1.5"
+          className={`px-3.5 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${tk.outlineBtn}`}
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Kembali
         </button>
@@ -269,12 +265,12 @@ export function StepOutline({
           type="button"
           disabled={isLoading || outline.sections.length === 0}
           onClick={() => onContinue({ ...outline, title }, title)}
-          className="flex items-center gap-2 py-2 px-5 rounded-md bg-white hover:bg-[#f4f4f5] disabled:bg-[#27272a] disabled:text-[#52525b] text-black text-xs font-semibold transition-colors disabled:cursor-not-allowed cursor-pointer"
+          className={`t-accent-bg flex items-center gap-2 py-2 px-5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
         >
           {isLoading ? (
             <>
-              <div className="w-3.5 h-3.5 border-2 border-[#52525b] border-t-[#a1a1aa] rounded-full animate-spin" />
-              <span className="text-[#a1a1aa]">Memulai penulisan...</span>
+              <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Memulai penulisan...</span>
             </>
           ) : (
             <>

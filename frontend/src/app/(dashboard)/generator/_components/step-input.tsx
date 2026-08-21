@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Globe, Sliders, Type, Plus, X, Search, ChevronDown, ArrowRight } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
-import { useTheme } from "@/contexts/theme-context";
+import { useTokens } from "@/lib/use-tokens";
 
 interface StepInputProps {
   onSubmit: (formData: any) => void;
@@ -18,18 +18,10 @@ const TONES = [
   { value: "storytelling",  label: "Storytelling" },
   { value: "academic",      label: "Akademik" },
 ];
-
-const LENGTHS = [
-  { value: 1000, label: "1.000" },
-  { value: 1500, label: "1.500" },
-  { value: 2000, label: "2.000" },
-  { value: 3000, label: "3.000" },
-];
+const LENGTHS = [1000, 1500, 2000, 3000];
 
 export function StepInput({ onSubmit, isLoading }: StepInputProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
+  const tk = useTokens();
   const [keyword, setKeyword] = useState("");
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("id");
@@ -53,166 +45,124 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
     e.preventDefault();
     if (!keyword.trim()) return;
     onSubmit({
-      target_keyword: keyword.trim(),
-      title: title.trim() || undefined,
-      language, tone,
-      target_length: Number(targetLength),
+      target_keyword: keyword.trim(), title: title.trim() || undefined,
+      language, tone, target_length: Number(targetLength),
       secondary_keywords: secondaryKeywords,
       brand_voice_instructions: brandVoice.trim() || undefined,
       competitor_urls: [],
     });
   };
 
-  // Shared theme classes
-  const textPrimary = isDark ? "text-white" : "text-[#09090b]";
-  const textSec = isDark ? "text-[#a1a1aa]" : "text-[#71717a]";
-  const textMuted = isDark ? "text-[#52525b]" : "text-[#a1a1aa]";
-  const labelClass = `text-[11px] font-medium uppercase tracking-wider ${isDark ? "text-[#a1a1aa]" : "text-[#71717a]"}`;
-  const inputClass = `w-full border rounded-md py-2.5 text-sm focus:outline-none transition-colors ${
-    isDark
-      ? "bg-[#121215] border-[#27272a] text-white placeholder:text-[#3f3f46] focus:border-[#3f3f46]"
-      : "bg-white border-[#e4e4e7] text-[#09090b] placeholder:text-[#c4c4c7] focus:border-[#d4d4d8]"
-  }`;
-  const selectClass = `w-full border rounded-md py-2.5 text-sm focus:outline-none appearance-none cursor-pointer transition-colors ${
-    isDark
-      ? "bg-[#121215] border-[#27272a] text-[#d4d4d8] focus:border-[#3f3f46]"
-      : "bg-white border-[#e4e4e7] text-[#3f3f46] focus:border-[#d4d4d8]"
-  }`;
-  const ctaEnabled = isDark
-    ? "bg-white hover:bg-[#f4f4f5] text-black"
-    : "bg-[#09090b] hover:bg-[#18181b] text-white";
-  const ctaDisabled = isDark
-    ? "bg-[#27272a] text-[#52525b]"
-    : "bg-[#e4e4e7] text-[#a1a1aa]";
-  const lenActive = isDark
-    ? "bg-[#1e1e21] border-[#3f3f46] text-white"
-    : "bg-[#09090b] border-[#09090b] text-white";
-  const lenInactive = isDark
-    ? "bg-[#121215] border-[#27272a] text-[#71717a] hover:border-[#3f3f46] hover:text-[#a1a1aa]"
-    : "bg-white border-[#e4e4e7] text-[#a1a1aa] hover:border-[#d4d4d8] hover:text-[#71717a]";
-  const addBtnClass = isDark
-    ? "bg-[#1e1e21] hover:bg-[#27272a] border-[#27272a] text-[#a1a1aa] hover:text-white"
-    : "bg-[#f4f4f5] hover:bg-[#e4e4e7] border-[#e4e4e7] text-[#71717a] hover:text-[#09090b]";
-  const tagClass = isDark
-    ? "bg-[#1e1e21] border-[#27272a] text-[#a1a1aa]"
-    : "bg-[#f4f4f5] border-[#e4e4e7] text-[#52525b]";
+  const labelClass = `text-[11px] font-semibold uppercase tracking-wider ${tk.textFaint}`;
+  const inputShared = "t-input border rounded-lg py-2.5 text-sm t-border-focus transition-colors";
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Page header */}
       <div className="space-y-1">
-        <h1 className={`text-base font-semibold ${textPrimary}`}>Generator Artikel</h1>
-        <p className={`text-xs ${textSec}`}>
+        <h1 className={`text-base font-semibold ${tk.textPrimary}`}>Generator Artikel</h1>
+        <p className={`text-xs ${tk.textMuted}`}>
           Isi detail artikel lalu AI akan menganalisis SERP, membuat outline, dan menulis kontennya.
         </p>
       </div>
 
-      {/* Step indicator */}
+      {/* Breadcrumb steps */}
       <div className="flex items-center gap-2 text-[11px]">
-        <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${isDark ? "bg-white text-black" : "bg-[#09090b] text-white"}`}>1</span>
-        <span className={`font-medium ${textPrimary}`}>Konfigurasi</span>
-        <ChevronDown className={`w-3 h-3 rotate-[-90deg] ${textMuted}`} />
-        <span className={textMuted}>Outline</span>
-        <ChevronDown className={`w-3 h-3 rotate-[-90deg] ${textMuted}`} />
-        <span className={textMuted}>Penulisan</span>
+        <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold t-accent-bg`}>1</span>
+        <span className={`font-medium ${tk.textPrimary}`}>Konfigurasi</span>
+        <ChevronDown className={`w-3 h-3 rotate-[-90deg] ${tk.textFaint}`} />
+        <span className={tk.textMuted}>Outline</span>
+        <ChevronDown className={`w-3 h-3 rotate-[-90deg] ${tk.textFaint}`} />
+        <span className={tk.textMuted}>Penulisan</span>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Target Keyword */}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Primary Keyword */}
         <div className="space-y-1.5">
-          <label className={labelClass}>
-            Target Keyword Utama <span className="text-red-500">*</span>
-          </label>
+          <label className={labelClass}>Target Keyword Utama <span className="text-red-500">*</span></label>
           <div className="relative">
-            <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${textMuted}`} />
+            <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${tk.textFaint}`} />
             <input
               type="text" required value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="contoh: cara riset keyword seo untuk pemula"
-              className={`${inputClass} pl-9 pr-4`}
+              className={`w-full ${inputShared} pl-9 pr-4`}
             />
           </div>
-          <p className={`text-[11px] ${textMuted}`}>Keyword yang ingin mendominasi halaman 1 Google.</p>
+          <p className={`text-[11px] ${tk.textFaint}`}>Keyword yang ingin mendominasi halaman 1 Google.</p>
         </div>
 
-        {/* Custom Title */}
+        {/* Title */}
         <div className="space-y-1.5">
           <label className={labelClass}>
-            Judul Artikel{" "}
-            <span className={`font-normal normal-case ${textMuted}`}>— Opsional, dibuatkan otomatis jika kosong</span>
+            Judul Artikel <span className={`font-normal normal-case ${tk.textFaint}`}>— Opsional</span>
           </label>
           <div className="relative">
-            <Type className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${textMuted}`} />
+            <Type className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${tk.textFaint}`} />
             <input
               type="text" value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Biarkan kosong untuk judul otomatis yang click-worthy"
-              className={`${inputClass} pl-9 pr-4`}
+              className={`w-full ${inputShared} pl-9 pr-4`}
             />
           </div>
         </div>
 
-        {/* Language + Tone — 2 col */}
+        {/* Language + Tone */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <label className={labelClass}>Bahasa</label>
-            <div className="relative">
-              <Globe className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${textMuted}`} />
-              <select value={language} onChange={(e) => setLanguage(e.target.value)} className={`${selectClass} pl-9 pr-3`}>
-                <option value="id">Indonesia</option>
-                <option value="en">English</option>
-                <option value="ms">Melayu</option>
-                <option value="es">Español</option>
-              </select>
+          {[
+            { label: "Bahasa", icon: Globe, value: language, onChange: setLanguage, options: [{v:"id",l:"Indonesia"},{v:"en",l:"English"},{v:"ms",l:"Melayu"},{v:"es",l:"Español"}] },
+            { label: "Tone of Voice", icon: Sliders, value: tone, onChange: setTone, options: TONES.map(t => ({v:t.value,l:t.label})) },
+          ].map((field) => (
+            <div key={field.label} className="space-y-1.5">
+              <label className={labelClass}>{field.label}</label>
+              <div className="relative">
+                <field.icon className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${tk.textFaint}`} />
+                <select
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className={`w-full ${inputShared} pl-9 pr-3 appearance-none cursor-pointer`}
+                >
+                  {field.options.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+                </select>
+              </div>
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className={labelClass}>Tone of Voice</label>
-            <div className="relative">
-              <Sliders className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${textMuted}`} />
-              <select value={tone} onChange={(e) => setTone(e.target.value)} className={`${selectClass} pl-9 pr-3`}>
-                {TONES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Target Length */}
+        {/* Length selector */}
         <div className="space-y-1.5">
           <label className={labelClass}>Target Panjang Artikel</label>
           <div className="flex gap-2">
             {LENGTHS.map((l) => (
               <button
-                key={l.value} type="button"
-                onClick={() => setTargetLength(l.value)}
-                className={`flex-1 py-2 rounded-md text-xs font-medium border transition-colors ${targetLength === l.value ? lenActive : lenInactive}`}
+                key={l} type="button"
+                onClick={() => setTargetLength(l)}
+                className={`flex-1 py-2 rounded-lg text-xs font-medium border transition-all ${targetLength === l ? tk.lenActive : tk.lenInactive}`}
               >
-                {l.label}
+                {l.toLocaleString("id-ID")}
               </button>
             ))}
           </div>
-          <p className={`text-[11px] ${textMuted}`}>~{formatNumber(targetLength)} kata target output akhir.</p>
+          <p className={`text-[11px] ${tk.textFaint}`}>~{formatNumber(targetLength)} kata target output akhir.</p>
         </div>
 
-        {/* Secondary Keywords */}
+        {/* Secondary keywords */}
         <div className="space-y-1.5">
           <label className={labelClass}>
-            Secondary & LSI Keywords{" "}
-            <span className={`font-normal normal-case ${textMuted}`}>— Opsional</span>
+            Secondary & LSI Keywords <span className={`font-normal normal-case ${tk.textFaint}`}>— Opsional</span>
           </label>
           <div className="flex gap-2">
             <input
               type="text" value={newKeywordInput}
               onChange={(e) => setNewKeywordInput(e.target.value)}
               onKeyDown={handleAddSecondary}
-              placeholder="Ketik lalu tekan Enter untuk menambah..."
-              className={`flex-1 border rounded-md px-3 py-2 text-xs focus:outline-none transition-colors ${
-                isDark ? "bg-[#121215] border-[#27272a] text-white placeholder:text-[#3f3f46] focus:border-[#3f3f46]" : "bg-white border-[#e4e4e7] text-[#09090b] placeholder:text-[#c4c4c7] focus:border-[#d4d4d8]"
-              }`}
+              placeholder="Ketik lalu tekan Enter..."
+              className={`flex-1 t-input border rounded-lg px-3 py-2 text-xs t-border-focus transition-colors`}
             />
             <button
               type="button" onClick={handleAddSecondary}
-              className={`px-3 py-2 border rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${addBtnClass}`}
+              className={`px-3 py-2 border rounded-lg text-xs font-medium transition-colors flex items-center gap-1 ${tk.outlineBtn}`}
             >
               <Plus className="w-3.5 h-3.5" /> Tambah
             </button>
@@ -220,7 +170,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
           {secondaryKeywords.length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-1">
               {secondaryKeywords.map((kw) => (
-                <span key={kw} className={`inline-flex items-center gap-1 px-2 py-1 rounded border text-[11px] font-mono ${tagClass}`}>
+                <span key={kw} className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-[11px] font-mono ${tk.monoBadge}`}>
                   {kw}
                   <button type="button" onClick={() => setSecondaryKeywords(secondaryKeywords.filter((k) => k !== kw))} className="hover:text-red-400 transition-colors ml-0.5">
                     <X className="w-3 h-3" />
@@ -231,33 +181,30 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
           )}
         </div>
 
-        {/* Brand Voice */}
+        {/* Brand voice */}
         <div className="space-y-1.5">
           <label className={labelClass}>
-            Instruksi Tambahan / Brand Voice{" "}
-            <span className={`font-normal normal-case ${textMuted}`}>— Opsional</span>
+            Instruksi / Brand Voice <span className={`font-normal normal-case ${tk.textFaint}`}>— Opsional</span>
           </label>
           <textarea
             rows={2} value={brandVoice}
             onChange={(e) => setBrandVoice(e.target.value)}
             placeholder="Contoh: Sebutkan brand kami, hindari kata klise AI, gunakan contoh dari tools lokal..."
-            className={`w-full border rounded-md p-3 text-xs focus:outline-none resize-none transition-colors ${
-              isDark ? "bg-[#121215] border-[#27272a] text-white placeholder:text-[#3f3f46] focus:border-[#3f3f46]" : "bg-white border-[#e4e4e7] text-[#09090b] placeholder:text-[#c4c4c7] focus:border-[#d4d4d8]"
-            }`}
+            className={`w-full t-input border rounded-lg p-3 text-xs t-border-focus resize-none transition-colors`}
           />
         </div>
 
-        {/* Submit */}
-        <div className="pt-2">
+        {/* CTA */}
+        <div className="pt-1">
           <button
             type="submit"
             disabled={isLoading || !keyword.trim()}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 px-6 rounded-md text-sm font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed ${isLoading || !keyword.trim() ? ctaDisabled : ctaEnabled}`}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 px-6 rounded-lg text-sm font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 t-accent-bg`}
           >
             {isLoading ? (
               <>
-                <div className={`w-4 h-4 border-2 rounded-full animate-spin ${isDark ? "border-[#52525b] border-t-[#a1a1aa]" : "border-[#c4c4c7] border-t-[#71717a]"}`} />
-                <span className={textMuted}>Menganalisis SERP & membuat outline...</span>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Menganalisis SERP & membuat outline...</span>
               </>
             ) : (
               <>

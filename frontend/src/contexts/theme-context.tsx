@@ -2,40 +2,34 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light";
+export type Theme = "dark" | "light" | "warm";
 
 interface ThemeContextType {
   theme: Theme;
-  toggleTheme: () => void;
   setTheme: (t: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "dark",
-  toggleTheme: () => {},
+  theme: "warm",
   setTheme: () => {},
 });
 
+const ALL_THEMES: Theme[] = ["dark", "light", "warm"];
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("warm");
 
   useEffect(() => {
     const stored = localStorage.getItem("hariyuka-theme") as Theme | null;
-    if (stored === "light" || stored === "dark") {
-      setThemeState(stored);
-      applyTheme(stored);
-    }
+    const initial = ALL_THEMES.includes(stored as Theme) ? (stored as Theme) : "warm";
+    setThemeState(initial);
+    applyTheme(initial);
   }, []);
 
   const applyTheme = (t: Theme) => {
     const root = document.documentElement;
-    if (t === "light") {
-      root.classList.remove("dark");
-      root.classList.add("light");
-    } else {
-      root.classList.remove("light");
-      root.classList.add("dark");
-    }
+    root.classList.remove(...ALL_THEMES);
+    root.classList.add(t);
   };
 
   const setTheme = (t: Theme) => {
@@ -44,10 +38,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("hariyuka-theme", t);
   };
 
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

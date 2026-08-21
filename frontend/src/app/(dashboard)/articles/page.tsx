@@ -4,18 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   FileText,
-  Sparkles,
   Search,
-  Filter,
   CheckCircle2,
   Clock,
-  ChevronRight,
-  Trash2,
-  ExternalLink,
   ShieldCheck,
   Plus,
+  Loader2,
+  ArrowUpRight,
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
+import { useTokens } from "@/lib/use-tokens";
 
 interface ArticleItem {
   id: string;
@@ -28,7 +26,8 @@ interface ArticleItem {
   created_at: string;
 }
 
-export function ArticlesPage() {
+export default function ArticlesPage() {
+  const tk = useTokens();
   const [articles, setArticles] = useState<ArticleItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -55,8 +54,8 @@ export function ArticlesPage() {
 
   const filteredArticles = articles.filter((a) => {
     const matchesSearch =
-      a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.target_keyword.toLowerCase().includes(searchQuery.toLowerCase());
+      a.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.target_keyword?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || a.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -65,25 +64,25 @@ export function ArticlesPage() {
     switch (status) {
       case "completed":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <CheckCircle2 className="w-3 h-3" /> Selesai
+          <span className={`inline-flex items-center gap-1 font-semibold ${tk.statusSuccess}`}>
+            <CheckCircle2 className="w-3.5 h-3.5" /> Selesai
           </span>
         );
       case "outline_pending":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-400">
-            <Clock className="w-3 h-3" /> Review Outline
+          <span className={`inline-flex items-center gap-1 font-semibold ${tk.statusPending}`}>
+            <Clock className="w-3.5 h-3.5" /> Review Outline
           </span>
         );
       case "generating":
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <Sparkles className="w-3 h-3 animate-spin" /> Menulis...
+          <span className={`inline-flex items-center gap-1 font-semibold ${tk.statusRunning}`}>
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Menulis...
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+          <span className={`inline-flex items-center gap-1 font-semibold ${tk.statusDraft}`}>
             Draft
           </span>
         );
@@ -95,136 +94,152 @@ export function ArticlesPage() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Artikel Saya</h1>
-          <p className="text-xs text-slate-400">
-            Kelola, edit, dan pantau performa seluruh artikel SEO yang telah Anda buat.
+          <h1 className={`text-base font-semibold ${tk.textPrimary}`}>Artikel Saya</h1>
+          <p className={`text-xs ${tk.textMuted} mt-0.5`}>
+            Daftar seluruh artikel SEO yang telah dibuat melalui pipeline Hariyuka AI.
           </p>
         </div>
 
         <Link
           href="/generator"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 transition-all active:scale-95 w-fit"
+          className="t-accent-bg flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-fit"
         >
-          <Plus className="w-4 h-4" />
-          <span>Tulis Artikel Baru</span>
+          <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+          <span>Buat Artikel Baru</span>
         </Link>
       </div>
 
-      {/* Search & Filter Controls */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+      {/* Filter & Search Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="relative w-full sm:w-72">
+          <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 ${tk.textFaint}`} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari berdasarkan judul atau keyword..."
-            className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+            className={`w-full t-input border rounded-lg pl-8 pr-3 py-1.5 text-xs t-border-focus transition-colors`}
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
-          {["all", "completed", "outline_pending"].map((st) => (
+        <div className="flex items-center gap-1.5 w-full sm:w-auto">
+          {["all", "completed", "generating", "outline_pending"].map((st) => (
             <button
               key={st}
+              type="button"
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                 statusFilter === st
-                  ? "bg-indigo-600/20 border-indigo-500 text-indigo-300"
-                  : "bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700"
+                  ? "t-accent-bg border-transparent"
+                  : tk.outlineBtn
               }`}
             >
-              {st === "all" ? "Semua Status" : st === "completed" ? "Selesai" : "Menunggu Review"}
+              {st === "all"
+                ? "Semua"
+                : st === "completed"
+                ? "Selesai"
+                : st === "generating"
+                ? "Menulis"
+                : "Review"}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Articles Table */}
-      <div className="bg-slate-900/70 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
-              <tr>
-                <th className="py-3.5 px-5">Judul & Keyword</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4">Kata</th>
-                <th className="py-3.5 px-4">Skor SEO</th>
-                <th className="py-3.5 px-4">Dibuat Pada</th>
-                <th className="py-3.5 px-5 text-right">Aksi</th>
+      {/* Table Card */}
+      <div className={`t-card rounded-xl overflow-hidden shadow-sm`}>
+        {isLoading ? (
+          <div className="py-20 flex flex-col items-center justify-center space-y-2">
+            <Loader2 className={`w-5 h-5 animate-spin ${tk.accentText}`} />
+            <span className={`text-xs ${tk.textMuted}`}>Memuat daftar artikel...</span>
+          </div>
+        ) : filteredArticles.length === 0 ? (
+          <div className="py-20 px-4 text-center space-y-3">
+            <div className={`w-10 h-10 rounded-xl t-bg-tag border t-border flex items-center justify-center mx-auto`}>
+              <FileText className={`w-5 h-5 ${tk.textFaint}`} />
+            </div>
+            <div>
+              <h3 className={`text-sm font-semibold ${tk.textPrimary}`}>Belum Ada Artikel</h3>
+              <p className={`text-xs ${tk.textMuted} mt-1 max-w-sm mx-auto`}>
+                Tidak ada artikel yang sesuai dengan kriteria pencarian. Buat artikel baru sekarang.
+              </p>
+            </div>
+            <Link
+              href="/generator"
+              className="t-accent-bg inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors mt-2"
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+              <span>Tulis Artikel</span>
+            </Link>
+          </div>
+        ) : (
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b t-border">
+                <th className={`py-2.5 px-5 text-left text-[11px] font-medium ${tk.textFaint} w-full`}>Judul Artikel</th>
+                <th className={`py-2.5 px-4 text-left text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>Target Keyword</th>
+                <th className={`py-2.5 px-4 text-right text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>Kata</th>
+                <th className={`py-2.5 px-4 text-right text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>SEO Score</th>
+                <th className={`py-2.5 px-4 text-left text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>Status</th>
+                <th className={`py-2.5 px-4 text-left text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>Tanggal</th>
+                <th className={`py-2.5 px-5 text-right text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {filteredArticles.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
-                    Belum ada artikel yang cocok. Buat artikel pertama Anda sekarang!
+            <tbody className={`divide-y ${tk.dividerRow}`}>
+              {filteredArticles.map((art) => (
+                <tr key={art.id} className="t-bg-card-hover transition-colors group">
+                  <td className="py-3.5 px-5">
+                    <Link
+                      href={`/articles/${art.id}`}
+                      className={`font-semibold ${tk.textPrimary} hover:${tk.accentText} transition-colors line-clamp-1 flex items-center gap-1.5`}
+                    >
+                      {art.title}
+                      <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />
+                    </Link>
+                  </td>
+                  <td className="py-3.5 px-4">
+                    <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded border ${tk.monoBadge}`}>
+                      {art.target_keyword}
+                    </span>
+                  </td>
+                  <td className={`py-3.5 px-4 text-right ${tk.textMuted} tabular-nums`}>
+                    {art.word_count > 0 ? formatNumber(art.word_count) : "—"}
+                  </td>
+                  <td className="py-3.5 px-4 text-right">
+                    {art.seo_score > 0 ? (
+                      <span className="inline-flex items-center gap-1 font-semibold text-emerald-400">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        {art.seo_score}/100
+                      </span>
+                    ) : (
+                      <span className={tk.textFaint}>—</span>
+                    )}
+                  </td>
+                  <td className="py-3.5 px-4">
+                    {getStatusBadge(art.status)}
+                  </td>
+                  <td className={`py-3.5 px-4 ${tk.textFaint}`}>
+                    {new Date(art.created_at).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </td>
+                  <td className="py-3.5 px-5 text-right">
+                    <Link
+                      href={`/articles/${art.id}`}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${tk.outlineBtn}`}
+                    >
+                      <span>Buka</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </Link>
                   </td>
                 </tr>
-              ) : (
-                filteredArticles.map((art) => (
-                  <tr
-                    key={art.id}
-                    className="hover:bg-slate-800/40 transition-colors group"
-                  >
-                    <td className="py-4 px-5 max-w-sm">
-                      <Link
-                        href={`/articles/${art.id}`}
-                        className="font-bold text-slate-100 group-hover:text-indigo-400 transition-colors line-clamp-1 text-sm"
-                      >
-                        {art.title}
-                      </Link>
-                      <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1.5">
-                        <span className="font-mono bg-slate-950/80 px-1.5 py-0.5 rounded border border-slate-800">
-                          {art.target_keyword}
-                        </span>
-                        <span>• {art.language.toUpperCase()}</span>
-                      </div>
-                    </td>
-
-                    <td className="py-4 px-4">{getStatusBadge(art.status)}</td>
-
-                    <td className="py-4 px-4 font-semibold text-slate-200">
-                      {art.word_count > 0 ? `${formatNumber(art.word_count)} kata` : "-"}
-                    </td>
-
-                    <td className="py-4 px-4">
-                      {art.seo_score > 0 ? (
-                        <span className="inline-flex items-center gap-1 font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          {art.seo_score}/100
-                        </span>
-                      ) : (
-                        <span className="text-slate-600">-</span>
-                      )}
-                    </td>
-
-                    <td className="py-4 px-4 text-slate-400">
-                      {new Date(art.created_at).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-
-                    <td className="py-4 px-5 text-right">
-                      <Link
-                        href={`/articles/${art.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-semibold transition-all"
-                      >
-                        <span>Buka Editor</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
-        </div>
+        )}
       </div>
     </div>
   );
 }
-
-export default ArticlesPage;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PenLine,
   LayoutDashboard,
@@ -13,10 +13,13 @@ import {
   ChevronRight,
   Sun,
   Moon,
+  Flame,
   Info,
   X,
+  LogOut,
 } from "lucide-react";
-import { useTheme } from "@/contexts/theme-context";
+import { useTheme, type Theme } from "@/contexts/theme-context";
+import { useTokens } from "@/lib/use-tokens";
 
 const navigation = [
   { name: "Dashboard",   href: "/dashboard", icon: LayoutDashboard },
@@ -26,199 +29,273 @@ const navigation = [
   { name: "API & Model", href: "/settings",   icon: Settings },
 ];
 
+const THEMES: { key: Theme; label: string; icon: any; desc: string }[] = [
+  { key: "warm",  label: "Warm (Claude.ai)", icon: Flame, desc: "Warm editorial · Terracotta accent (Default)" },
+  { key: "dark",  label: "Dark (Zinc)",      icon: Moon,  desc: "Cool dark · Minimal neutral" },
+  { key: "light", label: "Light (Sand)",     icon: Sun,   desc: "Warm off-white · Sand cream" },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const tk = useTokens();
   const [collapsed, setCollapsed] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [articleCount, setArticleCount] = useState<number>(0);
 
-  const isDark = theme === "dark";
+  useEffect(() => {
+    fetch("http://localhost:8000/api/v1/settings/dashboard-stats")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.total_articles !== undefined) setArticleCount(d.total_articles);
+      })
+      .catch(() => {});
+  }, []);
 
-  const base = isDark
-    ? "bg-[#121215] border-[#27272a] text-[#a1a1aa]"
-    : "bg-white border-[#e4e4e7] text-[#3f3f46]";
-  const activeLink = isDark
-    ? "bg-[#27272a] text-white"
-    : "bg-[#f4f4f5] text-[#09090b]";
-  const hoverLink = isDark
-    ? "hover:bg-[#1e1e21] hover:text-white"
-    : "hover:bg-[#f4f4f5] hover:text-[#09090b]";
-  const mutedText = isDark ? "text-[#52525b]" : "text-[#a1a1aa]";
-  const borderTop = isDark ? "border-[#27272a]" : "border-[#e4e4e7]";
-  const bgHover = isDark ? "hover:bg-[#1e1e21]" : "hover:bg-[#f4f4f5]";
-  const cardBg = isDark ? "bg-[#1e1e21] border-[#27272a]" : "bg-[#f4f4f5] border-[#e4e4e7]";
+  const handleLogout = () => {
+    if (confirm("Reset sesi kerja Hariyuka AI?")) {
+      window.location.href = "/dashboard";
+    }
+  };
 
   return (
     <>
-      {/* About Modal */}
+      {/* ─── ABOUT MODAL ─── */}
       {showAbout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowAbout(false)}
-          />
-          <div className={`relative z-10 w-full max-w-sm rounded-xl border p-6 shadow-2xl space-y-4 ${isDark ? "bg-[#121215] border-[#27272a]" : "bg-white border-[#e4e4e7]"}`}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAbout(false)} />
+          <div className={`relative z-10 w-full max-w-sm rounded-2xl border p-6 shadow-2xl space-y-5 ${tk.cardBg}`}>
+            {/* Header */}
             <div className="flex items-center justify-between">
-              <h2 className={`text-sm font-semibold ${isDark ? "text-white" : "text-[#09090b]"}`}>Tentang Hariyuka AI</h2>
-              <button
-                onClick={() => setShowAbout(false)}
-                className={`p-1 rounded-md ${bgHover} transition-colors`}
-              >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg t-accent-bg flex items-center justify-center">
+                  <PenLine className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className={`text-sm font-semibold ${tk.textPrimary}`}>Hariyuka AI</h2>
+                  <p className={`text-[10px] ${tk.textFaint}`}>Next-Gen SEO Platform</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAbout(false)} className={`p-1.5 rounded-lg transition-colors ${tk.navInactive}`}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className={`space-y-3 text-xs ${isDark ? "text-[#a1a1aa]" : "text-[#52525b]"}`}>
-              <div className={`p-3 rounded-lg border ${cardBg} space-y-1`}>
-                <div className={`text-[10px] uppercase tracking-wider font-medium ${mutedText}`}>Platform</div>
-                <p className={`font-medium ${isDark ? "text-white" : "text-[#09090b]"}`}>Hariyuka AI</p>
-                <p className={mutedText}>Multi-Step Agentic SEO Article Writer — 100% Open-Source & Self-Hosted</p>
-              </div>
+            {/* About body */}
+            <div className="space-y-4">
+              <p className={`text-xs leading-relaxed ${tk.textMuted}`}>
+                Platform SEO Article Generator berbasis multi-step agentic AI pipeline. 100% open-source & self-hosted tanpa batasan kata atau paywall.
+              </p>
 
-              <div className={`p-3 rounded-lg border ${cardBg} space-y-2`}>
-                <div className={`text-[10px] uppercase tracking-wider font-medium ${mutedText}`}>Tim Pembuat</div>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center text-[11px] font-bold text-white">K</div>
-                  <div>
-                    <div className={`font-semibold ${isDark ? "text-white" : "text-[#09090b]"}`}>Keefa</div>
-                    <div className={mutedText}>Developer & Architect</div>
+              {/* Team Section */}
+              <div className="space-y-2">
+                <div className={`text-[10px] font-semibold uppercase tracking-widest ${tk.textFaint}`}>Tim Pembuat</div>
+                {[
+                  { initial: "K", name: "Keefa", role: "Developer & Architect" },
+                  { initial: "S", name: "Salna", role: "Helper & Content Strategist" },
+                ].map((p) => (
+                  <div key={p.name} className={`flex items-center gap-3 p-3 rounded-xl border ${tk.tagBg}`}>
+                    <div className="w-8 h-8 rounded-full t-accent-bg flex items-center justify-center text-sm font-bold shrink-0">
+                      {p.initial}
+                    </div>
+                    <div>
+                      <div className={`text-sm font-semibold ${tk.textPrimary}`}>{p.name}</div>
+                      <div className={`text-[11px] ${tk.textMuted}`}>{p.role}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-full bg-zinc-600 flex items-center justify-center text-[11px] font-bold text-white">S</div>
-                  <div>
-                    <div className={`font-semibold ${isDark ? "text-white" : "text-[#09090b]"}`}>Salna</div>
-                    <div className={mutedText}>Helper & Content Strategist</div>
-                  </div>
-                </div>
+                ))}
               </div>
 
-              <div className={`p-3 rounded-lg border ${cardBg} space-y-1`}>
-                <div className={`text-[10px] uppercase tracking-wider font-medium ${mutedText}`}>Stack Teknologi</div>
-                <p className={mutedText}>Next.js 14 · FastAPI · Supabase · Claude 4.6 · Gemini 3.7 via 9Router</p>
+              {/* Tech stack */}
+              <div className={`p-3 rounded-xl border space-y-1 ${tk.tagBg}`}>
+                <div className={`text-[10px] font-semibold uppercase tracking-widest ${tk.textFaint}`}>Teknologi</div>
+                <p className={`text-[11px] ${tk.textMuted}`}>
+                  Next.js 14 · FastAPI · Claude 4.6 · Gemini 3.7 · 9Router Proxy · Supabase
+                </p>
               </div>
 
-              <div className={`text-center text-[10px] ${mutedText}`}>
-                Made with ♥ · Open-Source
+              <div className={`text-center text-[10px] ${tk.textFaint}`}>
+                Made with ♥ by Keefa & Salna · Open-Source
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Sidebar */}
+      {/* ─── SETTINGS (THEME) MODAL ─── */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
+          <div className={`relative z-10 w-full max-w-sm rounded-2xl border p-6 shadow-2xl space-y-5 ${tk.cardBg}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Settings className={`w-4 h-4 ${tk.accentText}`} />
+                <h2 className={`text-sm font-semibold ${tk.textPrimary}`}>Pengaturan Tampilan</h2>
+              </div>
+              <button onClick={() => setShowSettings(false)} className={`p-1.5 rounded-lg transition-colors ${tk.navInactive}`}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <div className={`text-[10px] font-semibold uppercase tracking-widest ${tk.textFaint}`}>Pilih Tema Visual</div>
+              {THEMES.map((t) => {
+                const Icon = t.icon;
+                const isActive = theme === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => { setTheme(t.key); setShowSettings(false); }}
+                    className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      isActive
+                        ? "t-accent-bg border-transparent shadow-md"
+                        : `${tk.tagBg} ${tk.navInactive}`
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className={`text-xs font-semibold ${isActive ? "text-white" : tk.textPrimary}`}>
+                        {t.label}
+                      </div>
+                      <div className={`text-[10px] mt-0.5 ${isActive ? "text-white/80" : tk.textFaint}`}>
+                        {t.desc}
+                      </div>
+                    </div>
+                    {isActive && <div className="w-2 h-2 rounded-full bg-white shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── SIDEBAR ─── */}
       <aside
-        className={`relative flex flex-col justify-between h-screen sticky top-0 border-r transition-[width] duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${base} ${collapsed ? "w-[57px]" : "w-56"}`}
+        className={`relative flex flex-col h-screen sticky top-0 border-r t-sidebar sidebar-container ${
+          collapsed ? "w-[57px]" : "w-56"
+        }`}
       >
-        {/* Toggle button — sits on the edge */}
+        {/* Collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`absolute -right-3 top-[54px] z-20 w-6 h-6 rounded-full border flex items-center justify-center shadow-md transition-colors ${isDark ? "bg-[#121215] border-[#27272a] hover:bg-[#1e1e21] text-[#71717a]" : "bg-white border-[#e4e4e7] hover:bg-[#f4f4f5] text-[#71717a]"}`}
+          className={`absolute -right-3 top-[52px] z-20 w-6 h-6 rounded-full border shadow-md flex items-center justify-center transition-colors t-card t-bg-card`}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed
-            ? <ChevronRight className="w-3 h-3" />
-            : <ChevronLeft className="w-3 h-3" />
-          }
+            ? <ChevronRight className="w-3 h-3 t-text-muted" />
+            : <ChevronLeft className="w-3 h-3 t-text-muted" />}
         </button>
 
-        <div className="flex flex-col min-h-0 flex-1">
-          {/* Logo */}
-          <div className={`h-14 flex items-center px-3.5 border-b ${borderTop} shrink-0`}>
-            <div className="flex items-center gap-2.5">
-              <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${isDark ? "bg-white" : "bg-[#09090b]"}`}>
-                <PenLine className={`w-3.5 h-3.5 ${isDark ? "text-black" : "text-white"}`} strokeWidth={2.5} />
-              </div>
-              <span
-                className={`font-semibold text-sm tracking-tight transition-[opacity,width] duration-200 overflow-hidden whitespace-nowrap ${isDark ? "text-white" : "text-[#09090b]"} ${collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"}`}
-              >
-                Hariyuka AI
-              </span>
+        {/* Logo */}
+        <div className="h-14 flex items-center px-3.5 border-b t-border shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded t-accent-bg flex items-center justify-center shrink-0 shadow-sm">
+              <PenLine className="w-3.5 h-3.5" strokeWidth={2.5} />
             </div>
+            <span
+              className={`font-semibold text-sm tracking-tight overflow-hidden whitespace-nowrap transition-[opacity,width] duration-200 t-text-primary ${
+                collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
+              }`}
+            >
+              Hariyuka AI
+            </span>
           </div>
-
-          {/* Navigation */}
-          <nav className="p-2 mt-1 space-y-0.5 flex-1">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  title={collapsed ? item.name : undefined}
-                  className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors group ${isActive ? activeLink : `${mutedText} ${hoverLink}`}`}
-                >
-                  <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
-                  <span
-                    className={`transition-[opacity,width] duration-200 overflow-hidden whitespace-nowrap ${collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"}`}
-                  >
-                    {item.name}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
         </div>
 
-        {/* Bottom section */}
-        <div className={`border-t ${borderTop} p-2 space-y-1 shrink-0`}>
-          {/* Settings (Theme) button */}
-          {!collapsed && (
-            <div className={`rounded-lg border p-3 space-y-2 ${cardBg}`}>
-              <div className={`text-[10px] uppercase tracking-wider font-medium ${mutedText}`}>Tampilan</div>
-              <div className="flex gap-1.5">
-                <button
-                  onClick={() => setTheme("dark")}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium border transition-colors ${
-                    !isDark
-                      ? `${isDark ? "text-[#71717a] border-[#27272a]" : "text-[#a1a1aa] border-[#e4e4e7]"}`
-                      : "bg-[#27272a] border-[#3f3f46] text-white"
+        {/* Navigation */}
+        <nav className="p-2 mt-1 space-y-0.5 flex-1 overflow-y-auto">
+          {navigation.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                title={collapsed ? item.name : undefined}
+                className={`relative flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors ${
+                  isActive ? `${tk.navActive} nav-active-indicator` : tk.navInactive
+                }`}
+              >
+                <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
+                <span
+                  className={`overflow-hidden whitespace-nowrap transition-[opacity,width] duration-200 ${
+                    collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
                   }`}
                 >
-                  <Moon className="w-3 h-3" />
-                  <span>Dark</span>
-                </button>
+                  {item.name}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* ─── BOTTOM USER & CONTROLS FOOTER (Exact Match to User Reference) ─── */}
+        <div className="border-t t-border shrink-0">
+          {!collapsed ? (
+            <div className="p-3 space-y-2.5">
+              {/* Row 1: 🟢 keefa9 | [-> LOGOUT */}
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 font-medium t-text-primary">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 shadow-sm" />
+                  <span className="truncate">keefa9</span>
+                </div>
                 <button
-                  onClick={() => setTheme("light")}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium border transition-colors ${
-                    isDark
-                      ? "text-[#71717a] border-[#27272a] hover:border-[#3f3f46]"
-                      : "bg-[#e4e4e7] border-[#d4d4d8] text-[#09090b]"
-                  }`}
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 text-[11px] tracking-wider uppercase t-text-faint hover:t-text-primary transition-colors cursor-pointer"
+                  title="Logout"
                 >
-                  <Sun className="w-3 h-3" />
-                  <span>Light</span>
+                  <LogOut className="w-3 h-3" />
+                  <span>LOGOUT</span>
                 </button>
               </div>
+
+              {/* Row 2: N chats / artikel | ABOUT | ⚙️ SETTINGS */}
+              <div className="flex items-center justify-between text-[11px] pt-1 border-t t-border font-medium">
+                <span className="t-text-faint">
+                  {articleCount} {articleCount === 1 ? "artikel" : "chats"}
+                </span>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowAbout(true)}
+                    className="uppercase tracking-wider t-text-faint hover:t-text-primary transition-colors cursor-pointer"
+                  >
+                    ABOUT
+                  </button>
+
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="flex items-center gap-1 uppercase tracking-wider t-text-faint hover:t-text-primary transition-colors cursor-pointer"
+                  >
+                    <Settings className="w-3 h-3" />
+                    <span>SETTINGS</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Collapsed Bottom Buttons */
+            <div className="p-1 space-y-1">
+              <button
+                onClick={() => setShowAbout(true)}
+                className={`w-full flex items-center justify-center p-2 rounded-lg transition-colors ${tk.navInactive}`}
+                title="About"
+              >
+                <Info className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setShowSettings(true)}
+                className={`w-full flex items-center justify-center p-2 rounded-lg transition-colors ${tk.navInactive}`}
+                title="Settings & Theme"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
             </div>
           )}
-
-          {/* About button */}
-          <button
-            onClick={() => setShowAbout(true)}
-            title="Tentang Hariyuka AI"
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors ${mutedText} ${bgHover}`}
-          >
-            <Info className="w-4 h-4 shrink-0" strokeWidth={1.75} />
-            <span className={`transition-[opacity,width] duration-200 overflow-hidden whitespace-nowrap ${collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
-              Tentang
-            </span>
-          </button>
-
-          {/* User profile */}
-          <div className={`flex items-center gap-2.5 px-2.5 py-2`}>
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${isDark ? "bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa]" : "bg-[#e4e4e7] border border-[#d4d4d8] text-[#52525b]"}`}>
-              H
-            </div>
-            <div className={`min-w-0 transition-[opacity,width] duration-200 overflow-hidden ${collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"}`}>
-              <div className={`text-xs font-medium truncate ${isDark ? "text-[#d4d4d8]" : "text-[#3f3f46]"}`}>Hariyuka Writer</div>
-              <div className={`text-[10px] truncate flex items-center gap-1 ${mutedText}`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                Self-Hosted
-              </div>
-            </div>
-          </div>
         </div>
       </aside>
     </>
