@@ -1,0 +1,61 @@
+/* ===== LIGHT THEME OVERRIDES ===== */
+html.light {
+  --bg-base: #fafafa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f4f4f5;
+  --border-color: #e4e4e7;
+  --border-hover: #d4d4d8;
+  --text-primary: #09090b;
+  --text-secondary: #3f3f46;
+  --text-muted: #71717a;
+  --text-faint: #a1a1aa;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e4e4e7;
+  --header-bg: #ffffff;
+  --btn-primary-bg: #09090b;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover: #18181b;
+  --input-bg: #f4f4f5;
+  --input-border: #e4e4e7;
+  --input-text: #09090b;
+}
+
+html.light body {
+  background-color: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Light theme scrollbar */
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ===== SIDEBAR COLLAPSE ANIMATION ===== */
+.sidebar-container {
+  transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width;
+  overflow: hidden;
+}
+
+.sidebar-content {
+  min-width: 224px;
+}
+
+.sidebar-collapsed .sidebar-content {
+  min-width: 56px;
+}
+
+/* Nav label fade */
+.sidebar-nav-label {
+  transition: opacity 200ms ease, width 200ms ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar-collapsed .sidebar-nav-label {
+  opacity: 0;
+  width: 0;
+}

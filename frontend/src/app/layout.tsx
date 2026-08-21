@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./theme.css";
+import { ThemeProvider } from "@/contexts/theme-context";
 
 export const metadata: Metadata = {
   title: "Hariyuka AI - Next-Gen AI SEO Article Writer",
@@ -13,8 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className="dark">
-      <body className="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
-        {children}
+      <body className="min-h-screen antialiased selection:bg-zinc-700 selection:text-white">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
