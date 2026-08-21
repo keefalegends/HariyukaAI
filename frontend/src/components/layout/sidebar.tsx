@@ -17,6 +17,8 @@ import {
   Info,
   X,
   LogOut,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useTheme, type Theme } from "@/contexts/theme-context";
 import { useTokens } from "@/lib/use-tokens";
@@ -180,38 +182,58 @@ export function Sidebar() {
       {/* ─── SIDEBAR ─── */}
       <aside
         className={`relative flex flex-col h-screen sticky top-0 border-r t-sidebar sidebar-container ${
-          collapsed ? "w-[57px]" : "w-56"
+          collapsed ? "w-[60px]" : "w-56"
         }`}
       >
-        {/* Collapse toggle */}
+        {/* Sleek Floating Collapse/Expand Button on Outer Edge */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`absolute -right-3 top-[52px] z-20 w-6 h-6 rounded-full border shadow-md flex items-center justify-center transition-colors t-card t-bg-card`}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className={`absolute -right-3.5 top-5 z-40 w-7 h-7 rounded-full border border-[#44403c] t-bg-card hover:bg-[#d97757] hover:border-[#d97757] text-stone-400 hover:text-white flex items-center justify-center shadow-lg transition-all cursor-pointer active:scale-95`}
+          title={collapsed ? "Buka Sidebar (Expand)" : "Sembunyikan Sidebar (Collapse)"}
         >
-          {collapsed
-            ? <ChevronRight className="w-3 h-3 t-text-muted" />
-            : <ChevronLeft className="w-3 h-3 t-text-muted" />}
+          {collapsed ? (
+            <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+          ) : (
+            <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
+          )}
         </button>
 
-        {/* Logo */}
-        <div className="h-14 flex items-center px-3.5 border-b t-border shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded t-accent-bg flex items-center justify-center shrink-0 shadow-sm">
-              <PenLine className="w-3.5 h-3.5" strokeWidth={2.5} />
+        {/* Logo & Header Toggle */}
+        <div className="h-14 flex items-center justify-between px-3 border-b t-border shrink-0">
+          {!collapsed ? (
+            <>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-lg t-accent-bg flex items-center justify-center shrink-0 shadow-sm">
+                  <PenLine className="w-4 h-4" strokeWidth={2.5} />
+                </div>
+                <span className={`font-bold text-sm tracking-tight truncate t-text-primary`}>
+                  Hariyuka AI
+                </span>
+              </div>
+
+              <button
+                onClick={() => setCollapsed(true)}
+                className={`p-1.5 rounded-lg border t-border t-bg-tag hover:border-[#d97757] hover:text-[#d97757] text-stone-400 transition-colors cursor-pointer shrink-0`}
+                title="Sembunyikan Sidebar"
+              >
+                <PanelLeftClose className="w-3.5 h-3.5" />
+              </button>
+            </>
+          ) : (
+            <div className="w-full flex justify-center">
+              <button
+                onClick={() => setCollapsed(false)}
+                className="w-7 h-7 rounded-lg t-accent-bg flex items-center justify-center cursor-pointer shadow-sm hover:scale-105 transition-transform"
+                title="Buka Sidebar (Expand)"
+              >
+                <PanelLeftOpen className="w-4 h-4" strokeWidth={2.5} />
+              </button>
             </div>
-            <span
-              className={`font-semibold text-sm tracking-tight overflow-hidden whitespace-nowrap transition-[opacity,width] duration-200 t-text-primary ${
-                collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
-              }`}
-            >
-              Hariyuka AI
-            </span>
-          </div>
+          )}
         </div>
 
-        {/* Navigation */}
-        <nav className="p-2 mt-1 space-y-0.5 flex-1 overflow-y-auto">
+        {/* Navigation Links */}
+        <nav className="p-2 mt-1 space-y-1 flex-1 overflow-y-auto">
           {navigation.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -224,16 +246,14 @@ export function Sidebar() {
                 title={collapsed ? item.name : undefined}
                 className={`relative flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors ${
                   isActive ? `${tk.navActive} nav-active-indicator` : tk.navInactive
-                }`}
+                } ${collapsed ? "justify-center px-0" : ""}`}
               >
                 <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
-                <span
-                  className={`overflow-hidden whitespace-nowrap transition-[opacity,width] duration-200 ${
-                    collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
-                  }`}
-                >
-                  {item.name}
-                </span>
+                {!collapsed && (
+                  <span className="truncate font-medium">
+                    {item.name}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -260,7 +280,7 @@ export function Sidebar() {
               </div>
 
               {/* Row 2: N chats / artikel | ABOUT | ⚙️ SETTINGS */}
-              <div className="flex items-center justify-between text-[11px] pt-1 border-t t-border font-medium">
+              <div className="flex items-center justify-between text-[11px] pt-1.5 border-t t-border font-medium">
                 <span className="t-text-faint">
                   {articleCount} {articleCount === 1 ? "artikel" : "chats"}
                 </span>
