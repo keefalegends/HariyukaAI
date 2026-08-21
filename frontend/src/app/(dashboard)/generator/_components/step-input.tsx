@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Globe, Sliders, Type, Plus, X, Search, ChevronDown, ArrowRight } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
@@ -22,6 +23,7 @@ const LENGTHS = [1000, 1500, 2000, 3000];
 
 export function StepInput({ onSubmit, isLoading }: StepInputProps) {
   const tk = useTokens();
+  const searchParams = useSearchParams();
   const [keyword, setKeyword] = useState("");
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("id");
@@ -30,6 +32,13 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
   const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([]);
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [brandVoice, setBrandVoice] = useState("");
+
+  useEffect(() => {
+    const kwParam = searchParams.get("keyword");
+    if (kwParam) {
+      setKeyword(kwParam);
+    }
+  }, [searchParams]);
 
   const handleAddSecondary = (e: React.KeyboardEvent | React.MouseEvent) => {
     if (("key" in e && e.key !== "Enter") && e.type !== "click") return;

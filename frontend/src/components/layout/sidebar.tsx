@@ -31,7 +31,7 @@ const navigation = [
 
 const THEMES: { key: Theme; label: string; icon: any; desc: string }[] = [
   { key: "warm",  label: "Warm (Claude.ai)", icon: Flame, desc: "Warm editorial · Terracotta accent (Default)" },
-  { key: "dark",  label: "Dark (Zinc)",      icon: Moon,  desc: "Cool dark · Minimal neutral" },
+  { key: "dark",  label: "Dark (Zinc)",      icon: Moon,  desc: "Cool dark · Minimalist neutral" },
   { key: "light", label: "Light (Sand)",     icon: Sun,   desc: "Warm off-white · Sand cream" },
 ];
 
@@ -149,20 +149,26 @@ export function Sidebar() {
                     onClick={() => { setTheme(t.key); setShowSettings(false); }}
                     className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                       isActive
-                        ? "t-accent-bg border-transparent shadow-md"
-                        : `${tk.tagBg} ${tk.navInactive}`
+                        ? "border-[#d97757] bg-[#d97757]/10 shadow-sm"
+                        : `${tk.tagBg} ${tk.navInactive} hover:border-[#78716c]`
                     }`}
                   >
-                    <Icon className="w-4 h-4 shrink-0" />
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      isActive ? "bg-[#d97757] text-white" : "t-bg-card text-stone-400"
+                    }`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <div className={`text-xs font-semibold ${isActive ? "text-white" : tk.textPrimary}`}>
+                      <div className={`text-xs font-semibold ${isActive ? tk.textPrimary : tk.textSecondary}`}>
                         {t.label}
                       </div>
-                      <div className={`text-[10px] mt-0.5 ${isActive ? "text-white/80" : tk.textFaint}`}>
+                      <div className={`text-[10px] mt-0.5 ${tk.textFaint}`}>
                         {t.desc}
                       </div>
                     </div>
-                    {isActive && <div className="w-2 h-2 rounded-full bg-white shrink-0" />}
+                    {isActive && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-[#d97757] shrink-0 shadow-sm" />
+                    )}
                   </button>
                 );
               })}
@@ -233,7 +239,7 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* ─── BOTTOM USER & CONTROLS FOOTER (Exact Match to User Reference) ─── */}
+        {/* ─── BOTTOM USER & CONTROLS FOOTER ─── */}
         <div className="border-t t-border shrink-0">
           {!collapsed ? (
             <div className="p-3 space-y-2.5">
