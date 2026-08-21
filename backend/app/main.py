@@ -7,6 +7,7 @@ from app.config import settings
 from app.api.v1.articles import router as articles_router
 from app.api.v1.stream import router as stream_router
 from app.api.v1.projects import router as projects_router
+from app.api.v1.settings import router as settings_router
 
 app = FastAPI(
     title="Hariyuka AI - Engine API",
@@ -34,6 +35,7 @@ app.add_middleware(
 app.include_router(articles_router, prefix=settings.API_V1_STR)
 app.include_router(stream_router, prefix=settings.API_V1_STR)
 app.include_router(projects_router, prefix=settings.API_V1_STR)
+app.include_router(settings_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Health"])

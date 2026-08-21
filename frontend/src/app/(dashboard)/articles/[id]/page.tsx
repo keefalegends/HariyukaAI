@@ -41,68 +41,10 @@ export default function ArticleDetailPage() {
           setContentHtml(data.content_html || "");
           setSeoAudit(data.seo_audit);
         } else {
-          // Fallback mock data for preview
-          const mockArticle = {
-            id: articleId,
-            title: "Panduan Lengkap SEO On-Page 2026: Strategi Peringkat 1 Google",
-            target_keyword: "SEO On-Page",
-            language: "id",
-            tone: "authoritative",
-            target_length: 2000,
-            word_count: 1850,
-            seo_score: 94,
-            content_markdown: `# Panduan Lengkap SEO On-Page 2026: Strategi Peringkat 1 Google
-
-Dalam lanskap pencarian modern saat ini, **SEO On-Page** menjadi fondasi utama untuk memenangkan persaingan algoritma Google. Tanpa struktur halaman yang tepat, konten terbaik sekalipun akan sulit ditemukan calon pembaca potensial.
-
-Artikel ini menyajikan panduan mendalam langkah demi langkah untuk mengoptimasi setiap elemen teknis dan kontekstual halaman website Anda.
-
-[IMAGE: Infografis Diagram Komponen SEO On-Page 2026 | alt='komponen utama optimasi seo on-page']
-
-## 1. Riset Search Intent dan Pemetaan Kata Kunci
-
-Sebelum menulis sebaris kalimat pun, memahami **search intent** adalah hal mutlak. Algoritma mesin pencari kini memprioritaskan relevansi langsung terhadap maksud pencarian pengguna:
-
-- **Informational Intent**: Pengguna mencari penjelasan atau panduan ("bagaimana cara...").
-- **Commercial Intent**: Pengguna membandingkan fitur atau layanan terbaik.
-- **Transactional Intent**: Pengguna siap melakukan aksi pendaftaran atau pembelian.
-
-## 2. Struktur Heading H2 & H3 yang Hierarkis
-
-Penataan sub-heading yang logis tidak hanya membantu Google memahami alur artikel, tetapi juga menjaga kenyamanan membaca pengguna (readability):
-
-### 2.1 Formula Penempatan Keyword pada H2
-Pastikan kata kunci utama atau variasi LSI muncul secara natural pada setidaknya 2 sub-heading H2 utama Anda.
-
-### 2.2 Sinyal E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness)
-Sertakan studi kasus nyata, kutipan data industri, dan kesimpulan yang dapat langsung dipraktikkan oleh pembaca.
-
-[IMAGE: Contoh struktur heading artikel SEO | alt='struktur heading h2 h3 seo on-page']
-
-## 3. Kesimpulan dan Rencana Aksi
-
-Optimasi On-Page adalah proses berkelanjutan. Mulailah dengan mengaudit konten terpenting Anda hari ini dan perhatikan peningkatan impresi organik Anda di Google Search Console.`,
-            status: "completed",
-            seo_audit: {
-              score: 94,
-              word_count: 1850,
-              reading_time_minutes: 9,
-              keyword_density: 1.4,
-              checklist: [
-                { rule: "Word Count", passed: true, message: "1.850 kata (Sangat Bagus untuk Ranking)" },
-                { rule: "Keyword Density", passed: true, message: "Kepadatan keyword utama ideal (1.4%)" },
-                { rule: "First Paragraph Keyword", passed: true, message: "Keyword utama ada di paragraf pembuka" },
-                { rule: "Heading Structure", passed: true, message: "Struktur sub-heading rapi (3 H2, 2 H3)" },
-                { rule: "Rich Media & Formatting", passed: true, message: "Media visual & bold formatting optimal" }
-              ]
-            }
-          };
-          setArticle(mockArticle);
-          setContentMarkdown(mockArticle.content_markdown);
-          setSeoAudit(mockArticle.seo_audit);
+          setArticle(null);
         }
       } catch (err) {
-        console.error("Fetch article error:", err);
+        setArticle(null);
       }
     };
 

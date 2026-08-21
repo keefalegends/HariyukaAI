@@ -40,66 +40,12 @@ export function ArticlesPage() {
         const res = await fetch("http://localhost:8000/api/v1/articles");
         if (res.ok) {
           const data = await res.json();
-          setArticles(data);
+          setArticles(Array.isArray(data) ? data : []);
         } else {
-          // Fallback mock data
-          setArticles([
-            {
-              id: "art-1",
-              title: "Panduan Lengkap SEO On-Page 2026: Strategi Peringkat 1 Google",
-              target_keyword: "SEO On-Page",
-              language: "id",
-              status: "completed",
-              word_count: 1850,
-              seo_score: 94,
-              created_at: new Date().toISOString(),
-            },
-            {
-              id: "art-2",
-              title: "10 AI Tools Terbaik untuk Meningkatkan Produktivitas Penulisan Konten",
-              target_keyword: "AI tools penulisan",
-              language: "id",
-              status: "completed",
-              word_count: 2200,
-              seo_score: 89,
-              created_at: new Date(Date.now() - 86400000).toISOString(),
-            },
-            {
-              id: "art-3",
-              title: "Cara Riset Long-Tail Keywords dengan Search Intent Tinggi",
-              target_keyword: "riset long-tail keywords",
-              language: "id",
-              status: "outline_pending",
-              word_count: 0,
-              seo_score: 0,
-              created_at: new Date(Date.now() - 172800000).toISOString(),
-            },
-          ]);
+          setArticles([]);
         }
       } catch (err) {
-        // Fallback mock data
-        setArticles([
-          {
-            id: "art-1",
-            title: "Panduan Lengkap SEO On-Page 2026: Strategi Peringkat 1 Google",
-            target_keyword: "SEO On-Page",
-            language: "id",
-            status: "completed",
-            word_count: 1850,
-            seo_score: 94,
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: "art-2",
-            title: "10 AI Tools Terbaik untuk Meningkatkan Produktivitas Penulisan Konten",
-            target_keyword: "AI tools penulisan",
-            language: "id",
-            status: "completed",
-            word_count: 2200,
-            seo_score: 89,
-            created_at: new Date(Date.now() - 86400000).toISOString(),
-          },
-        ]);
+        setArticles([]);
       }
       setIsLoading(false);
     };
