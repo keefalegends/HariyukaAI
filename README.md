@@ -1,6 +1,5 @@
 # ⚡ Hariyuka AI — Next-Generation AI SEO Writer Platform
 
-[![Website](https://img.shields.io/badge/Website-hariyuka.ai-6366f1?style=for-the-badge&logo=google-chrome)](https://hariyuka.ai)
 [![Next.js](https://img.shields.io/badge/Next.js%2014-App%20Router-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL%20%2B%20RLS-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
