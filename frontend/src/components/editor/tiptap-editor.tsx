@@ -23,6 +23,7 @@ import {
   Check,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTokens } from "@/lib/use-tokens";
 
 interface TiptapEditorProps {
   initialContent?: string;
@@ -30,7 +31,73 @@ interface TiptapEditorProps {
   readOnly?: boolean;
 }
 
+/** Simple, robust Markdown to HTML converter for Tiptap */
+function markdownToHtml(md: string): string {
+  if (!md) return "<p></p>";
+  if (md.trim().startsWith("<") && md.trim().endsWith(">")) return md; // Already HTML
+
+  const lines = md.split(/\r?\n/);
+  const htmlLines: string[] = [];
+  let inList = false;
+  let inOrderedList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    // Close open lists if line is empty or not a list item
+    if (inList && !line.trim().startsWith("- ") && !line.trim().startsWith("* ")) {
+      htmlLines.push("</ul>");
+      inList = false;
+    }
+    if (inOrderedList && !/^\d+\.\s/.test(line.trim())) {
+      htmlLines.push("</ol>");
+      inOrderedList = false;
+    }
+
+    if (!line.trim()) {
+      continue;
+    }
+
+    // Inline formatting (bold, italic, code)
+    line = line
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>");
+
+    // Headings
+    if (line.startsWith("### ")) {
+      htmlLines.push(`<h3>${line.slice(4)}</h3>`);
+    } else if (line.startsWith("## ")) {
+      htmlLines.push(`<h2>${line.slice(3)}</h2>`);
+    } else if (line.startsWith("# ")) {
+      htmlLines.push(`<h1>${line.slice(2)}</h1>`);
+    } else if (line.startsWith("> ")) {
+      htmlLines.push(`<blockquote><p>${line.slice(2)}</p></blockquote>`);
+    } else if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
+      if (!inList) {
+        htmlLines.push("<ul>");
+        inList = true;
+      }
+      htmlLines.push(`<li>${line.trim().slice(2)}</li>`);
+    } else if (/^\d+\.\s/.test(line.trim())) {
+      if (!inOrderedList) {
+        htmlLines.push("<ol>");
+        inOrderedList = true;
+      }
+      htmlLines.push(`<li>${line.trim().replace(/^\d+\.\s/, "")}</li>`);
+    } else {
+      htmlLines.push(`<p>${line}</p>`);
+    }
+  }
+
+  if (inList) htmlLines.push("</ul>");
+  if (inOrderedList) htmlLines.push("</ol>");
+
+  return htmlLines.join("");
+}
+
 export function TiptapEditor({ initialContent = "", onChange, readOnly = false }: TiptapEditorProps) {
+  const tk = useTokens();
   const [copied, setCopied] = useState(false);
 
   const editor = useEditor({
@@ -52,7 +119,7 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
         openOnClick: false,
       }),
     ],
-    content: initialContent || "<p></p>",
+    content: markdownToHtml(initialContent),
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       const text = editor.getText();
@@ -64,15 +131,17 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
 
   // Update content if initialContent changes externally
   useEffect(() => {
-    if (editor && initialContent && editor.getHTML() !== initialContent && editor.getText() !== initialContent) {
-      // If content is pure markdown or text, render paragraph or headings
-      editor.commands.setContent(initialContent);
+    if (editor && initialContent) {
+      const parsedHtml = markdownToHtml(initialContent);
+      if (editor.getHTML() !== parsedHtml) {
+        editor.commands.setContent(parsedHtml);
+      }
     }
   }, [initialContent, editor]);
 
   if (!editor) {
     return (
-      <div className="h-[450px] flex items-center justify-center text-slate-500 text-sm bg-slate-950/60 rounded-2xl border border-slate-800">
+      <div className={`h-[450px] flex items-center justify-center text-sm rounded-2xl border t-border t-bg-card ${tk.textMuted}`}>
         Memuat Editor Tiptap...
       </div>
     );
@@ -101,18 +170,20 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
     a.click();
   };
 
+  const btnBase = "p-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer";
+  const btnActive = "t-accent-bg shadow-sm";
+  const btnInactive = `${tk.textMuted} hover:t-text-primary hover:bg-[#d97757]/10`;
+
   return (
-    <div className="bg-slate-900/70 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+    <div className={`t-card rounded-2xl overflow-hidden shadow-sm flex flex-col border t-border`}>
       {/* Editor Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-950/80 border-b border-slate-800 text-slate-300">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-3 border-b t-border t-bg-tag">
         <div className="flex flex-wrap items-center gap-1">
           {/* Headings */}
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={`p-1.5 rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors ${
-              editor.isActive("heading", { level: 1 }) ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("heading", { level: 1 }) ? btnActive : btnInactive}`}
             title="Heading 1"
           >
             <Heading1 className="w-4 h-4" />
@@ -121,9 +192,7 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={`p-1.5 rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors ${
-              editor.isActive("heading", { level: 2 }) ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("heading", { level: 2 }) ? btnActive : btnInactive}`}
             title="Heading 2"
           >
             <Heading2 className="w-4 h-4" />
@@ -132,23 +201,19 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={`p-1.5 rounded-lg text-xs font-semibold hover:bg-slate-800 transition-colors ${
-              editor.isActive("heading", { level: 3 }) ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("heading", { level: 3 }) ? btnActive : btnInactive}`}
             title="Heading 3"
           >
             <Heading3 className="w-4 h-4" />
           </button>
 
-          <div className="w-[1px] h-4 bg-slate-800 mx-1" />
+          <div className="w-[1px] h-4 mx-1 border-r t-border" />
 
           {/* Formats */}
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBold().run()}
-            className={`p-1.5 rounded-lg hover:bg-slate-800 transition-colors ${
-              editor.isActive("bold") ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("bold") ? btnActive : btnInactive}`}
             title="Bold (Tebal)"
           >
             <Bold className="w-4 h-4" />
@@ -157,23 +222,19 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={`p-1.5 rounded-lg hover:bg-slate-800 transition-colors ${
-              editor.isActive("italic") ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("italic") ? btnActive : btnInactive}`}
             title="Italic (Miring)"
           >
             <Italic className="w-4 h-4" />
           </button>
 
-          <div className="w-[1px] h-4 bg-slate-800 mx-1" />
+          <div className="w-[1px] h-4 mx-1 border-r t-border" />
 
           {/* Lists */}
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
-            className={`p-1.5 rounded-lg hover:bg-slate-800 transition-colors ${
-              editor.isActive("bulletList") ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("bulletList") ? btnActive : btnInactive}`}
             title="Bullet List"
           >
             <List className="w-4 h-4" />
@@ -182,9 +243,7 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
-            className={`p-1.5 rounded-lg hover:bg-slate-800 transition-colors ${
-              editor.isActive("orderedList") ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("orderedList") ? btnActive : btnInactive}`}
             title="Numbered List"
           >
             <ListOrdered className="w-4 h-4" />
@@ -193,9 +252,7 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            className={`p-1.5 rounded-lg hover:bg-slate-800 transition-colors ${
-              editor.isActive("blockquote") ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("blockquote") ? btnActive : btnInactive}`}
             title="Kutipan (Quote)"
           >
             <Quote className="w-4 h-4" />
@@ -204,9 +261,7 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-            className={`p-1.5 rounded-lg hover:bg-slate-800 transition-colors ${
-              editor.isActive("codeBlock") ? "bg-indigo-600/30 text-indigo-400" : ""
-            }`}
+            className={`${btnBase} ${editor.isActive("codeBlock") ? btnActive : btnInactive}`}
             title="Code Block"
           >
             <Code className="w-4 h-4" />
@@ -215,20 +270,20 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
           <button
             type="button"
             onClick={addImage}
-            className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-slate-200"
+            className={`${btnBase} ${btnInactive}`}
             title="Sisipkan Gambar"
           >
             <ImageIcon className="w-4 h-4" />
           </button>
 
-          <div className="w-[1px] h-4 bg-slate-800 mx-1" />
+          <div className="w-[1px] h-4 mx-1 border-r t-border" />
 
           {/* Undo / Redo */}
           <button
             type="button"
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
-            className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-30"
+            className={`${btnBase} ${btnInactive} disabled:opacity-30`}
             title="Undo"
           >
             <Undo className="w-4 h-4" />
@@ -238,7 +293,7 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
             type="button"
             onClick={() => editor.chain().focus().redo().run()}
             disabled={!editor.can().redo()}
-            className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-30"
+            className={`${btnBase} ${btnInactive} disabled:opacity-30`}
             title="Redo"
           >
             <Redo className="w-4 h-4" />
@@ -246,11 +301,11 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
         </div>
 
         {/* Action Export Buttons */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={copyToClipboard}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-colors"
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${tk.outlineBtn}`}
             title="Salin semua teks"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -260,7 +315,7 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
           <button
             type="button"
             onClick={downloadMarkdown}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 font-medium transition-colors"
+            className="t-accent-bg flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-semibold shadow-sm transition-all"
             title="Download .md"
           >
             <Download className="w-3.5 h-3.5" />
@@ -270,7 +325,7 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
       </div>
 
       {/* Editor Content Area */}
-      <div className="p-6 md:p-8 bg-slate-950/40 min-h-[480px] focus:outline-none">
+      <div className="p-6 md:p-8 t-bg-card min-h-[520px] focus:outline-none transition-colors">
         <EditorContent editor={editor} />
       </div>
     </div>

@@ -185,19 +185,6 @@ export function Sidebar() {
           collapsed ? "w-[60px]" : "w-56"
         }`}
       >
-        {/* Sleek Floating Collapse/Expand Button on Outer Edge */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={`absolute -right-3.5 top-5 z-40 w-7 h-7 rounded-full border border-[#44403c] t-bg-card hover:bg-[#d97757] hover:border-[#d97757] text-stone-400 hover:text-white flex items-center justify-center shadow-lg transition-all cursor-pointer active:scale-95`}
-          title={collapsed ? "Buka Sidebar (Expand)" : "Sembunyikan Sidebar (Collapse)"}
-        >
-          {collapsed ? (
-            <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
-          ) : (
-            <ChevronLeft className="w-3.5 h-3.5 stroke-[2.5]" />
-          )}
-        </button>
-
         {/* Logo & Header Toggle */}
         <div className="h-14 flex items-center justify-between px-3 border-b t-border shrink-0">
           {!collapsed ? (
