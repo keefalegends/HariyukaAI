@@ -136,64 +136,80 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ─── 2. 3-COLUMN METRICS ROW (Clean, No Active Engine) ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        {[
-          {
-            label: "Total Artikel",
-            value: formatNumber(stats.total_articles),
-            sub: stats.total_articles > 0 ? `${stats.completed_articles} artikel selesai` : "Belum ada artikel",
-            icon: FileText,
-            badge: stats.total_articles > 0 ? "Live" : null,
-          },
-          {
-            label: "Total Kata Tertulis",
-            value: formatNumber(stats.total_words),
-            sub:
-              stats.total_articles > 0
-                ? `~${formatNumber(Math.round(stats.total_words / stats.total_articles))} kata/artikel`
-                : "0 kata tertulis",
-            icon: Hash,
-            badge: "Multi-Pass",
-          },
-          {
-            label: "Rata-rata Skor SEO",
-            value: stats.average_seo_score > 0 ? `${stats.average_seo_score}/100` : "—",
-            sub: stats.average_seo_score >= 80 ? "E-E-A-T Rank Ready" : "Audit otomatis",
-            icon: ShieldCheck,
-            badge: "E-E-A-T",
-          },
-        ].map((c) => (
-          <div key={c.label} className={`t-card rounded-xl p-4.5 space-y-3 shadow-sm hover:border-[#78716c] transition-colors`}>
-            <div className="flex items-center justify-between">
-              <span className={`text-[11px] font-semibold uppercase tracking-wider ${tk.textFaint}`}>
-                {c.label}
-              </span>
-              <div className={`p-1.5 rounded-lg t-bg-tag border t-border`}>
-                <c.icon className={`w-3.5 h-3.5 ${tk.accentText}`} />
-              </div>
-            </div>
-
-            <div>
-              <div className={`text-2xl font-bold tracking-tight ${tk.textPrimary}`}>{c.value}</div>
-              <div className={`text-[11px] mt-0.5 ${tk.textMuted} flex items-center justify-between`}>
-                <span>{c.sub}</span>
-                {c.badge && (
-                  <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border ${tk.monoBadge}`}>
-                    {c.badge}
-                  </span>
-                )}
-              </div>
+      {/* ─── 2. 3-COLUMN METRICS ROW (Clean, Elegant, Perfectly Balanced) ─── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Card 1: Total Artikel */}
+        <div className={`t-card rounded-2xl p-5 space-y-3 shadow-sm hover:border-[#78716c] transition-colors flex flex-col justify-between`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-xs font-medium ${tk.textSecondary}`}>
+              Total Artikel
+            </span>
+            <div className="w-8 h-8 rounded-lg t-bg-tag border t-border flex items-center justify-center">
+              <FileText className={`w-4 h-4 ${tk.accentText}`} />
             </div>
           </div>
-        ))}
+          <div>
+            <div className={`text-3xl font-extrabold tracking-tight ${tk.textPrimary}`}>
+              {formatNumber(stats.total_articles)}
+            </div>
+            <p className={`text-xs mt-1 ${tk.textMuted}`}>
+              {stats.total_articles > 0
+                ? `${stats.completed_articles} artikel berhasil selesai`
+                : "Belum ada artikel yang dibuat"}
+            </p>
+          </div>
+        </div>
+
+        {/* Card 2: Total Kata Tertulis */}
+        <div className={`t-card rounded-2xl p-5 space-y-3 shadow-sm hover:border-[#78716c] transition-colors flex flex-col justify-between`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-xs font-medium ${tk.textSecondary}`}>
+              Total Kata Tertulis
+            </span>
+            <div className="w-8 h-8 rounded-lg t-bg-tag border t-border flex items-center justify-center">
+              <Hash className={`w-4 h-4 ${tk.accentText}`} />
+            </div>
+          </div>
+          <div>
+            <div className={`text-3xl font-extrabold tracking-tight ${tk.textPrimary}`}>
+              {formatNumber(stats.total_words)}
+            </div>
+            <p className={`text-xs mt-1 ${tk.textMuted}`}>
+              {stats.total_articles > 0
+                ? `Rata-rata ~${formatNumber(Math.round(stats.total_words / stats.total_articles))} kata per artikel`
+                : "0 kata digenerate oleh AI"}
+            </p>
+          </div>
+        </div>
+
+        {/* Card 3: Rata-rata Skor SEO */}
+        <div className={`t-card rounded-2xl p-5 space-y-3 shadow-sm hover:border-[#78716c] transition-colors flex flex-col justify-between`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-xs font-medium ${tk.textSecondary}`}>
+              Rata-rata Skor SEO
+            </span>
+            <div className="w-8 h-8 rounded-lg t-bg-tag border t-border flex items-center justify-center">
+              <ShieldCheck className={`w-4 h-4 ${tk.accentText}`} />
+            </div>
+          </div>
+          <div>
+            <div className={`text-3xl font-extrabold tracking-tight ${stats.average_seo_score > 0 ? "text-emerald-400" : tk.textPrimary}`}>
+              {stats.average_seo_score > 0 ? `${stats.average_seo_score}/100` : "—"}
+            </div>
+            <p className={`text-xs mt-1 ${tk.textMuted}`}>
+              {stats.average_seo_score >= 80
+                ? "Standar E-E-A-T Google Rank Ready"
+                : "Target audit optimasi 100/100"}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ─── 3. RECENT ARTICLES TABLE ─── */}
-      <div className={`t-card rounded-xl overflow-hidden shadow-sm`}>
-        <div className="flex items-center justify-between px-5 py-3.5 border-b t-border">
+      <div className={`t-card rounded-2xl overflow-hidden shadow-sm`}>
+        <div className="flex items-center justify-between px-5 py-4 border-b t-border">
           <div className="flex items-center gap-2">
-            <FileText className={`w-3.5 h-3.5 ${tk.accentText}`} />
+            <FileText className={`w-4 h-4 ${tk.accentText}`} />
             <h2 className={`text-xs font-semibold uppercase tracking-wider ${tk.textPrimary}`}>
               Artikel Terbaru
             </h2>
@@ -202,16 +218,16 @@ export default function DashboardPage() {
           {stats.total_articles > 0 && (
             <Link
               href="/articles"
-              className={`flex items-center gap-1 text-[11px] ${tk.textFaint} hover:${tk.accentText} transition-colors`}
+              className={`flex items-center gap-1 text-xs ${tk.textFaint} hover:${tk.accentText} transition-colors font-medium`}
             >
-              Lihat semua artikel <ArrowUpRight className="w-3 h-3" />
+              Lihat semua artikel <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           )}
         </div>
 
         {stats.recent_articles.length === 0 ? (
           /* Clean Empty State */
-          <div className="flex flex-col items-center justify-center py-14 px-6 text-center space-y-3">
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center space-y-3">
             <div className={`w-12 h-12 rounded-2xl t-bg-tag border t-border flex items-center justify-center`}>
               <BookOpen className={`w-6 h-6 ${tk.textFaint}`} />
             </div>
@@ -234,19 +250,19 @@ export default function DashboardPage() {
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b t-border">
-                <th className={`text-left px-5 py-2.5 text-[11px] font-medium ${tk.textFaint} w-full`}>
+                <th className={`text-left px-5 py-3 text-[11px] font-medium ${tk.textFaint} w-full`}>
                   Judul Artikel
                 </th>
-                <th className={`text-left px-4 py-2.5 text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>
+                <th className={`text-left px-4 py-3 text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>
                   Target Keyword
                 </th>
-                <th className={`text-right px-4 py-2.5 text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>
+                <th className={`text-right px-4 py-3 text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>
                   Jumlah Kata
                 </th>
-                <th className={`text-right px-4 py-2.5 text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>
+                <th className={`text-right px-4 py-3 text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>
                   Skor SEO
                 </th>
-                <th className={`text-right px-5 py-2.5 text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>
+                <th className={`text-right px-5 py-3 text-[11px] font-medium ${tk.textFaint} whitespace-nowrap`}>
                   Status
                 </th>
               </tr>
