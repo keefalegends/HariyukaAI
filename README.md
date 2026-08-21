@@ -5,7 +5,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL%20%2B%20RLS-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![Tiptap](https://img.shields.io/badge/Editor-Tiptap%20Suite-000000?style=for-the-badge)](https://tiptap.dev/)
 
-> **Hariyuka AI** adalah platform SaaS pembuat artikel SEO human-grade berbasis **Multi-Step Agentic Pipeline** yang dirancang untuk mengungguli kompetitor dan mendominasi peringkat 1 Google. Menggabungkan analisis SERP otomatis, review outline interaktif, penulisan multi-pass bertenaga Claude 4.6 & Gemini 3.7 via **9Router Proxy**, serta real-time streaming ke Tiptap Rich Editor.
+> **Hariyuka AI** adalah platform **100% Free & Open-Source Self-Hosted** AI SEO Article Writer berbasis **Multi-Step Agentic Pipeline** yang dirancang untuk menghasilkan artikel human-grade berkualitas jurnalis dan mendominasi peringkat 1 Google. Menggabungkan analisis SERP otomatis, review outline interaktif, penulisan multi-pass bertenaga Claude 4.6 & Gemini 3.7 via **9Router Proxy**, serta real-time streaming ke Tiptap Rich Editor tanpa batasan kredit kata.
 
 ---
 

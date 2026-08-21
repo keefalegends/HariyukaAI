@@ -10,7 +10,8 @@ import {
   Clock,
   ArrowRight,
   ChevronRight,
-  Flame,
+  Infinity,
+  Server,
   Globe,
 } from "lucide-react";
 
@@ -20,15 +21,15 @@ export default function DashboardPage() {
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950/70 via-purple-950/50 to-slate-900/80 border border-indigo-500/20 p-8 shadow-2xl">
         <div className="relative z-10 max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Multi-Step Agentic SEO Pipeline 2.0</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+            <Infinity className="w-3.5 h-3.5" />
+            <span>Open-Source Self-Hosted Engine • Unlimited Articles</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white">
             Selamat Datang di <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">Hariyuka AI</span>
           </h1>
           <p className="text-sm text-slate-300 leading-relaxed">
-            Hasilkan artikel berperingkat tinggi di Google dengan analisis SERP kompetitor real-time, review outline interaktif, dan penulisan multi-pass bertenaga Claude 4.6 & Gemini 3.7.
+            Hasilkan artikel SEO berperingkat tinggi di Google dengan pipeline multi-pass bertenaga Claude 4.6 & Gemini 3.7 via 9Router Proxy. Tanpa batasan kuota kredit.
           </p>
           <div className="pt-2">
             <Link
@@ -36,7 +37,7 @@ export default function DashboardPage() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 transition-all active:scale-95"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Buat Artikel Baru Sekarang</span>
+              <span>Tulis Artikel Baru Sekarang</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -82,17 +83,17 @@ export default function DashboardPage() {
 
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>Kredit Tersedia</span>
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
-              <Flame className="w-4 h-4" />
+            <span>Status Kuota</span>
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+              <Infinity className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-black text-white">4.850</div>
-          <div className="text-[11px] text-slate-400">Diperbarui bulan ini</div>
+          <div className="text-2xl font-black text-emerald-400">UNLIMITED</div>
+          <div className="text-[11px] text-slate-400">Self-Hosted 9Router Proxy</div>
         </div>
       </div>
 
-      {/* Recent Articles & Quick Generator Flow */}
+      {/* Recent Articles & Pipeline Status */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Recent Articles */}
         <div className="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
@@ -115,7 +116,7 @@ export default function DashboardPage() {
                 id: "art-1",
                 title: "Panduan Lengkap SEO On-Page 2026: Strategi Peringkat 1 Google",
                 keyword: "SEO On-Page",
-                words: 1850,
+                words: "1.850",
                 score: 94,
                 date: "Hari ini",
               },
@@ -123,7 +124,7 @@ export default function DashboardPage() {
                 id: "art-2",
                 title: "10 AI Tools Terbaik untuk Meningkatkan Produktivitas Penulisan Konten",
                 keyword: "AI tools penulisan",
-                words: 2200,
+                words: "2.200",
                 score: 89,
                 date: "Kemarin",
               },
@@ -131,7 +132,7 @@ export default function DashboardPage() {
                 id: "art-3",
                 title: "Cara Efektif Membangun Topical Authority untuk Website Baru",
                 keyword: "Topical Authority SEO",
-                words: 2450,
+                words: "2.450",
                 score: 96,
                 date: "3 hari lalu",
               },
@@ -175,10 +176,15 @@ export default function DashboardPage() {
 
         {/* Right 1 Col: Pipeline Status */}
         <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            9Router AI Engine
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <Server className="w-4 h-4 text-indigo-400" />
+              9Router AI Gateway
+            </h2>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              Online
+            </span>
+          </div>
 
           <div className="space-y-3 text-xs">
             <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">

@@ -8,19 +8,18 @@ import {
   FileText,
   FolderKanban,
   Settings,
-  CreditCard,
   Zap,
-  Globe2,
-  ChevronRight,
+  Server,
+  Infinity,
+  ShieldCheck,
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Generator Artikel", href: "/generator", icon: Sparkles, badge: "AI" },
+  { name: "Generator Artikel", href: "/generator", icon: Sparkles, badge: "Unlimited" },
   { name: "Artikel Saya", href: "/articles", icon: FileText },
   { name: "Proyek & Brand Voice", href: "/projects", icon: FolderKanban },
-  { name: "Billing & Kredit", href: "/billing", icon: CreditCard },
-  { name: "Pengaturan", href: "/settings", icon: Settings },
+  { name: "Pengaturan API & Model", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -38,8 +37,10 @@ export function Sidebar() {
             <span className="font-bold text-base bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">
               Hariyuka AI
             </span>
-            <div className="text-[10px] text-indigo-400 font-medium tracking-wider uppercase">
-              Next-Gen SEO Writer
+            <div className="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase flex items-center gap-1">
+              <span>Open-Source</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-emerald-400">Self-Hosted</span>
             </div>
           </div>
         </div>
@@ -69,7 +70,7 @@ export function Sidebar() {
                   <span>{item.name}</span>
                 </div>
                 {item.badge && (
-                  <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md">
+                  <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-md">
                     {item.badge}
                   </span>
                 )}
@@ -79,38 +80,43 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* Footer / Credit Status */}
+      {/* Footer / System Status */}
       <div className="p-4 border-t border-slate-800/60 space-y-3">
-        <div className="p-3.5 rounded-xl bg-gradient-to-b from-slate-900/90 to-slate-900/40 border border-slate-800">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-slate-400 font-medium flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              Sisa Kredit Kata
+        {/* Self-Hosted Engine Status Card */}
+        <div className="p-3.5 rounded-xl bg-gradient-to-b from-slate-900/90 to-slate-900/40 border border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-300 font-semibold flex items-center gap-1.5">
+              <Infinity className="w-3.5 h-3.5 text-indigo-400" />
+              Unlimited Mode
             </span>
-            <span className="text-indigo-400 font-semibold">4.850 / 5.000</span>
+            <span className="text-emerald-400 font-bold text-[11px] bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+              Active
+            </span>
           </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full w-[97%]" />
-          </div>
-          <div className="mt-2.5 flex items-center justify-between">
-            <span className="text-[10px] text-slate-500">Plan Pro Tier</span>
-            <Link
-              href="/billing"
-              className="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5 font-medium"
-            >
-              Upgrade <ChevronRight className="w-3 h-3" />
-            </Link>
+
+          <div className="text-[11px] text-slate-400 space-y-1 pt-1 border-t border-slate-800/80">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">SERP/Outline:</span>
+              <span className="text-indigo-300 font-mono text-[10px]">Gemini 3.7</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Writer:</span>
+              <span className="text-purple-300 font-mono text-[10px]">Claude 4.6</span>
+            </div>
           </div>
         </div>
 
-        {/* User Card */}
+        {/* User Profile Card */}
         <div className="flex items-center gap-3 px-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white">
-            HA
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white shadow-md">
+            H
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-medium text-slate-200 truncate">Hariyuka User</div>
-            <div className="text-[10px] text-slate-500 truncate">user@hariyuka.ai</div>
+            <div className="text-xs font-semibold text-slate-200 truncate">Hariyuka Writer</div>
+            <div className="text-[10px] text-slate-500 truncate flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+              Self-Hosted Admin
+            </div>
           </div>
         </div>
       </div>

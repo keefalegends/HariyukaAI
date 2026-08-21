@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- HARIYUKA AI: INITIAL DATABASE SCHEMA MIGRATION
--- Multi-Step Agentic SEO Writer Architecture
+-- Open-Source / Self-Hosted Multi-Step Agentic SEO Writer
 -- ==============================================================================
 
 -- Enable UUID extension
@@ -9,12 +9,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ------------------------------------------------------------------------------
 -- 1. ENUMS & CUSTOM TYPES
 -- ------------------------------------------------------------------------------
-DO $$ BEGIN
-    CREATE TYPE plan_tier_type AS ENUM ('free', 'starter', 'pro', 'agency', 'enterprise');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
-
 DO $$ BEGIN
     CREATE TYPE article_status_type AS ENUM (
         'draft',
@@ -40,15 +34,13 @@ EXCEPTION
 END $$;
 
 -- ------------------------------------------------------------------------------
--- 2. USERS TABLE (Linked with Supabase Auth)
+-- 2. USERS TABLE (Self-Hosted / Linked with Supabase Auth)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.users (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT NOT NULL UNIQUE,
     full_name TEXT,
     avatar_url TEXT,
-    plan_tier plan_tier_type NOT NULL DEFAULT 'free',
-    credits INTEGER NOT NULL DEFAULT 5000, -- Available generation word credits
     created_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW())
 );
@@ -68,7 +60,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 );
 
 -- ------------------------------------------------------------------------------
--- 4. ARTICLES TABLE (Core Content Records)
+-- 4. ARTICLES TABLE (Core Content Records - Unlimited)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.articles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -158,14 +150,12 @@ CREATE TRIGGER tr_generation_jobs_updated_at
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.users (id, email, full_name, avatar_url, plan_tier, credits)
+    INSERT INTO public.users (id, email, full_name, avatar_url)
     VALUES (
         NEW.id,
         NEW.email,
         COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-        COALESCE(NEW.raw_user_meta_data->>'avatar_url', ''),
-        'free',
-        5000
+        COALESCE(NEW.raw_user_meta_data->>'avatar_url', '')
     )
     ON CONFLICT (id) DO UPDATE
     SET email = EXCLUDED.email,
