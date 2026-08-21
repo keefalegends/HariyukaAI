@@ -111,91 +111,70 @@ export function StepOutline({
   );
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
-      {/* Header Banner */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
-          <Check className="w-3.5 h-3.5" />
-          <span>Langkah 2: Review & Kustomisasi Kerangka Outline (Gemini 3.7)</span>
+    <div className="space-y-6 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-[11px] text-[#71717a]">
+          <span className="text-white font-medium">Generator</span>
+          <span>/</span>
+          <span>Outline Review</span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-          Struktur Artikel Siap Ditinjau
-        </h1>
-        <p className="text-sm text-slate-400 max-w-xl mx-auto">
-          AI telah menyusun outline berdasarkan analisis kompetitor SERP. Anda dapat mengubah urutan, menambah subheading, atau mengedit target kata sebelum proses penulisan.
+        <h1 className="text-base font-semibold text-white">Review Kerangka Artikel</h1>
+        <p className="text-xs text-[#71717a]">
+          AI telah menyusun outline berdasarkan analisis SERP. Edit urutan atau konten sebelum memulai penulisan.
         </p>
       </div>
 
-      {/* SERP Insights Pill Strip */}
+      {/* SERP Insights strip */}
       {serpData && (
-        <div className="bg-slate-900/40 border border-slate-800 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-slate-500 text-[10px] font-semibold uppercase">Search Intent</div>
-              <div className="text-slate-200 font-semibold">{serpData.search_intent || "Informational"}</div>
-            </div>
+        <div className="bg-[#121215] border border-[#27272a] rounded-lg px-5 py-3.5 grid grid-cols-3 gap-3 text-xs">
+          <div>
+            <div className="text-[10px] text-[#52525b] uppercase tracking-wider mb-0.5">Search Intent</div>
+            <div className="text-[#d4d4d8] font-medium">{serpData.search_intent || "Informational"}</div>
           </div>
-
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
-              <Tag className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-slate-500 text-[10px] font-semibold uppercase">LSI Keywords Terdeteksi</div>
-              <div className="text-slate-200 font-medium truncate max-w-[200px]">
-                {serpData.lsi_keywords?.slice(0, 3).join(", ") || "Terpetakan"}
-              </div>
-            </div>
+          <div>
+            <div className="text-[10px] text-[#52525b] uppercase tracking-wider mb-0.5">LSI Keywords</div>
+            <div className="text-[#d4d4d8] font-medium truncate">{serpData.lsi_keywords?.slice(0, 3).join(", ") || "Terpetakan"}</div>
           </div>
-
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
-              <FileText className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="text-slate-500 text-[10px] font-semibold uppercase">Total Target Kata</div>
-              <div className="text-slate-200 font-semibold">{totalTargetWords} Kata ({outline.sections.length} Section)</div>
-            </div>
+          <div>
+            <div className="text-[10px] text-[#52525b] uppercase tracking-wider mb-0.5">Target Kata</div>
+            <div className="text-[#d4d4d8] font-medium">{totalTargetWords} kata · {outline.sections.length} section</div>
           </div>
         </div>
       )}
 
-      {/* Editable Title Section */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
-        <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-          Judul Artikel SEO (Dapat Diedit)
+      {/* Editable Title */}
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-medium text-[#a1a1aa] uppercase tracking-wider">
+          Judul Artikel
         </label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-base font-bold text-white focus:outline-none focus:border-indigo-500"
+          className="w-full bg-[#121215] border border-[#27272a] focus:border-[#3f3f46] rounded-md px-4 py-2.5 text-sm font-semibold text-white focus:outline-none transition-colors"
         />
       </div>
 
-      {/* Outline Section List */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-indigo-400" />
-            Daftar Heading & Subheading ({outline.sections.length})
+      {/* Section List */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[11px] font-medium text-[#a1a1aa] uppercase tracking-wider">
+            Struktur Heading ({outline.sections.length})
           </h3>
           <button
             type="button"
             onClick={addH2Section}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#1e1e21] hover:bg-[#27272a] border border-[#27272a] text-[#a1a1aa] hover:text-white text-xs font-medium transition-colors"
           >
-            <Plus className="w-3.5 h-3.5" /> Tambah Subheading H2
+            <Plus className="w-3.5 h-3.5" /> Tambah H2
           </button>
         </div>
 
         {outline.sections.map((section, idx) => (
           <div
             key={section.id || idx}
-            className="bg-slate-900/70 border border-slate-800/90 hover:border-slate-700 rounded-xl p-4 transition-all space-y-3 group"
+            className="bg-[#121215] border border-[#27272a] hover:border-[#3f3f46] rounded-lg p-4 transition-colors space-y-3 group"
           >
             <div className="flex items-center justify-between gap-3">
               {/* Level & Heading */}
@@ -276,12 +255,12 @@ export function StepOutline({
       </div>
 
       {/* Action Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+      <div className="flex items-center justify-between pt-4 border-t border-[#27272a]">
         <button
           type="button"
           onClick={onBack}
           disabled={isLoading}
-          className="px-4 py-2.5 rounded-xl border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-all flex items-center gap-1.5"
+          className="px-3.5 py-2 rounded-md border border-[#27272a] text-xs font-medium text-[#71717a] hover:text-white hover:border-[#3f3f46] transition-colors flex items-center gap-1.5"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Kembali
         </button>
@@ -290,18 +269,17 @@ export function StepOutline({
           type="button"
           disabled={isLoading || outline.sections.length === 0}
           onClick={() => onContinue({ ...outline, title }, title)}
-          className="py-3.5 px-8 rounded-xl bg-gradient-to-r from-emerald-600 via-indigo-600 to-purple-600 hover:from-emerald-500 hover:to-purple-500 text-sm font-bold text-white shadow-xl shadow-indigo-500/25 flex items-center gap-2.5 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+          className="flex items-center gap-2 py-2 px-5 rounded-md bg-white hover:bg-[#f4f4f5] disabled:bg-[#27272a] disabled:text-[#52525b] text-black text-xs font-semibold transition-colors disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Memulai Penulisan Section via Claude 4.6...</span>
+              <div className="w-3.5 h-3.5 border-2 border-[#52525b] border-t-[#a1a1aa] rounded-full animate-spin" />
+              <span className="text-[#a1a1aa]">Memulai penulisan...</span>
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4" />
-              <span>Lanjutkan Penulisan Artikel (Claude 4.6)</span>
-              <ChevronRight className="w-4 h-4" />
+              <span>Lanjutkan Penulisan</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </>
           )}
         </button>

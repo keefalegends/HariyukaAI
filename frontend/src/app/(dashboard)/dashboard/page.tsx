@@ -3,16 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Sparkles,
   FileText,
-  TrendingUp,
   ShieldCheck,
-  Zap,
-  Clock,
-  ArrowRight,
-  ChevronRight,
-  Server,
+  Hash,
+  ArrowUpRight,
   Plus,
+  Clock,
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 
@@ -32,6 +28,14 @@ interface DashboardStats {
   }>;
 }
 
+const STATUS_MAP: Record<string, { label: string; color: string }> = {
+  completed:       { label: "Selesai",    color: "text-emerald-500" },
+  generating:      { label: "Generating", color: "text-blue-400" },
+  outline_pending: { label: "Review",     color: "text-amber-400" },
+  draft:           { label: "Draft",      color: "text-[#71717a]" },
+  failed:          { label: "Gagal",      color: "text-red-500" },
+};
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
     total_articles: 0,
@@ -40,255 +44,162 @@ export default function DashboardPage() {
     completed_articles: 0,
     recent_articles: [],
   });
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetch_ = async () => {
       try {
         const res = await fetch("http://localhost:8000/api/v1/settings/dashboard-stats");
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-        } else {
-          setStats({
-            total_articles: 0,
-            total_words: 0,
-            average_seo_score: 0,
-            completed_articles: 0,
-            recent_articles: [],
-          });
-        }
-      } catch (e) {
-        setStats({
-          total_articles: 0,
-          total_words: 0,
-          average_seo_score: 0,
-          completed_articles: 0,
-          recent_articles: [],
-        });
-      }
-      setIsLoading(false);
+        if (res.ok) setStats(await res.json());
+      } catch {}
     };
-
-    fetchStats();
+    fetch_();
   }, []);
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950/70 via-purple-950/50 to-slate-900/80 border border-indigo-500/20 p-8 shadow-2xl">
-        <div className="relative z-10 max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Multi-Step Agentic SEO Pipeline 2.0</span>
+    <div className="space-y-6">
+      {/* Page Header Row */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-base font-semibold text-white">Dashboard</h1>
+          <p className="text-xs text-[#71717a] mt-0.5">Overview artikel dan aktivitas generator.</p>
+        </div>
+        <Link
+          href="/generator"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-[#f4f4f5] text-black text-xs font-semibold transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+          Artikel Baru
+        </Link>
+      </div>
+
+      {/* Metrics Row — 4 cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          {
+            label: "Total Artikel",
+            value: formatNumber(stats.total_articles),
+            sub: stats.total_articles > 0 ? `${stats.completed_articles} selesai` : "—",
+            icon: FileText,
+          },
+          {
+            label: "Total Kata",
+            value: formatNumber(stats.total_words),
+            sub: stats.total_articles > 0
+              ? `~${formatNumber(Math.round(stats.total_words / stats.total_articles))}/artikel`
+              : "—",
+            icon: Hash,
+          },
+          {
+            label: "Rata-rata SEO Score",
+            value: stats.average_seo_score > 0 ? `${stats.average_seo_score}/100` : "—",
+            sub: stats.average_seo_score >= 80 ? "E-E-A-T Ready" : "Belum ada data",
+            icon: ShieldCheck,
+          },
+          {
+            label: "Artikel Selesai",
+            value: formatNumber(stats.completed_articles),
+            sub: stats.total_articles > 0
+              ? `dari ${formatNumber(stats.total_articles)} total`
+              : "—",
+            icon: Clock,
+          },
+        ].map((card) => (
+          <div
+            key={card.label}
+            className="bg-[#121215] border border-[#27272a] rounded-lg p-4 space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-[#71717a] font-medium">{card.label}</span>
+              <card.icon className="w-3.5 h-3.5 text-[#52525b]" />
+            </div>
+            <div className="text-xl font-semibold text-white tracking-tight">{card.value}</div>
+            <div className="text-[11px] text-[#52525b]">{card.sub}</div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white">
-            Selamat Datang di <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">Hariyuka AI</span>
-          </h1>
-          <p className="text-sm text-slate-300 leading-relaxed">
-            Hasilkan artikel SEO berperingkat tinggi di Google dengan pipeline multi-pass bertenaga Claude 4.6 & Gemini 3.7 via 9Router Proxy. Mengambil data referensi asli dari SERP Google.
-          </p>
-          <div className="pt-2">
+        ))}
+      </div>
+
+      {/* Recent Articles Table */}
+      <div className="bg-[#121215] border border-[#27272a] rounded-lg overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#27272a]">
+          <h2 className="text-xs font-semibold text-white">Artikel Terbaru</h2>
+          {stats.total_articles > 0 && (
             <Link
-              href="/generator"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 transition-all active:scale-95"
+              href="/articles"
+              className="flex items-center gap-1 text-[11px] text-[#71717a] hover:text-white transition-colors"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>Tulis Artikel Baru Sekarang</span>
-              <ArrowRight className="w-4 h-4" />
+              Lihat semua
+              <ArrowUpRight className="w-3 h-3" />
             </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Clean 3-Column Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Metric 1: Total Articles */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>Total Artikel</span>
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
-              <FileText className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-white">
-            {formatNumber(stats.total_articles)}
-          </div>
-          <div className="text-[11px] text-slate-400">
-            {stats.total_articles > 0 ? `${stats.completed_articles} artikel selesai` : "Belum ada artikel"}
-          </div>
-        </div>
-
-        {/* Metric 2: Total Words */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>Total Kata Digenerate</span>
-            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400">
-              <Zap className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-white">
-            {formatNumber(stats.total_words)}
-          </div>
-          <div className="text-[11px] text-slate-400 font-medium">
-            {stats.total_articles > 0
-              ? `Rata-rata ${formatNumber(Math.round(stats.total_words / stats.total_articles))} kata/artikel`
-              : "0 kata tertulis"}
-          </div>
-        </div>
-
-        {/* Metric 3: Average SEO Score */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-2">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>Rata-Rata Skor SEO</span>
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-2xl font-black text-emerald-400">
-            {stats.average_seo_score > 0 ? stats.average_seo_score : "-"}{" "}
-            {stats.average_seo_score > 0 && <span className="text-xs text-slate-400">/100</span>}
-          </div>
-          <div className="text-[11px] text-emerald-400 font-semibold">
-            {stats.average_seo_score >= 80 ? "Rank-ready E-E-A-T" : "Audit Real-Time"}
-          </div>
-        </div>
-      </div>
-
-      {/* Real Recent Articles & Pipeline Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Recent Articles */}
-        <div className="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-indigo-400" />
-              Artikel Terbaru
-            </h2>
-            {stats.total_articles > 0 && (
-              <Link
-                href="/articles"
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
-              >
-                Lihat Semua <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
-            )}
-          </div>
-
-          {stats.recent_articles.length === 0 ? (
-            /* Clean Empty State */
-            <div className="py-12 px-4 text-center space-y-3 bg-slate-950/40 rounded-xl border border-dashed border-slate-800">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto">
-                <FileText className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-white">Belum Ada Artikel yang Dibuat</h3>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
-                  Mulai buat artikel pertama Anda dengan memasukkan keyword target di Generator Artikel.
-                </p>
-              </div>
-              <div className="pt-2">
-                <Link
-                  href="/generator"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md transition-all active:scale-95"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Tulis Artikel Pertama</span>
-                </Link>
-              </div>
-            </div>
-          ) : (
-            /* Real Articles List */
-            <div className="divide-y divide-slate-800/60">
-              {stats.recent_articles.map((item) => (
-                <div
-                  key={item.id}
-                  className="py-3.5 flex items-center justify-between gap-4 hover:bg-slate-800/30 rounded-xl px-2 transition-colors"
-                >
-                  <div className="min-w-0">
-                    <Link
-                      href={`/articles/${item.id}`}
-                      className="text-sm font-bold text-slate-100 hover:text-indigo-400 transition-colors line-clamp-1"
-                    >
-                      {item.title}
-                    </Link>
-                    <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
-                      <span className="font-mono text-[11px] bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
-                        {item.target_keyword}
-                      </span>
-                      <span>• {formatNumber(item.word_count)} kata</span>
-                      <span>
-                        • {new Date(item.created_at).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0">
-                    {item.seo_score > 0 && (
-                      <span className="inline-flex items-center gap-1 font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 text-xs">
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        {item.seo_score}/100
-                      </span>
-                    )}
-                    <Link
-                      href={`/articles/${item.id}`}
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
           )}
         </div>
 
-        {/* Right 1 Col: Pipeline Status */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Server className="w-4 h-4 text-indigo-400" />
-              9Router AI Gateway
-            </h2>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              Online
-            </span>
+        {stats.recent_articles.length === 0 ? (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <div className="w-10 h-10 rounded-lg bg-[#1e1e21] border border-[#27272a] flex items-center justify-center mb-4">
+              <FileText className="w-5 h-5 text-[#52525b]" />
+            </div>
+            <p className="text-sm font-medium text-[#a1a1aa]">Belum ada artikel</p>
+            <p className="text-xs text-[#52525b] mt-1 max-w-xs">
+              Mulai buat artikel SEO pertama Anda dengan memasukkan keyword target.
+            </p>
+            <Link
+              href="/generator"
+              className="mt-4 flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-[#f4f4f5] text-black text-xs font-semibold transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+              Buat Artikel Pertama
+            </Link>
           </div>
-
-          <div className="space-y-3 text-xs">
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">
-              <div className="flex items-center justify-between font-semibold text-slate-300">
-                <span>SERP & Intent Analysis</span>
-                <span className="text-[10px] text-indigo-400 font-mono">Gemini 3.7</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Ekstraksi keyword LSI, entitas semantik & People Also Ask secara instan.
-              </p>
-            </div>
-
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">
-              <div className="flex items-center justify-between font-semibold text-slate-300">
-                <span>Multi-Pass Section Writer</span>
-                <span className="text-[10px] text-purple-400 font-mono">Claude 4.6</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Prosa natural berstandar jurnalis tanpa klise AI dan tanpa repetisi alur.
-              </p>
-            </div>
-
-            <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1.5">
-              <div className="flex items-center justify-between font-semibold text-slate-300">
-                <span>SEO & E-E-A-T Polisher</span>
-                <span className="text-[10px] text-emerald-400 font-mono">Claude 4.6</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Penataan bolding penekanan, visual tag placeholders, dan audit skor 100%.
-              </p>
-            </div>
-          </div>
-        </div>
+        ) : (
+          /* Article rows */
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-[#27272a]">
+                <th className="text-left px-5 py-2.5 text-[11px] font-medium text-[#52525b] w-full">Judul</th>
+                <th className="text-left px-4 py-2.5 text-[11px] font-medium text-[#52525b] whitespace-nowrap">Keyword</th>
+                <th className="text-right px-4 py-2.5 text-[11px] font-medium text-[#52525b] whitespace-nowrap">Kata</th>
+                <th className="text-right px-4 py-2.5 text-[11px] font-medium text-[#52525b] whitespace-nowrap">SEO</th>
+                <th className="text-right px-5 py-2.5 text-[11px] font-medium text-[#52525b] whitespace-nowrap">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#1e1e21]">
+              {stats.recent_articles.map((item) => {
+                const s = STATUS_MAP[item.status] ?? STATUS_MAP.draft;
+                return (
+                  <tr key={item.id} className="hover:bg-[#1e1e21] transition-colors group">
+                    <td className="px-5 py-3">
+                      <Link
+                        href={`/articles/${item.id}`}
+                        className="font-medium text-[#d4d4d8] group-hover:text-white transition-colors line-clamp-1 flex items-center gap-1.5"
+                      >
+                        {item.title}
+                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />
+                      </Link>
+                      <span className="text-[10px] text-[#52525b] mt-0.5 block">
+                        {new Date(item.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-mono text-[10px] text-[#71717a] bg-[#1e1e21] border border-[#27272a] px-1.5 py-0.5 rounded">
+                        {item.target_keyword}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right text-[#a1a1aa] tabular-nums">
+                      {item.word_count > 0 ? formatNumber(item.word_count) : "—"}
+                    </td>
+                    <td className="px-4 py-3 text-right text-[#a1a1aa] tabular-nums">
+                      {item.seo_score > 0 ? `${item.seo_score}` : "—"}
+                    </td>
+                    <td className={`px-5 py-3 text-right font-medium ${s.color}`}>
+                      {s.label}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
