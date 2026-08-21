@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useTheme, type Theme } from "@/contexts/theme-context";
 import { useTokens } from "@/lib/use-tokens";
+import { HariyukaLogo } from "@/components/ui/hariyuka-logo";
 
 const navigation = [
   { name: "Dashboard",   href: "/dashboard", icon: LayoutDashboard },
@@ -161,8 +162,8 @@ export function Sidebar() {
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg t-accent-bg flex items-center justify-center">
-                  <PenLine className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-lg t-accent-bg flex items-center justify-center p-1.5 shadow-sm">
+                  <HariyukaLogo className="w-full h-full text-white" />
                 </div>
                 <div>
                   <h2 className={`text-sm font-semibold ${tk.textPrimary}`}>Hariyuka AI</h2>
@@ -280,8 +281,8 @@ export function Sidebar() {
           {!collapsed ? (
             <>
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-lg t-accent-bg flex items-center justify-center shrink-0 shadow-sm">
-                  <PenLine className="w-4 h-4" strokeWidth={2.5} />
+                <div className="w-7 h-7 rounded-lg t-accent-bg flex items-center justify-center shrink-0 shadow-sm p-1">
+                  <HariyukaLogo className="w-full h-full text-white" />
                 </div>
                 <span className={`font-bold text-sm tracking-tight truncate t-text-primary`}>
                   Hariyuka AI
@@ -300,10 +301,10 @@ export function Sidebar() {
             <div className="w-full flex justify-center">
               <button
                 onClick={() => setCollapsed(false)}
-                className="w-7 h-7 rounded-lg t-accent-bg flex items-center justify-center cursor-pointer shadow-sm hover:scale-105 transition-transform"
+                className="w-7 h-7 rounded-lg t-accent-bg flex items-center justify-center cursor-pointer shadow-sm hover:scale-105 transition-transform p-1"
                 title="Buka Sidebar (Expand)"
               >
-                <PanelLeftOpen className="w-4 h-4" strokeWidth={2.5} />
+                <HariyukaLogo className="w-full h-full text-white" />
               </button>
             </div>
           )}

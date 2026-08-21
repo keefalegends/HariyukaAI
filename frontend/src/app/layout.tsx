@@ -22,6 +22,11 @@ const serifFont = Lora({
 export const metadata: Metadata = {
   title: "Hariyuka AI - Next-Gen AI SEO Article Writer",
   description: "Generate human-grade, rank-ready long-form articles with multi-step agentic AI pipeline.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -31,6 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`dark ${sansFont.variable} ${serifFont.variable}`}>
+      <head>
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+      </head>
       <body className="font-sans min-h-screen antialiased selection:bg-[#d97757] selection:text-white">
         <ThemeProvider>
           {children}

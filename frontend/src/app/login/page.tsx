@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Globe, Eye, EyeOff, Terminal, Info, X, ShieldAlert, ArrowRight, Loader2 } from "lucide-react";
+import { HariyukaLogo } from "@/components/ui/hariyuka-logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -123,13 +124,18 @@ export default function LoginPage() {
         </div>
 
         {/* Main Branding */}
-        <div className="text-center py-2 space-y-1.5">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[0.25em] text-[#f5f5f4]">
-            HARIYUKA<span className="text-[#d97757]">·</span>AI
-          </h1>
-          <p className="text-[11px] text-[#78716c] tracking-wide font-sans">
-            Personal Console & Multi-Agent SEO Ground
-          </p>
+        <div className="text-center py-2 space-y-2.5 flex flex-col items-center">
+          <div className="w-10 h-10 rounded-xl bg-[#d97757]/15 border border-[#d97757]/40 flex items-center justify-center p-2 text-[#d97757] shadow-lg shadow-[#d97757]/10">
+            <HariyukaLogo className="w-full h-full" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[0.25em] text-[#f5f5f4]">
+              HARIYUKA<span className="text-[#d97757]">·</span>AI
+            </h1>
+            <p className="text-[11px] text-[#78716c] tracking-wide font-sans mt-0.5">
+              Personal Console & Multi-Agent SEO Ground
+            </p>
+          </div>
         </div>
 
         {/* Error Alert */}
