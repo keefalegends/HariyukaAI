@@ -10,6 +10,7 @@ import {
   Tag,
   Sparkles,
 } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 
 interface SeoSidebarProps {
   score?: number;
@@ -85,7 +86,7 @@ export function SeoSidebar({
             <FileText className="w-3.5 h-3.5 text-indigo-400" />
             Jumlah Kata
           </div>
-          <div className="text-sm font-bold text-white">{wordCount.toLocaleString()} kata</div>
+          <div className="text-sm font-bold text-white">{formatNumber(wordCount)} kata</div>
         </div>
 
         <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 space-y-1">

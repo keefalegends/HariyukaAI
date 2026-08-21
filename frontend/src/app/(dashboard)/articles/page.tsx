@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Plus,
 } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 
 interface ArticleItem {
   id: string;
@@ -238,7 +239,7 @@ export function ArticlesPage() {
                     <td className="py-4 px-4">{getStatusBadge(art.status)}</td>
 
                     <td className="py-4 px-4 font-semibold text-slate-200">
-                      {art.word_count > 0 ? `${art.word_count.toLocaleString()} kata` : "-"}
+                      {art.word_count > 0 ? `${formatNumber(art.word_count)} kata` : "-"}
                     </td>
 
                     <td className="py-4 px-4">

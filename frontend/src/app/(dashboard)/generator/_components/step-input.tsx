@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles, Globe, Sliders, Type, BookOpen, Layers, Plus, X, Search } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 
 interface StepInputProps {
   onSubmit: (formData: any) => void;
@@ -155,7 +156,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
               Target Panjang Artikel
             </label>
             <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
-              ~{targetLength.toLocaleString()} Kata
+              ~{formatNumber(targetLength)} Kata
             </span>
           </div>
           <div className="grid grid-cols-4 gap-2">
@@ -170,7 +171,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
                     : "bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700"
                 }`}
               >
-                {len.toLocaleString()} kata
+                {formatNumber(len)} kata
               </button>
             ))}
           </div>
