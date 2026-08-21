@@ -1,6 +1,6 @@
 """
 Article API Endpoints for Hariyuka AI.
-Handles Outline Creation, Editing, Multi-pass Writing, and Article CRUD.
+Handles Outline Creation, Editing, Multi-pass Writing, and Article CRUD with Persistent Storage.
 """
 import uuid
 import asyncio
@@ -16,13 +16,13 @@ from app.schemas.article import (
 )
 from app.pipeline.orchestrator import orchestrator
 from app.services.seo_analyzer import seo_analyzer
+from app.db.storage import storage
 
 router = APIRouter(prefix="/articles", tags=["Articles"])
 
-# In-memory storage / Mock Database fallback for standalone and development mode
-# When Supabase is configured, this seamlessly persists to Postgres.
-MOCK_ARTICLES_DB: Dict[str, Dict[str, Any]] = {}
-MOCK_JOBS_DB: Dict[str, Dict[str, Any]] = {}
+# Expose storage dictionary for backwards compatibility
+MOCK_ARTICLES_DB = storage.articles
+MOCK_JOBS_DB = storage.jobs
 
 
 @router.post("/generate-outline", response_model=Dict[str, Any])
@@ -58,7 +58,8 @@ async def generate_outline_endpoint(
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     }
-    MOCK_ARTICLES_DB[article_id] = article_record
+    storage.articles[article_id] = article_record
+    storage.save_articles()
 
     job_record = {
         "id": job_id,
@@ -72,7 +73,8 @@ async def generate_outline_endpoint(
         "error_message": None,
         "updated_at": datetime.utcnow()
     }
-    MOCK_JOBS_DB[job_id] = job_record
+    storage.jobs[job_id] = job_record
+    storage.save_jobs()
 
     # Asynchronous outline generation task
     async def process_outline_task():
@@ -93,6 +95,7 @@ async def generate_outline_endpoint(
             article_record["serp_data"] = res["serp_data"]
             article_record["status"] = "outline_pending"
             article_record["updated_at"] = datetime.utcnow()
+            storage.save_articles()
 
             # Update Job record
             job_record["current_step"] = 2
@@ -100,11 +103,15 @@ async def generate_outline_endpoint(
             job_record["status"] = "waiting_user_input"
             job_record["step_name"] = "outline_review"
             job_record["updated_at"] = datetime.utcnow()
+            storage.save_jobs()
         except Exception as e:
             article_record["status"] = "failed"
+            article_record["updated_at"] = datetime.utcnow()
+            storage.save_articles()
             job_record["status"] = "failed"
             job_record["error_message"] = str(e)
             job_record["updated_at"] = datetime.utcnow()
+            storage.save_jobs()
 
     background_tasks.add_task(process_outline_task)
 
@@ -125,10 +132,10 @@ async def continue_writing_endpoint(
     """
     Step 3, 4 & 5: Takes the edited/approved outline and writes sections sequentially with Claude 4.6.
     """
-    if article_id not in MOCK_ARTICLES_DB:
+    if article_id not in storage.articles:
         raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
 
-    article = MOCK_ARTICLES_DB[article_id]
+    article = storage.articles[article_id]
     
     # Update article with latest outline and optional title changes
     if req.title:
@@ -136,6 +143,7 @@ async def continue_writing_endpoint(
     article["outline_json"] = req.outline.model_dump()
     article["status"] = "generating"
     article["updated_at"] = datetime.utcnow()
+    storage.save_articles()
 
     async def process_writing_task():
         try:
@@ -154,9 +162,11 @@ async def continue_writing_endpoint(
             article["seo_audit"] = result["seo_audit"]
             article["status"] = "completed"
             article["updated_at"] = datetime.utcnow()
+            storage.save_articles()
         except Exception as e:
             article["status"] = "failed"
             article["updated_at"] = datetime.utcnow()
+            storage.save_articles()
 
     background_tasks.add_task(process_writing_task)
 
@@ -170,30 +180,30 @@ async def continue_writing_endpoint(
 @router.get("", response_model=List[ArticleResponse])
 async def list_articles(
     status: Optional[str] = None,
-    limit: int = Query(20, ge=1, le=100)
+    limit: int = Query(50, ge=1, le=100)
 ):
     """List all user articles with optional status filtering."""
-    articles = list(MOCK_ARTICLES_DB.values())
+    articles = list(storage.articles.values())
     if status:
         articles = [a for a in articles if a["status"] == status]
-    return sorted(articles, key=lambda x: x["created_at"], reverse=True)[:limit]
+    return sorted(articles, key=lambda x: x.get("created_at", datetime.min), reverse=True)[:limit]
 
 
 @router.get("/{article_id}", response_model=ArticleResponse)
 async def get_article(article_id: str):
     """Get single article by ID with full content and SEO audit."""
-    if article_id not in MOCK_ARTICLES_DB:
+    if article_id not in storage.articles:
         raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
-    return MOCK_ARTICLES_DB[article_id]
+    return storage.articles[article_id]
 
 
 @router.put("/{article_id}", response_model=ArticleResponse)
 async def update_article_content(article_id: str, req: UpdateArticleContentRequest):
     """Update article content from Tiptap Editor and re-evaluate SEO score."""
-    if article_id not in MOCK_ARTICLES_DB:
+    if article_id not in storage.articles:
         raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
 
-    article = MOCK_ARTICLES_DB[article_id]
+    article = storage.articles[article_id]
     if req.content_markdown is not None:
         article["content_markdown"] = req.content_markdown
         # Recalculate SEO Audit live
@@ -212,13 +222,15 @@ async def update_article_content(article_id: str, req: UpdateArticleContentReque
         article["title"] = req.title
 
     article["updated_at"] = datetime.utcnow()
+    storage.save_articles()
     return article
 
 
 @router.delete("/{article_id}")
 async def delete_article(article_id: str):
     """Delete an article."""
-    if article_id in MOCK_ARTICLES_DB:
-        del MOCK_ARTICLES_DB[article_id]
+    if article_id in storage.articles:
+        del storage.articles[article_id]
+        storage.save_articles()
         return {"success": True, "message": "Artikel berhasil dihapus"}
     raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")

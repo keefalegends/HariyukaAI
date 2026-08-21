@@ -9,8 +9,6 @@ import {
   FileText,
   FolderOpen,
   Settings,
-  ChevronLeft,
-  ChevronRight,
   Sun,
   Moon,
   Flame,
@@ -19,6 +17,8 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  ShieldAlert,
+  Loader2,
 } from "lucide-react";
 import { useTheme, type Theme } from "@/contexts/theme-context";
 import { useTokens } from "@/lib/use-tokens";
@@ -44,25 +44,115 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [articleCount, setArticleCount] = useState<number>(0);
+  const [operatorName, setOperatorName] = useState<string>("keefa9");
 
   useEffect(() => {
+    // Fetch dashboard stats
     fetch("http://localhost:8000/api/v1/settings/dashboard-stats")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d?.total_articles !== undefined) setArticleCount(d.total_articles);
       })
       .catch(() => {});
+
+    // Fetch active logged-in operator
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.operator) setOperatorName(d.operator);
+      })
+      .catch(() => {});
   }, []);
 
-  const handleLogout = () => {
-    if (confirm("Reset sesi kerja Hariyuka AI?")) {
-      window.location.href = "/dashboard";
-    }
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {}
+    window.location.href = "/login";
   };
 
   return (
     <>
+      {/* ─── LOGOUT CONFIRMATION MODAL ─── */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-in fade-in"
+            onClick={() => !isLoggingOut && setShowLogoutModal(false)}
+          />
+          <div
+            className={`relative z-10 w-full max-w-sm rounded-2xl border p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150 ${tk.cardBg}`}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                  <LogOut className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className={`text-sm font-semibold ${tk.textPrimary}`}>
+                    Akhiri Sesi Operator
+                  </h2>
+                  <p className={`text-[10px] ${tk.textFaint}`}>Gateway Lock Required</p>
+                </div>
+              </div>
+              <button
+                disabled={isLoggingOut}
+                onClick={() => setShowLogoutModal(false)}
+                className={`p-1.5 rounded-lg transition-colors ${tk.navInactive}`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="space-y-3">
+              <p className={`text-xs leading-relaxed ${tk.textMuted}`}>
+                Apakah Anda yakin ingin keluar dari sesi operator{" "}
+                <span className={`font-mono font-bold ${tk.textPrimary}`}>
+                  {operatorName}
+                </span>
+                ? Kunci keamanan gateway akan diaktifkan dan Anda harus memasukkan passphrase kembali untuk mengakses dashboard.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t t-border">
+              <button
+                type="button"
+                disabled={isLoggingOut}
+                onClick={() => setShowLogoutModal(false)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer ${tk.outlineBtn}`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isLoggingOut}
+                onClick={handleConfirmLogout}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-500 text-white shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Mengunci...</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Logout & Kunci Gateway</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ─── ABOUT MODAL ─── */}
       {showAbout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -250,14 +340,14 @@ export function Sidebar() {
         <div className="border-t t-border shrink-0">
           {!collapsed ? (
             <div className="p-3 space-y-2.5">
-              {/* Row 1: 🟢 keefa9 | [-> LOGOUT */}
+              {/* Row 1: 🟢 operatorName | [-> LOGOUT */}
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2 font-medium t-text-primary">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 shadow-sm" />
-                  <span className="truncate">keefa9</span>
+                  <span className="truncate font-mono">{operatorName}</span>
                 </div>
                 <button
-                  onClick={handleLogout}
+                  onClick={() => setShowLogoutModal(true)}
                   className="flex items-center gap-1 text-[11px] tracking-wider uppercase t-text-faint hover:t-text-primary transition-colors cursor-pointer"
                   title="Logout"
                 >
@@ -306,6 +396,13 @@ export function Sidebar() {
                 title="Settings & Theme"
               >
                 <Settings className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className={`w-full flex items-center justify-center p-2 rounded-lg transition-colors text-red-400 hover:bg-red-500/10`}
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
           )}
