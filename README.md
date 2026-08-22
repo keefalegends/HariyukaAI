@@ -49,15 +49,7 @@
 ### 4. 🔍 Cek Orisinalitas & Plagiarisme (BETA)
 * **Pendeteksi Plagiarisme Live Web Indexing:** Memecah teks menjadi N-Gram unik dan mencocokkan secara live ke indeks pencarian web untuk menampilkan persentase keunikan serta daftar URL sumber duplikasi asli jika ada.
 * **Pendeteksi Konten AI (Multi-Signal):** Menganalisis *Perplexity Distribution*, *Sentence Burstiness Variance*, dan pola sintaksis untuk menghasilkan breakdown probabilitas AI kalimat per kalimat.
-* **Halaman Mandiri (`/checker`):** Area textarea luas untuk memeriksa teks bebas dari mana saja.
 * **Integrasi Editor Suite:** Tombol **`Cek AI & Plagiat`** instan di header editor artikel (`/articles/[id]`).
-* **Riwayat Audit Tersimpan:** Database lokal disk (`checker_history_db.json`) untuk memuat kembali hasil audit sebelumnya kapan saja.
-
----
-
-### 5. 💻 Live Background Terminal Console di Sidebar
-* Menampilkan log aktivitas real-time: inisialisasi daemon, status koneksi 9Router gateway, proses SERP Gemini 3.7, multi-pass Claude 4.6, dan kalkulasi audit Yoast.
-* Opsi Buka/Tutup (*Collapsible*) dengan indikator status dot berdenyut (*pulsing dot*).
 
 ---
 
