@@ -22,39 +22,28 @@ interface SidebarTerminalProps {
 
 export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
   const tk = useTokens();
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(true);
   const [gatewayStatus, setGatewayStatus] = useState<"online" | "offline">("online");
   const [jobStatus, setJobStatus] = useState<TerminalStatus>("idle");
   const [activeTask, setActiveTask] = useState<string>("daemon idle");
-  
-  const [logs, setLogs] = useState<TerminalLog[]>([
-    {
-      id: "1",
-      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-      type: "SYS",
-      message: "Hariyuka Daemon v1.0 online",
-    },
-    {
-      id: "2",
-      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-      type: "API",
-      message: "9Router Gateway: 200 OK",
-    },
-    {
-      id: "3",
-      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-      type: "SEO",
-      message: "Yoast 12-Rules SOP Loaded",
-    },
-  ]);
+  const [logs, setLogs] = useState<TerminalLog[]>([]);
 
   const logEndRef = useRef<HTMLDivElement>(null);
 
-  // Load persisted logs from session and listen to live events
+  // Client-side hydration mount
   useEffect(() => {
+    setMounted(true);
     const stored = getStoredTerminalLogs();
     if (stored && stored.length > 0) {
       setLogs(stored);
+    } else {
+      const now = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      setLogs([
+        { id: "1", time: now, type: "SYS", message: "Hariyuka Daemon v1.0 online" },
+        { id: "2", time: now, type: "API", message: "9Router Gateway: 200 OK" },
+        { id: "3", time: now, type: "SEO", message: "Yoast 12-Rules SOP Loaded" },
+      ]);
     }
 
     const handleLogEvent = (e: Event) => {
@@ -110,9 +99,10 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
   }, []);
 
   const handleClearLogs = () => {
+    const now = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     const resetLog: TerminalLog = {
       id: String(Date.now()),
-      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+      time: now,
       type: "SYS",
       message: "Terminal buffer cleared",
     };
@@ -140,6 +130,15 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
         return "text-stone-400";
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="mx-2 mb-2 rounded-xl border border-[#2c2926] bg-[#0f0e0c] h-8 flex items-center px-2.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-50" />
+        <span className="ml-1.5 text-[10px] font-mono text-[#78716c]">TERMINAL</span>
+      </div>
+    );
+  }
 
   // If sidebar is collapsed (w-60px), show miniature icon indicator
   if (collapsed) {
@@ -219,7 +218,7 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
         <div className="p-2.5 font-mono text-[10px] leading-tight space-y-1.5 max-h-[140px] overflow-y-auto bg-[#0a0908] scrollbar-thin">
           {logs.map((log) => (
             <div key={log.id} className="flex items-start gap-1.5 break-all animate-in fade-in duration-100">
-              <span className="text-[#57534e] shrink-0">{log.time}</span>
+              <span className="text-[#57534e] shrink-0" suppressHydrationWarning>{log.time}</span>
               <span className={`font-bold shrink-0 ${getTypeColor(log.type)}`}>
                 [{log.type}]
               </span>
