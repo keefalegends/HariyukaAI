@@ -30,7 +30,7 @@ const navigation = [
   { name: "Dashboard",        href: "/dashboard", icon: LayoutDashboard },
   { name: "Generator",        href: "/generator",  icon: PenLine },
   { name: "Artikel",          href: "/articles",   icon: FileText },
-  { name: "Cek AI & Plagiat", href: "/checker",    icon: ShieldCheck },
+  { name: "Cek AI & Plagiat", href: "/checker",    icon: ShieldCheck, badge: "BETA" },
   { name: "Proyek",           href: "/projects",   icon: FolderOpen },
   { name: "API & Model",      href: "/settings",   icon: Settings },
 ];
@@ -327,9 +327,16 @@ export function Sidebar() {
               >
                 <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2 : 1.75} />
                 {!collapsed && (
-                  <span className="truncate font-medium">
-                    {item.name}
-                  </span>
+                  <div className="flex items-center justify-between flex-1 min-w-0">
+                    <span className="truncate font-medium">
+                      {item.name}
+                    </span>
+                    {item.badge && (
+                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#d97757]/15 text-[#d97757] border border-[#d97757]/30 tracking-tight">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
                 )}
               </Link>
             );

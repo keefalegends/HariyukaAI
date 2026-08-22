@@ -231,7 +231,12 @@ export default function ArticleEditorPage() {
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className={`text-sm font-bold ${tk.textPrimary}`}>Audit Orisinalitas & AI</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className={`text-sm font-bold ${tk.textPrimary}`}>Audit Orisinalitas & AI</h3>
+                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-[#d97757]/15 text-[#d97757] border border-[#d97757]/30 tracking-wider">
+                      BETA
+                    </span>
+                  </div>
                   <p className={`text-[10px] ${tk.textFaint}`}>Pindai Indeks Web & Detektor Probabilitas AI</p>
                 </div>
               </div>

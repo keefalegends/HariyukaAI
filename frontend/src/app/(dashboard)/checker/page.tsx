@@ -124,11 +124,14 @@ Jangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless
       {/* ─── HEADER ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b t-border">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-[#d97757]/15 border border-[#d97757]/40 flex items-center justify-center text-[#d97757]">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <h1 className={`text-lg font-bold ${tk.textPrimary}`}>Cek Orisinalitas & Plagiarisme</h1>
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#d97757]/15 text-[#d97757] border border-[#d97757]/30 tracking-wider">
+              BETA
+            </span>
           </div>
           <p className={`text-xs mt-1 ${tk.textMuted}`}>
             Verifikasi keaslian artikel secara real-time: Pindai indeks web untuk duplikasi & deteksi probabilitas AI.
