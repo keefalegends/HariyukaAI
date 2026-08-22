@@ -134,5 +134,39 @@
     ],
     "error_message": null,
     "updated_at": "2026-08-22T11:01:18.751017"
+  },
+  "8f0d1cec-f856-45ea-83de-6a83ab80259e": {
+    "id": "8f0d1cec-f856-45ea-83de-6a83ab80259e",
+    "article_id": "5e97d921-428a-4d95-b321-9ea90b5b4938",
+    "current_step": 2,
+    "total_steps": 5,
+    "step_name": "outline_review",
+    "progress_percentage": 50,
+    "status": "waiting_user_input",
+    "logs": [
+      {
+        "time": "2026-08-22T11:09:12.795815",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": null,
+    "updated_at": "2026-08-22T11:09:33.201156"
+  },
+  "e462d0c6-f53d-4f81-9c87-51aa60cd7039": {
+    "id": "e462d0c6-f53d-4f81-9c87-51aa60cd7039",
+    "article_id": "c57d5e46-767a-4c6b-bfbb-f86596dc5a37",
+    "current_step": 2,
+    "total_steps": 5,
+    "step_name": "outline_review",
+    "progress_percentage": 50,
+    "status": "waiting_user_input",
+    "logs": [
+      {
+        "time": "2026-08-22T11:20:52.118546",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": null,
+    "updated_at": "2026-08-22T11:21:13.482321"
   }
 }

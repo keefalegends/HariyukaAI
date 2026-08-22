@@ -3,37 +3,50 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { TiptapEditor } from "@/components/editor/tiptap-editor";
-import { SeoSidebar } from "@/components/editor/seo-sidebar";
 import {
-  ArrowLeft,
   Save,
+  ArrowLeft,
   Check,
   Trash2,
   AlertTriangle,
   X,
   Loader2,
+  ShieldCheck,
+  FileCheck2,
+  Bot,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
+import { TiptapEditor } from "@/components/editor/tiptap-editor";
+import { SeoSidebar } from "@/components/editor/seo-sidebar";
 import { useTokens } from "@/lib/use-tokens";
+import { logTerminal } from "@/lib/terminal-bus";
 
-export default function ArticleDetailPage() {
-  const tk = useTokens();
+export default function ArticleEditorPage() {
   const params = useParams();
   const router = useRouter();
-  const articleId = params.id as string;
+  const articleId = params?.id as string;
+  const tk = useTokens();
 
   const [article, setArticle] = useState<any>(null);
   const [contentMarkdown, setContentMarkdown] = useState("");
-  const [contentHtml, setContentHtml] = useState("");
+  const [seoAudit, setSeoAudit] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
-  const [seoAudit, setSeoAudit] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Authenticity / Plagiarism & AI Checker state
+  const [showCheckerModal, setShowCheckerModal] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
+  const [checkerReport, setCheckerReport] = useState<any>(null);
+
   useEffect(() => {
+    if (!articleId) return;
+
     const fetchArticle = async () => {
       try {
         const res = await fetch(`http://localhost:8000/api/v1/articles/${articleId}`);
@@ -41,52 +54,51 @@ export default function ArticleDetailPage() {
           const data = await res.json();
           setArticle(data);
           setContentMarkdown(data.content_markdown || "");
-          setContentHtml(data.content_html || "");
-          setSeoAudit(data.seo_audit);
-        } else {
-          setArticle(null);
+          setSeoAudit(data.seo_audit || null);
         }
       } catch (err) {
-        setArticle(null);
+        console.error("Failed to fetch article:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (articleId) {
-      fetchArticle();
-    }
+    fetchArticle();
   }, [articleId]);
 
-  const handleEditorChange = (markdown: string, html: string) => {
+  const handleEditorChange = (markdown: string) => {
     setContentMarkdown(markdown);
-    setContentHtml(html);
   };
 
   const handleSave = async () => {
+    if (!articleId) return;
     setIsSaving(true);
+
     try {
       const res = await fetch(`http://localhost:8000/api/v1/articles/${articleId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content_markdown: contentMarkdown,
-          content_html: contentHtml,
-          title: article?.title,
         }),
       });
+
       if (res.ok) {
         const updated = await res.json();
         setArticle(updated);
         setSeoAudit(updated.seo_audit);
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 2000);
       }
-    } catch (e) {
-      console.warn("Save note:", e);
+    } catch (err) {
+      console.error("Failed to update article content:", err);
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2500);
   };
 
   const handleDelete = async () => {
+    if (!articleId) return;
     setIsDeleting(true);
     try {
       const res = await fetch(`http://localhost:8000/api/v1/articles/${articleId}`, {
@@ -101,6 +113,37 @@ export default function ArticleDetailPage() {
     }
     setIsDeleting(false);
     setShowDeleteModal(false);
+  };
+
+  const handleRunChecker = async () => {
+    setShowCheckerModal(true);
+    setIsChecking(true);
+    logTerminal("JOB", `Memindai keaslian konten: "${article?.title || articleId.slice(0, 8)}"...`);
+
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/checker/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: contentMarkdown || article?.content_markdown || "",
+          check_plagiarism: true,
+          check_ai: true,
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        setCheckerReport(json.data);
+        const aiScore = json.data.ai_detection?.ai_percentage ?? 0;
+        const plagScore = json.data.plagiarism?.plagiarism_score ?? 0;
+        logTerminal("OK", `Audit orisinalitas: ${100 - plagScore}% Unik | ${100 - aiScore}% Human`);
+      }
+    } catch (e) {
+      console.error("Checker audit failed:", e);
+      logTerminal("ERR", `Gagal memindai orisinalitas: ${String(e)}`);
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   return (
@@ -162,9 +205,168 @@ export default function ArticleDetailPage() {
                 ) : (
                   <>
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>Hapus Artikel</span>
+                    <span>Hapus Permanen</span>
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── LIVE CHECKER AUDIT MODAL ─── */}
+      {showCheckerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm animate-in fade-in"
+            onClick={() => !isChecking && setShowCheckerModal(false)}
+          />
+          <div
+            className={`relative z-10 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150 ${tk.cardBg}`}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b t-border">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#d97757]/15 border border-[#d97757]/40 flex items-center justify-center text-[#d97757]">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className={`text-sm font-bold ${tk.textPrimary}`}>Audit Orisinalitas & AI</h3>
+                  <p className={`text-[10px] ${tk.textFaint}`}>Pindai Indeks Web & Detektor Probabilitas AI</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCheckerModal(false)}
+                className={`p-1.5 rounded-lg transition-colors ${tk.navInactive}`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Loading State */}
+            {isChecking && (
+              <div className="py-12 flex flex-col items-center justify-center space-y-3">
+                <Loader2 className="w-8 h-8 animate-spin text-[#d97757]" />
+                <p className={`text-xs font-semibold ${tk.textPrimary}`}>Memindai Keaslian Konten...</p>
+                <p className={`text-[11px] ${tk.textFaint}`}>Mencocokkan ke web index & menganalisis variasi kalimat.</p>
+              </div>
+            )}
+
+            {/* Results View */}
+            {!isChecking && checkerReport && (
+              <div className="space-y-4">
+                {/* Metric Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Plagiarism Box */}
+                  <div className="p-4 rounded-xl border t-border bg-black/20 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-stone-400">Keunikan Plagiasi</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold">
+                        {checkerReport.plagiarism?.uniqueness_score}% Unik
+                      </span>
+                    </div>
+                    <div className="text-2xl font-extrabold font-mono text-emerald-400">
+                      {checkerReport.plagiarism?.uniqueness_score}%
+                    </div>
+                    <p className="text-[10px] text-stone-400">
+                      {checkerReport.plagiarism?.matched_sources?.length === 0
+                        ? "✓ 100% Bebas plagiasi dari web index."
+                        : `Ditemukan ${checkerReport.plagiarism?.matched_sources?.length} sumber yang cocok.`}
+                    </p>
+                  </div>
+
+                  {/* AI Detector Box */}
+                  <div className="p-4 rounded-xl border t-border bg-black/20 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-stone-400">Detektor Konten AI</span>
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                          checkerReport.ai_detection?.ai_percentage <= 30
+                            ? "bg-emerald-500/15 text-emerald-400"
+                            : "bg-amber-500/15 text-amber-400"
+                        }`}
+                      >
+                        {checkerReport.ai_detection?.verdict}
+                      </span>
+                    </div>
+                    <div
+                      className={`text-2xl font-extrabold font-mono ${
+                        checkerReport.ai_detection?.ai_percentage <= 30 ? "text-emerald-400" : "text-amber-400"
+                      }`}
+                    >
+                      {checkerReport.ai_detection?.human_percentage}% Human
+                    </div>
+                    <p className="text-[10px] text-stone-400">
+                      Skor AI: {checkerReport.ai_detection?.ai_percentage}% • Burstiness: {checkerReport.ai_detection?.burstiness_score}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sentence Highlight Breakdown */}
+                {checkerReport.ai_detection?.sentences && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className={`font-semibold ${tk.textPrimary}`}>Pratinjau Ritme Kalimat:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-emerald-400 text-[10px]">● Human</span>
+                        <span className="text-amber-400 text-[10px]">● Warning</span>
+                        <span className="text-red-400 text-[10px]">● Terindikasi AI</span>
+                      </div>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-black/30 border t-border text-xs leading-relaxed max-h-48 overflow-y-auto">
+                      {checkerReport.ai_detection.sentences.map((s: any, idx: number) => {
+                        let bg = "";
+                        if (s.tag === "ai") bg = "bg-red-500/20 text-red-200";
+                        else if (s.tag === "warning") bg = "bg-amber-500/20 text-amber-200";
+                        return (
+                          <span key={idx} className={`px-1 py-0.5 rounded mr-1 ${bg}`} title={s.reason}>
+                            {s.text}{" "}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Web Sources list if any */}
+                {checkerReport.plagiarism?.matched_sources?.length > 0 && (
+                  <div className="space-y-1.5 pt-2">
+                    <span className="text-xs font-semibold text-amber-400">Sumber Web yang Ditemukan:</span>
+                    <div className="space-y-1">
+                      {checkerReport.plagiarism.matched_sources.map((src: any, i: number) => (
+                        <a
+                          key={i}
+                          href={src.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg border t-border bg-black/20 hover:border-[#d97757] flex items-center justify-between text-xs"
+                        >
+                          <span className="truncate">{src.title}</span>
+                          <ExternalLink className="w-3 h-3 shrink-0 text-stone-400" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-between pt-3 border-t t-border">
+              <Link
+                href="/checker"
+                className={`text-xs font-medium ${tk.accentText} hover:underline flex items-center gap-1`}
+              >
+                <span>Buka Tool Checker Penuh</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setShowCheckerModal(false)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${tk.outlineBtn}`}
+              >
+                Tutup
               </button>
             </div>
           </div>
@@ -195,6 +397,17 @@ export default function ArticleDetailPage() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
+          {/* Cek AI & Plagiat Button */}
+          <button
+            type="button"
+            onClick={handleRunChecker}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all active:scale-95 cursor-pointer ${tk.outlineBtn} hover:border-[#d97757] hover:text-[#d97757]`}
+            title="Pindai Keaslian & Deteksi AI"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-[#d97757]" />
+            <span>Cek AI & Plagiat</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setShowDeleteModal(true)}

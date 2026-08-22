@@ -18,6 +18,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ShieldAlert,
+  ShieldCheck,
   Loader2,
 } from "lucide-react";
 import { useTheme, type Theme } from "@/contexts/theme-context";
@@ -26,11 +27,12 @@ import { HariyukaLogo } from "@/components/ui/hariyuka-logo";
 import { SidebarTerminal } from "@/components/layout/sidebar-terminal";
 
 const navigation = [
-  { name: "Dashboard",   href: "/dashboard", icon: LayoutDashboard },
-  { name: "Generator",   href: "/generator",  icon: PenLine },
-  { name: "Artikel",     href: "/articles",   icon: FileText },
-  { name: "Proyek",      href: "/projects",   icon: FolderOpen },
-  { name: "API & Model", href: "/settings",   icon: Settings },
+  { name: "Dashboard",        href: "/dashboard", icon: LayoutDashboard },
+  { name: "Generator",        href: "/generator",  icon: PenLine },
+  { name: "Artikel",          href: "/articles",   icon: FileText },
+  { name: "Cek AI & Plagiat", href: "/checker",    icon: ShieldCheck },
+  { name: "Proyek",           href: "/projects",   icon: FolderOpen },
+  { name: "API & Model",      href: "/settings",   icon: Settings },
 ];
 
 const THEMES: { key: Theme; label: string; icon: any; desc: string }[] = [

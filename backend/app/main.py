@@ -8,6 +8,7 @@ from app.api.v1.articles import router as articles_router
 from app.api.v1.stream import router as stream_router
 from app.api.v1.projects import router as projects_router
 from app.api.v1.settings import router as settings_router
+from app.api.v1.checker import router as checker_router
 
 app = FastAPI(
     title="Hariyuka AI - Engine API",
@@ -36,6 +37,7 @@ app.include_router(articles_router, prefix=settings.API_V1_STR)
 app.include_router(stream_router, prefix=settings.API_V1_STR)
 app.include_router(projects_router, prefix=settings.API_V1_STR)
 app.include_router(settings_router, prefix=settings.API_V1_STR)
+app.include_router(checker_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Health"])
@@ -59,8 +61,3 @@ async def root():
         "message": "Welcome to Hariyuka AI Core Engine API.",
         "documentation": "/docs"
     }
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=settings.PORT, reload=True)
