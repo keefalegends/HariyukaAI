@@ -8,6 +8,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 ARTICLES_FILE = DATA_DIR / "articles_db.json"
 JOBS_FILE = DATA_DIR / "jobs_db.json"
 PROJECTS_FILE = DATA_DIR / "projects_db.json"
+CHECKER_HISTORY_FILE = DATA_DIR / "checker_history_db.json"
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -33,6 +34,7 @@ class PersistentStorage:
         self.articles: Dict[str, Dict[str, Any]] = self._load_articles()
         self.jobs: Dict[str, Dict[str, Any]] = self._load_jobs()
         self.projects: Dict[str, Dict[str, Any]] = self._load_projects()
+        self.checker_history: Dict[str, Dict[str, Any]] = self._load_checker_history()
 
     def _load_articles(self) -> Dict[str, Dict[str, Any]]:
         if not ARTICLES_FILE.exists():
@@ -67,6 +69,17 @@ class PersistentStorage:
             print(f"[Storage] Error loading projects: {e}")
             return {}
 
+    def _load_checker_history(self) -> Dict[str, Dict[str, Any]]:
+        if not CHECKER_HISTORY_FILE.exists():
+            return {}
+        try:
+            with open(CHECKER_HISTORY_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return {k: _deserialize_datetime(v) for k, v in data.items()}
+        except Exception as e:
+            print(f"[Storage] Error loading checker history: {e}")
+            return {}
+
     def save_articles(self):
         try:
             with open(ARTICLES_FILE, "w", encoding="utf-8") as f:
@@ -87,6 +100,13 @@ class PersistentStorage:
                 json.dump(self.projects, f, default=_serialize_datetime, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"[Storage] Error saving projects to disk: {e}")
+
+    def save_checker_history(self):
+        try:
+            with open(CHECKER_HISTORY_FILE, "w", encoding="utf-8") as f:
+                json.dump(self.checker_history, f, default=_serialize_datetime, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"[Storage] Error saving checker history to disk: {e}")
 
 
 storage = PersistentStorage()

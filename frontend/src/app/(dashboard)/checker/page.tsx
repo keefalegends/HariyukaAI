@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ShieldCheck,
   Search,
@@ -15,6 +15,9 @@ import {
   Loader2,
   ArrowRight,
   RefreshCw,
+  History,
+  Clock,
+  Eye,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 import { logTerminal } from "@/lib/terminal-bus";
@@ -49,6 +52,20 @@ interface AuditResult {
   };
 }
 
+interface HistoryItem {
+  id: string;
+  title: string;
+  text: string;
+  word_count: number;
+  uniqueness_score: number;
+  plagiarism_score: number;
+  ai_percentage: number;
+  human_percentage: number;
+  verdict: string;
+  report: AuditResult;
+  created_at: string;
+}
+
 export default function CheckerPage() {
   const tk = useTokens();
   const [text, setText] = useState("");
@@ -56,10 +73,32 @@ export default function CheckerPage() {
   const [checkPlag, setCheckPlag] = useState(true);
   const [checkAi, setCheckAi] = useState(true);
   const [result, setResult] = useState<AuditResult | null>(null);
-  const [activeTab, setActiveTab] = useState<"all" | "ai" | "plag">("all");
+  
+  // History state
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
   const charCount = text.length;
+
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/checker/history");
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch checker history:", e);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   const handlePaste = async () => {
     try {
@@ -110,6 +149,8 @@ Jangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless
         const aiScore = json.data.ai_detection?.ai_percentage ?? 0;
         const plagScore = json.data.plagiarism?.plagiarism_score ?? 0;
         logTerminal("OK", `Audit selesai: ${100 - plagScore}% Unik | ${100 - aiScore}% Human Written`);
+        // Refresh history list
+        fetchHistory();
       }
     } catch (e) {
       console.error("Audit error:", e);
@@ -119,8 +160,46 @@ Jangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless
     setIsScanning(false);
   };
 
+  const handleLoadHistoryItem = (item: HistoryItem) => {
+    setText(item.text);
+    setResult(item.report);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    logTerminal("SYS", `Memuat hasil audit riwayat: "${item.title.slice(0, 30)}..."`);
+  };
+
+  const handleDeleteHistoryItem = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    setDeletingId(id);
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/checker/history/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setHistory((prev) => prev.filter((h) => h.id !== id));
+      }
+    } catch (e) {
+      console.error("Failed to delete history item:", e);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleClearAllHistory = async () => {
+    if (!confirm("Apakah Anda yakin ingin menghapus semua riwayat audit?")) return;
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/checker/history", {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setHistory([]);
+      }
+    } catch (e) {
+      console.error("Failed to clear history:", e);
+    }
+  };
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+    <div className="space-y-8 max-w-6xl mx-auto pb-16">
       {/* ─── HEADER ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b t-border">
         <div>
@@ -183,7 +262,7 @@ Jangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless
         </div>
 
         <textarea
-          rows={9}
+          rows={8}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Tempel teks artikel atau draf konten yang ingin Anda periksa keasliannya di sini..."
@@ -435,6 +514,112 @@ Jangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless
           )}
         </div>
       )}
+
+      {/* ─── RIWAYAT / HISTORIS AUDIT (PERSISTENT DISK DB) ─── */}
+      <div className={`p-5 rounded-2xl border ${tk.cardBg} space-y-4`}>
+        <div className="flex items-center justify-between pb-3 border-b t-border">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-[#d97757]" />
+            <h3 className={`text-sm font-bold ${tk.textPrimary}`}>Riwayat Audit Orisinalitas</h3>
+            <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${tk.monoBadge}`}>
+              {history.length} audit tersimpan
+            </span>
+          </div>
+
+          {history.length > 0 && (
+            <button
+              type="button"
+              onClick={handleClearAllHistory}
+              className="text-[11px] text-stone-500 hover:text-red-400 transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <Trash2 className="w-3 h-3" />
+              <span>Bersihkan Riwayat</span>
+            </button>
+          )}
+        </div>
+
+        {isLoadingHistory ? (
+          <div className="py-8 flex items-center justify-center gap-2 text-xs text-stone-400">
+            <Loader2 className="w-4 h-4 animate-spin text-[#d97757]" />
+            <span>Memuat riwayat audit...</span>
+          </div>
+        ) : history.length === 0 ? (
+          <div className="py-8 text-center space-y-1">
+            <p className={`text-xs ${tk.textMuted}`}>Belum ada riwayat audit tersimpan.</p>
+            <p className={`text-[11px] ${tk.textFaint}`}>Setiap kali Anda menjalankan audit, hasilnya akan otomatis disimpan di sini.</p>
+          </div>
+        ) : (
+          <div className="divide-y t-border">
+            {history.map((item) => {
+              const dateStr = new Date(item.created_at).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => handleLoadHistoryItem(item)}
+                  className="py-3 px-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-black/10 rounded-xl transition-colors cursor-pointer group"
+                >
+                  <div className="space-y-1 min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-stone-200 group-hover:text-[#d97757] transition-colors truncate">
+                        {item.title}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-[10px] text-stone-400 font-mono">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-stone-500" />
+                        {dateStr}
+                      </span>
+                      <span>•</span>
+                      <span>{item.word_count} kata</span>
+                    </div>
+                  </div>
+
+                  {/* Badges & Actions */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      {item.uniqueness_score}% Unik
+                    </span>
+
+                    <span
+                      className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                        item.ai_percentage <= 30
+                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                          : item.ai_percentage <= 55
+                          ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                          : "bg-red-500/15 text-red-400 border-red-500/30"
+                      }`}
+                    >
+                      {item.human_percentage}% Human
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteHistoryItem(e, item.id)}
+                      disabled={deletingId === item.id}
+                      className="p-1.5 rounded-lg text-stone-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                      title="Hapus Dari Riwayat"
+                    >
+                      {deletingId === item.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
