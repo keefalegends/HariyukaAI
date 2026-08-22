@@ -1,7 +1,7 @@
 """
 AI Router Service for 9Router Proxy.
 Integrates Gemini 3.7 (SERP/Outline) and Claude 4.6 (Writer/SEO Polish).
-Updated with Salna's Yoast WordPress SEO SOP & Humanizer Anti-AI Detector Mode.
+Equipped with Deep Humanizer Anti-AI Detector Engineering (Ultra-Low Perplexity & High Burstiness).
 """
 import re
 import json
@@ -166,7 +166,7 @@ Total: ~1550 words
             section_breakdown = f"""
 1. Section 1 (H2 Pembuka & Konteks Lapangan): ~120 words
 2. Section 2 (H2 5 Alasan / Tips Praktis {target_keyword}): ~280 words
-3. Section 3 (H2 Perawatan / Solusi Penting): ~100 words
+3. Section 3 (H2 Pertimbangan Penting Sebelum Beli): ~100 words
 4. Section 4 (H2 Kesimpulan {target_keyword}): ~70 words
 Total: ~550 words (strictly 500-599 words)
 """
@@ -250,7 +250,7 @@ Output valid JSON matching this schema:
         return self.extract_json(raw)
 
     # --------------------------------------------------------------------------
-    # STEP 3: Multi-Pass Section Writer (Claude 4.6 / Sonnet) - Humanizer Enabled
+    # STEP 3: Multi-Pass Section Writer (Claude 4.6) - Deep Humanizer
     # --------------------------------------------------------------------------
     async def write_section(
         self,
@@ -277,16 +277,13 @@ Output valid JSON matching this schema:
         include_image_placeholder: bool = False,
         humanize_writing: bool = True,
     ) -> str:
-        """
-        Step 3: Write section with burstiness and anti-AI detection patterns.
-        """
         is_first_section = (section_index == 1)
         is_last_section = (section_index == total_sections)
 
         link_instructions = ""
         if link_1_url and (is_first_section or section_index == 2):
             anchor = link_1_anchor or target_keyword
-            link_instructions += f"\n- CONTEXTUAL LINK: Naturally wrap `[{anchor}]({link_1_url})` into the body."
+            link_instructions += f"\n- CONTEXTUAL LINK: Naturally wrap `[{anchor}]({link_1_url})` into the body text."
 
         if link_2_url and is_last_section:
             anchor = link_2_anchor or (product_name or "Official Website")
@@ -303,26 +300,36 @@ Output valid JSON matching this schema:
 [caption id="attachment_8609" align="alignnone" width="885"]<img class="wp-image-8609" src="https://placehold.co/885x590/292524/d97757?text={target_keyword.replace(' ', '+')}" alt="{target_keyword}" width="885" height="590" /> {target_keyword}[/caption]
 """
 
-        # Humanizer & Anti-AI Detector directives
-        humanizer_directives = ""
+        # Deep Humanizer Rules to bypass AI Detectors (<15% AI Score)
         if humanize_writing:
             humanizer_directives = """
-HUMANIZER & ANTI-AI DETECTOR INSTRUCTIONS:
-1. BURSTINESS (VARY SENTENCE LENGTHS DRAMATICALLY):
-   - Mix ultra-short sentences (3-6 words: "Jangan buru-buru beli.", "Kuncinya sederhana.", "Faktanya jelas.") with medium and rich compound sentences.
-   - Do NOT write sentences of uniform length. Break robotic cadence.
-2. ABSOLUTELY FORBIDDEN AI SIGNATURE CLICHES:
-   - NEVER use: "Hal yang perlu dipahami sejak awal adalah...", "Berikut adalah beberapa tips/langkah...", "Merupakan langkah krusial...", "Tidak dapat dipungkiri bahwa...", "Memegang peranan penting dalam...", "Dalam era modern saat ini...", "Mari kita telusuri lebih dalam..."
-3. NATURAL NATIVE CONJUNCTIONS & EXPERIENTIAL VOICE:
-   - Use natural Indonesian transitions: "Padahal,", "Untungnya,", "Bahkan,", "Sebaliknya,", "Malah seringkali,".
-   - Write like an experienced practitioner sharing practical on-the-ground insights directly with the reader.
+🚨 ULTRA HUMANIZER & ANTI-AI DETECTOR DIRECTIVES (TARGET: 0-15% AI SCORE):
+1. FORBIDDEN PUNCTUATION:
+   - DO NOT USE EM-DASHES (`—` or `--`). Real Indonesian writers use commas, parentheses, or start fresh sentences.
+2. BANNED AI RHETORICAL ARCHETYPES (DO NOT USE):
+   - "Ini bukan sekadar X, ini soal Y..." / "Ini bukan soal gengsi..."
+   - "A, bahkan B saat C..."
+   - "Hal yang perlu dipahami sejak awal adalah..."
+   - "Merupakan langkah yang sangat krusial / penting..."
+   - "Berikut adalah beberapa tips/langkah praktis..."
+   - "Tidak dapat dipungkiri bahwa..."
+   - "Memberikan fleksibilitas memasak yang nyata..."
+   - "Pilihan yang tepat dimulai dari pengetahuan yang benar." (Hapus kalimat moral kesimpulan di akhir paragraf!)
+3. NATIVE INDONESIAN WRITING PARTICLES & EXPERIENTIAL FLOW:
+   - Write like a real Indonesian blogger / technical reviewer who uses natural conversational particles: 'sih', 'kan', 'dong', 'nih', 'lho', 'kok'.
+   - Use vivid expressions: 'Gimana caranya?', 'Jangan sampai salah pilih,', 'Bakal kerasa banget di...', 'Repot kalau...', 'Untungnya sekarang...', 'Coba cek dulu...'.
+4. EXTREME SENTENCE BURSTINESS:
+   - Mix ultra-short 3-5 word sentences ("Jangan buru-buru beli.", "Kuncinya ada di sini.", "Simpel tapi krusial.") with natural compound sentences.
+   - Break monotonous Subject-Verb-Object patterns.
 """
+        else:
+            humanizer_directives = ""
 
-        system_prompt = f"""You are an Elite Human SEO Copywriter writing in natural, engaging Indonesian.
+        system_prompt = f"""You are an Authentic Indonesian SEO Writer crafting high-ranking, human-written editorial content.
 {humanizer_directives}
 RULES:
 1. ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
-2. Word count target for this section: EXACTLY ~{target_word_count} words. Write rich, practical paragraphs.
+2. Word count target for this section: EXACTLY ~{target_word_count} words. Write substantive, engaging paragraphs.
 3. KEYPHRASE DENSITY: Mention the exact focus keyphrase AT MOST 1 or 2 times in this section. Use natural pronouns ('alat ini', 'langkah tersebut') elsewhere.
 4. If this is Section 1, mention keyphrase in the very first sentence.
 """
@@ -350,14 +357,20 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
             {"role": "user", "content": user_prompt},
         ]
 
-        return await self.complete(
+        raw_output = await self.complete(
             model=self.model_writer,
             messages=messages,
-            temperature=0.75 if humanize_writing else 0.65,
+            temperature=0.85 if humanize_writing else 0.65,
         )
 
+        # Post-clean any remaining em-dashes
+        if humanize_writing:
+            raw_output = raw_output.replace(" — ", ", ").replace("—", ", ")
+
+        return raw_output
+
     # --------------------------------------------------------------------------
-    # STEP 4: Final SEO Polish & Compliance Check (Claude 4.6)
+    # STEP 4: Final SEO Polish & Anti-AI Sanitizer (Claude 4.6)
     # --------------------------------------------------------------------------
     async def polish_and_optimize_seo(
         self,
@@ -375,19 +388,21 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
 
         image_rule = "Ensure no [caption] or img tags exist; output clean pure text markdown." if not include_image_placeholder else "Preserve [caption] block intact."
 
-        humanizer_polish = ""
         if humanize_writing:
             humanizer_polish = """
-6. ANTI-AI POLISH PASS:
-   - Break any monotonous robotic sentences into bursty short-and-long rhythms.
-   - Replace any remaining AI filler ('Hal yang perlu dipahami', 'Berikut lima tips', 'Merupakan langkah krusial') with natural human storytelling.
-   - Ensure the prose reads 100% human-crafted and passes AI detectors with <30% score.
+6. ANTI-AI DETECTOR SANITIZATION PASS:
+   - Eliminate ALL em-dashes (`—` and `--`). Replace with commas or clean periods.
+   - Break any remaining formulaic AI transitions ('Ini bukan sekadar...', 'Hal yang perlu dipahami...', 'Berikut lima tips...', 'Merupakan langkah krusial...').
+   - Infuse native Indonesian conversational ease ('kan', 'sih', 'lho', 'nih', 'Gimana solusinya?') so AI detector gives < 15% score.
+   - Ensure the prose reads 100% natural and passes both Yoast SEO and PlagiarismDetector.
 """
+        else:
+            humanizer_polish = ""
 
-        system_prompt = f"""You are a Master SEO & Human Writing Editor polishing an Indonesian article for Yoast WordPress Green Light.
+        system_prompt = f"""You are a Master Indonesian Editor and Anti-AI SEO Specialist.
 CALIBRATION REQUIREMENTS:
-1. STRICT WORD COUNT: The final text length MUST be between {target_range}.
-   If currently under 500 words, expand paragraphs with helpful details and actionable explanations.
+1. STRICT WORD COUNT: Final text length MUST be between {target_range}.
+   If under 500 words, expand paragraphs with helpful details and actionable real-world tips.
 2. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
    Count occurrences of '{target_keyword}'. It MUST appear between 5 and 7 times total across the entire article!
    If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
@@ -412,11 +427,17 @@ Return the final polished markdown:
             {"role": "user", "content": user_prompt},
         ]
 
-        return await self.complete(
+        polished = await self.complete(
             model=self.model_seo,
             messages=messages,
-            temperature=0.35 if humanize_writing else 0.25,
+            temperature=0.4 if humanize_writing else 0.25,
         )
+
+        # Final pass: Strip any lingering em-dashes
+        if humanize_writing:
+            polished = polished.replace(" — ", ", ").replace("—", ", ")
+
+        return polished
 
 
 ai_router = AIRouterService()
