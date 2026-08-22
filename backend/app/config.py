@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Hariyuka AI"
     
     # 9Router AI Proxy Settings
-    NINEROUTER_BASE_URL: str = "http://202.10.47.200:20128/v1"
-    NINEROUTER_API_KEY: str = "sk-fc0b27cf63ed9f2a-hilooi-b3a32928"
+    NINEROUTER_BASE_URL: str = "http://localhost:20128/v1"
+    NINEROUTER_API_KEY: str = "your_9router_api_key_here"
     
     # Default Models (ag/ alias prefix)
     MODEL_SERP_EXTRACTOR: str = "ag/gemini-3.7-flash-high"

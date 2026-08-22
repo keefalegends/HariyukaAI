@@ -160,6 +160,17 @@ async def save_settings(req: SaveSettingsRequest):
     }
 
 
+@router.get("/current")
+async def get_current_settings():
+    """Get currently active settings from environment/memory."""
+    return {
+        "base_url": settings.NINEROUTER_BASE_URL,
+        "api_key_set": bool(settings.NINEROUTER_API_KEY and settings.NINEROUTER_API_KEY != "your_9router_api_key_here"),
+        "model_serp": settings.MODEL_SERP_EXTRACTOR,
+        "model_writer": settings.MODEL_SECTION_WRITER,
+    }
+
+
 @router.get("/dashboard-stats")
 async def get_dashboard_stats():
     """

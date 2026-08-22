@@ -18,8 +18,8 @@ import { useTokens } from "@/lib/use-tokens";
 
 export default function SettingsPage() {
   const tk = useTokens();
-  const [baseUrl, setBaseUrl] = useState("http://202.10.47.200:20128/v1");
-  const [apiKey, setApiKey] = useState("sk-fc0b27cf63ed9f2a-hilooi-b3a32928");
+  const [baseUrl, setBaseUrl] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [serpModel, setSerpModel] = useState("ag/gemini-3.7-flash-high");
   const [writerModel, setWriterModel] = useState("ag/claude-sonnet-4-6");
 
@@ -36,20 +36,29 @@ export default function SettingsPage() {
   } | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // Initial load
+  // Initial load from backend active config
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const res = await fetch("http://localhost:8000/health");
+        const res = await fetch("http://localhost:8000/api/v1/settings/current");
         if (res.ok) {
           const data = await res.json();
-          if (data.models) {
-            setSerpModel(data.models.serp_extractor || "ag/gemini-3.7-flash-high");
-            setWriterModel(data.models.section_writer || "ag/claude-sonnet-4-6");
-          }
+          if (data.base_url) setBaseUrl(data.base_url);
+          if (data.model_serp) setSerpModel(data.model_serp);
+          if (data.model_writer) setWriterModel(data.model_writer);
         }
       } catch (e) {
-        // Backend offline or local
+        // Fallback to health endpoint if current not available
+        try {
+          const res = await fetch("http://localhost:8000/health");
+          if (res.ok) {
+            const data = await res.json();
+            if (data.models) {
+              setSerpModel(data.models.serp_extractor || "ag/gemini-3.7-flash-high");
+              setWriterModel(data.models.section_writer || "ag/claude-sonnet-4-6");
+            }
+          }
+        } catch (err) {}
       }
     };
     loadSettings();
@@ -239,7 +248,7 @@ export default function SettingsPage() {
               />
             </div>
             <p className={`text-[11px] mt-1 ${tk.textFaint}`}>
-              Default proxy server: <code className={tk.accentText}>http://202.10.47.200:20128/v1</code>
+              Format alamat gateway: <code className={tk.accentText}>http://host:20128/v1</code>
             </p>
           </div>
 

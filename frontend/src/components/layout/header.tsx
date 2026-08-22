@@ -17,10 +17,7 @@ export function Header() {
       const res = await fetch("http://localhost:8000/api/v1/settings/test-9router", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          base_url: "http://202.10.47.200:20128/v1",
-          api_key: "sk-fc0b27cf63ed9f2a-hilooi-b3a32928",
-        }),
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (res.ok && data.success) {

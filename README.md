@@ -46,8 +46,8 @@ graph TD
 | **Styling & UI** | Tailwind CSS, Lucide Icons, Shadcn UI Themes |
 | **Editor Suite** | Tiptap Rich Text Editor (Markdown sync, HTML export, Image embed) |
 | **Backend Engine** | Python FastAPI, Pydantic v2, AsyncIO, SSE Streaming |
-| **AI Gateway** | 9Router Proxy (`http://202.10.47.200:20128/v1`) via OpenAI SDK |
-| **AI Model Routing** | `gemini-3.7` (SERP/Outline) & `claude-4.6` (Writing/Polish) |
+| **AI Gateway** | 9Router Proxy (`http://your-9router-host:20128/v1`) via OpenAI SDK |
+| **AI Model Routing** | `ag/gemini-3.7-flash-high` & `ag/claude-sonnet-4-6` |
 | **Database & Auth** | Supabase (PostgreSQL 15+ dengan Row Level Security) |
 | **Queue & Cache** | Redis 7 (Alpine) |
 
@@ -125,14 +125,14 @@ cp .env.example .env
 Sesuaikan variabel di file `.env`:
 ```env
 # 9Router Proxy AI Configuration
-NINEROUTER_BASE_URL=http://202.10.47.200:20128/v1
+NINEROUTER_BASE_URL=http://your-9router-host:20128/v1
 NINEROUTER_API_KEY=your_api_key_here
 
 # Model Routing Aliases
-MODEL_SERP_EXTRACTOR=gemini-3.7
-MODEL_OUTLINE_GENERATOR=gemini-3.7
-MODEL_SECTION_WRITER=claude-4.6
-MODEL_SEO_POLISHER=claude-4.6
+MODEL_SERP_EXTRACTOR=ag/gemini-3.7-flash-high
+MODEL_OUTLINE_GENERATOR=ag/gemini-3.7-flash-high
+MODEL_SECTION_WRITER=ag/claude-sonnet-4-6
+MODEL_SEO_POLISHER=ag/claude-sonnet-4-6
 
 # Supabase (Opsional jika menggunakan backend standalone)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
