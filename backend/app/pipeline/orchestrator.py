@@ -140,6 +140,7 @@ class ArticlePipelineOrchestrator:
         tone: str = "authoritative",
         brand_voice: Optional[str] = None,
         secondary_keywords: Optional[List[str]] = None,
+        include_image_placeholder: bool = False,
         target_link_1_url: Optional[str] = None,
         target_link_1_anchor: Optional[str] = None,
         target_link_2_url: Optional[str] = None,
@@ -206,7 +207,8 @@ class ArticlePipelineOrchestrator:
                 link_2_url=target_link_2_url,
                 link_2_anchor=target_link_2_anchor,
                 product_name=product_name,
-                product_promotion_context=product_promotion_context
+                product_promotion_context=product_promotion_context,
+                include_image_placeholder=include_image_placeholder
             )
 
             written_sections.append(section_text)
@@ -239,7 +241,8 @@ class ArticlePipelineOrchestrator:
             target_keyword=target_keyword,
             article_type=article_type,
             secondary_keywords=secondary_keywords or [],
-            tone=tone
+            tone=tone,
+            include_image_placeholder=include_image_placeholder
         )
 
         # ----------------------------------------------------------------------
@@ -255,7 +258,8 @@ class ArticlePipelineOrchestrator:
             content_markdown=polished_markdown,
             target_keyword=target_keyword,
             secondary_keywords=secondary_keywords or [],
-            article_type=article_type
+            article_type=article_type,
+            include_image_placeholder=include_image_placeholder
         )
 
         final_result = {

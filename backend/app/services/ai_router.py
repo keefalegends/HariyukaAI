@@ -1,7 +1,11 @@
 """
 AI Router Service for 9Router Proxy.
 Integrates Gemini 3.7 (SERP/Outline) and Claude 4.6 (Writer/SEO Polish).
-Updated with Salna's Yoast WordPress SEO SOP (500-599 vs 1500-1599 words, only H2/H3, link & image injection).
+Updated with Salna's Yoast WordPress SEO SOP:
+- Strict Word Count (500-599 words for backlink, 1500-1599 for pillar)
+- Strict Keyphrase Density (5 to 7 mentions total, ~1.0-1.4%)
+- Pure text output by default (image placeholder optional)
+- H2 & H3 hierarchy only
 """
 import re
 import json
@@ -152,44 +156,55 @@ Return a valid JSON object matching this schema exactly:
         product_name: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
-        Step 2: Generate a hierarchical outline strictly using H2 and H3 only.
-        Target word counts:
-        - 'pillar': 1500 - 1599 words
-        - 'backlink_article': 500 - 599 words
-        - 'backlink_product': 500 - 599 words
+        Step 2: Generate outline calibrated for strict word counts:
+        - 'pillar': 1500 - 1599 words (5-6 sections)
+        - 'backlink_article': 500 - 599 words (3-4 sections with ~550 total words)
+        - 'backlink_product': 500 - 599 words (3-4 sections with ~550 total words)
         """
-        # Set strict target length based on SOP
         if article_type == "pillar":
-            exact_target = target_word_count if (target_word_count and 1400 <= target_word_count <= 1700) else 1550
-            num_sections_guide = "5 to 6 H2 sections with nested H3 subsections to reach 1500-1599 total words."
+            exact_target = target_word_count if (target_word_count and 1450 <= target_word_count <= 1650) else 1550
+            section_breakdown = f"""
+1. Section 1 (H2 Intro): ~250 words
+2. Section 2 (H2 Core Method): ~450 words
+3. Section 3 (H2 Best Practices): ~400 words
+4. Section 4 (H2 Troubleshooting/Tips): ~300 words
+5. Section 5 (H2 Kesimpulan {target_keyword}): ~150 words
+Total: ~1550 words
+"""
         else:
             exact_target = 550
-            num_sections_guide = "Exactly 3 to 4 concise H2/H3 sections (e.g. 1 intro H2 list with 5 points, 1 conclusion H2) to reach 500-599 total words."
+            section_breakdown = f"""
+1. Section 1 (H2 Pembuka & Konteks Masalah): ~120 words (introduce keyphrase in first sentence)
+2. Section 2 (H2 5 Alasan / Tips Praktis {target_keyword}): ~280 words (5 actionable points)
+3. Section 3 (H2 Pertimbangan / Perawatan demi Hasil Optimal): ~100 words
+4. Section 4 (H2 Kesimpulan {target_keyword}): ~70 words
+Total: ~550 words (strictly 500-599 words)
+"""
 
         system_prompt = (
-            "You are a Senior SEO Content Architect trained on WordPress Yoast & RankMath SOP standards. "
+            "You are a Senior SEO Content Architect trained on WordPress Yoast & RankMath SOP standards.\n"
             "CRITICAL RULES:\n"
-            "1. ONLY use H2 and H3 levels. NEVER use H1 in the sections outline.\n"
+            "1. ONLY use H2 and H3 levels. NEVER output H1.\n"
             f"2. Total word count must strictly target {exact_target} words ({'1500-1599 words' if article_type == 'pillar' else '500-599 words'}).\n"
-            "3. At least 3 subheadings (H2 or H3) must naturally reflect/include the exact target keyphrase or its variations.\n"
-            "4. Include a dedicated Conclusion section with H2 heading matching: 'Kesimpulan [Target Keyphrase]'."
+            "3. Include the keyphrase in at most 2 or 3 subheadings (NOT in all subheadings to prevent keyword stuffing).\n"
+            f"4. End with a conclusion section: 'Kesimpulan {target_keyword}'."
         )
 
         user_prompt = f"""
 Article Title: {title}
 Target Keyword: {target_keyword}
-Article Type: {article_type.upper()} ({'Pillar 1500-1599 words' if article_type == 'pillar' else 'Backlink 500-599 words'})
+Article Type: {article_type.upper()}
 Target Total Words: {exact_target}
 Tone: {tone}
 Product Focus: {product_name or 'None (General SEO)'}
 Brand Voice Instructions: {brand_voice or "Clear, engaging, human-written editorial"}
 
-Structure Guide: {num_sections_guide}
+Section Word Allocation Target:
+{section_breakdown}
 
 SERP & Intent Context:
 - Search Intent: {serp_analysis.get('search_intent')}
 - LSI Keywords: {', '.join(serp_analysis.get('lsi_keywords', []))}
-- Semantic Entities: {', '.join(serp_analysis.get('semantic_entities', []))}
 
 Output valid JSON matching this schema:
 {{
@@ -200,34 +215,32 @@ Output valid JSON matching this schema:
       "id": "section-1",
       "heading": "...",
       "level": "h2",
-      "target_word_count": {int(exact_target * 0.25)},
-      "key_points": ["Hook reader with problem", "Introduce focus keyphrase in first 100 words"],
+      "target_word_count": 120,
+      "key_points": ["Hook reader", "Introduce {target_keyword} in first 2 sentences"],
       "keywords_to_include": ["{target_keyword}"]
     }},
     {{
       "id": "section-2",
-      "heading": "...",
+      "heading": "5 Alasan Pentingnya {target_keyword}",
       "level": "h2",
-      "target_word_count": {int(exact_target * 0.55)},
-      "key_points": ["Point 1", "Point 2", "Point 3"],
-      "keywords_to_include": ["{target_keyword}"],
-      "subsections": [
-        {{
-          "id": "section-2-1",
-          "heading": "...",
-          "level": "h3",
-          "target_word_count": {int(exact_target * 0.15)},
-          "key_points": ["..."],
-          "keywords_to_include": ["..."]
-        }}
-      ]
+      "target_word_count": 280,
+      "key_points": ["Point 1", "Point 2", "Point 3", "Point 4", "Point 5"],
+      "keywords_to_include": ["{target_keyword}"]
     }},
     {{
       "id": "section-3",
+      "heading": "...",
+      "level": "h2",
+      "target_word_count": 100,
+      "key_points": ["..."],
+      "keywords_to_include": []
+    }},
+    {{
+      "id": "section-4",
       "heading": "Kesimpulan {target_keyword}",
       "level": "h2",
-      "target_word_count": {int(exact_target * 0.20)},
-      "key_points": ["Actionable summary", "Final brand / call to action recommendation"],
+      "target_word_count": 70,
+      "key_points": ["Summary", "Actionable takeaway"],
       "keywords_to_include": ["{target_keyword}"]
     }}
   ]
@@ -271,63 +284,60 @@ Output valid JSON matching this schema:
         link_2_anchor: Optional[str] = None,
         product_name: Optional[str] = None,
         product_promotion_context: Optional[str] = None,
+        include_image_placeholder: bool = False,
     ) -> str:
         """
-        Step 3: Write an individual section following Salna's WordPress Yoast guidelines.
+        Step 3: Write section with strict word length and keyphrase frequency limits.
         """
         is_first_section = (section_index == 1)
         is_last_section = (section_index == total_sections)
 
         link_instructions = ""
-        # Link 1 insertion (in first/second section body)
         if link_1_url and (is_first_section or section_index == 2):
             anchor = link_1_anchor or target_keyword
-            link_instructions += f"\n- NATURAL CONTEXTUAL LINK REQUIREMENT: Naturally embed `[{anchor}]({link_1_url})` into the second paragraph of this section."
+            link_instructions += f"\n- CONTEXTUAL LINK REQUIREMENT: Naturally wrap `[{anchor}]({link_1_url})` into the body of this section."
 
-        # Link 2 insertion (in conclusion section)
         if link_2_url and is_last_section:
             anchor = link_2_anchor or (product_name or "Official Website")
-            link_instructions += f"\n- BRAND/PRODUCT LINK REQUIREMENT: In this concluding section, naturally mention the brand/solution and embed `[{anchor}]({link_2_url})`."
+            link_instructions += f"\n- BRAND/PRODUCT LINK REQUIREMENT: In this concluding section, naturally mention `[{anchor}]({link_2_url})`."
 
-        # Product soft-selling instruction
         product_instruction = ""
         if article_type == "backlink_product" and product_name:
-            product_instruction = f"\n- PRODUCT SOFT-SELL: Seamlessly weave in **{product_name}** ({product_promotion_context or 'a reliable modern solution'}) as a practical recommendation without being overly aggressive."
+            product_instruction = f"\n- PRODUCT SOFT-SELL: Naturally weave in **{product_name}** ({product_promotion_context or 'rekomendasi peralatan modern yang terpercaya'}) as an actionable solution."
 
-        # Image placeholder instruction (below the first H2 section)
+        # Only embed image caption if explicitly requested
         image_instruction = ""
-        if section_index == 2 or (is_first_section and "pengenalan" not in section_heading.lower()):
+        if include_image_placeholder and (section_index == 2 or (is_first_section and "pengenalan" not in section_heading.lower())):
             image_instruction = f"""
-- WORDPRESS IMAGE EMBED REQUIREMENT: Right after the `{section_level.upper()} {section_heading}` heading, include exactly this WordPress caption block:
+- OPTIONAL WORDPRESS IMAGE EMBED: Right under the `{section_level.upper()} {section_heading}` heading, include:
 [caption id="attachment_8609" align="alignnone" width="885"]<img class="wp-image-8609" src="https://placehold.co/885x590/292524/d97757?text={target_keyword.replace(' ', '+')}" alt="{target_keyword}" width="885" height="590" /> {target_keyword}[/caption]
 """
 
         system_prompt = (
-            "You are an Elite SEO Copywriter writing in natural, flowing Indonesian. "
-            "You follow Yoast SEO WordPress standards:\n"
-            "1. ONLY use H2 (##) or H3 (###). NEVER output H1 (#) inside the section body.\n"
-            "2. Keep paragraphs short and readable (2-3 sentences max).\n"
-            "3. If this is the introduction, mention the EXACT target keyword in the very first 1-2 sentences (within 100 words).\n"
-            "4. Maintain a natural, authoritative tone without AI fluff.\n"
-            "5. Strict total keyphrase mentions across the whole article must be kept around 5-7 times (never spam)."
+            "You are an Elite SEO Copywriter writing in natural, flowing Indonesian.\n"
+            "STRICT RULES:\n"
+            "1. ONLY use H2 (##) or H3 (###). NEVER output H1 (#).\n"
+            f"2. Word Count Target: You MUST write approximately {target_word_count} words for this section. Write rich, practical, and informative paragraphs.\n"
+            "3. KEYPHRASE DENSITY CONTROL: Mention the exact focus keyphrase AT MOST 1 or 2 times in this section. DO NOT repeat the keyphrase in every sentence! Use natural pronouns ('alat ini', 'hal ini', 'solusi tersebut').\n"
+            "4. If this is Section 1 (Intro), mention the keyphrase in the very first sentence.\n"
+            "5. NO AI cliches or robotic filler."
         )
 
         user_prompt = f"""
 Article Title: {article_title}
 Target Primary Keyword: "{target_keyword}"
-Article Type: {article_type.upper()} ({'1500-1599 words' if article_type == 'pillar' else '500-599 words'})
+Article Type: {article_type.upper()}
 Section Index: {section_index} of {total_sections}
 Currently Writing Section:
 - Heading: {section_heading} ({section_level.upper()})
-- Target Word Count: ~{target_word_count} words
+- Target Word Count: EXACTLY ~{target_word_count} words
 - Key Points to Cover:
 {chr(10).join(f"  * {pt}" for pt in key_points)}
-- Keywords to include: {', '.join(keywords_to_include)}
 
 Special Section Requirements:{link_instructions}{product_instruction}{image_instruction}
 
-Context from Previous Sections (Do not repeat):
-{previous_sections_summary or "This is the opening section."}
+Context from Previous Sections:
+{previous_sections_summary or "Opening section."}
 
 Output the section in Markdown starting with `{section_level.upper()} {section_heading}`:
 """
@@ -352,35 +362,44 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         article_type: str = "backlink_article",
         secondary_keywords: Optional[List[str]] = None,
         tone: str = "authoritative",
+        include_image_placeholder: bool = False,
     ) -> str:
         """
         Step 4: Audit and polish full article to ensure:
         - Word count strictly fits target (500-599 for backlink, 1500-1599 for pillar)
-        - Keyphrase appears 5-7 times naturally (not stuffed)
-        - Only H2 and H3 used
-        - WordPress image caption with alt text is preserved
-        - Contextual links are clean and working
+        - Keyphrase appears strictly 5 to 7 times total (density ~1.0-1.4%)
+        - If include_image_placeholder is False, strip all [caption] blocks.
         """
-        target_range = "1.500 – 1.599 words" if article_type == "pillar" else "500 – 599 words"
+        target_min = 1500 if article_type == "pillar" else 510
+        target_max = 1590 if article_type == "pillar" else 585
+        target_range = f"{target_min} – {target_max} kata"
+
+        image_rule = "Ensure no [caption] or img tags exist; output clean pure text markdown." if not include_image_placeholder else "Preserve [caption] block intact."
 
         system_prompt = (
-            "You are a Senior SEO Editor polishing an Indonesian article for WordPress Yoast Green Light.\n"
-            f"1. Strict Word Count Target: Ensure total word count is strictly within {target_range}.\n"
-            "2. Single H1 Rule: Ensure the article body ONLY contains ## H2 and ### H3. Remove any extra # H1 tags in the body.\n"
-            "3. Keyphrase Density: Ensure the exact keyphrase appears 5 to 7 times in total.\n"
-            "4. Ensure keyphrase appears in first paragraph and in at least 3 subheadings.\n"
-            "5. Preserve all markdown links `[anchor](url)` and WordPress `[caption]` blocks intact.\n"
-            "Output the final polished article in clean Markdown."
+            "You are a Master SEO Editor polishing an Indonesian article for Yoast WordPress Green Light.\n"
+            "CRITICAL CALIBRATION REQUIREMENTS:\n"
+            f"1. STRICT WORD COUNT: The final text length MUST be between {target_range}. "
+            "If currently under 500 words, expand paragraphs with helpful details and actionable explanations. "
+            "If over 600 words, tighten sentences.\n"
+            "2. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY): "
+            f"Count the exact occurrences of '{target_keyword}'. It MUST appear between 5 and 7 times total across the entire article! "
+            "If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut'). "
+            "It must appear in the first sentence, in 2-3 subheadings, and in the conclusion.\n"
+            "3. SINGLE H1 RULE: The body MUST only contain ## H2 and ### H3. Remove any extra # H1 tags.\n"
+            f"4. IMAGE RULE: {image_rule}\n"
+            "5. Preserve all markdown links `[anchor](url)`.\n"
+            "Output only the final polished article in Markdown."
         )
 
         user_prompt = f"""
-Target Keyword: "{target_keyword}"
-Article Type: {article_type.upper()} ({target_range})
+Target Keyphrase: "{target_keyword}"
+Target Word Count: {target_range}
 
 Full Draft to Polish:
 {full_article_markdown}
 
-Return only the final polished markdown:
+Return the final polished markdown:
 """
         messages = [
             {"role": "system", "content": system_prompt},
@@ -390,7 +409,7 @@ Return only the final polished markdown:
         return await self.complete(
             model=self.model_seo,
             messages=messages,
-            temperature=0.3,
+            temperature=0.25,
         )
 
 

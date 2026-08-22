@@ -361,5 +361,184 @@
     },
     "created_at": "2026-08-22T04:47:21.110794",
     "updated_at": "2026-08-22T04:52:53.720866"
+  },
+  "09cdd0fa-90ef-448b-af98-01b0c0816546": {
+    "id": "09cdd0fa-90ef-448b-af98-01b0c0816546",
+    "user_id": "default-user",
+    "project_id": null,
+    "title": "Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak",
+    "target_keyword": "Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak",
+    "article_type": "backlink_article",
+    "secondary_keywords": [],
+    "language": "id",
+    "tone": "authoritative",
+    "target_length": 550,
+    "outline_json": {
+      "title": "Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak",
+      "estimated_total_words": 550,
+      "sections": [
+        {
+          "id": "section-1",
+          "heading": "Kondisi Udara Ruang Masak dan Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak",
+          "level": "h2",
+          "target_word_count": 120,
+          "key_points": [
+            "Hook pembaca mengenai polusi asap, uap minyak, dan aroma menyengat yang sering terperangkap di dapur saat memasak.",
+            "Memperkenalkan Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak di awal paragraf sebagai solusi utama sirkulasi udara bersih.",
+            "Mengulas sekilas fungsi exhaust hood dapur dalam menjaga kualitas udara dan kesehatan penghuni rumah."
+          ],
+          "keywords_to_include": [
+            "Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak",
+            "fungsi exhaust hood dapur",
+            "penghisap asap dapur"
+          ],
+          "subsections": []
+        },
+        {
+          "id": "section-2",
+          "heading": "5 Alasan Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak",
+          "level": "h2",
+          "target_word_count": 260,
+          "key_points": [
+            "1. Menjadi cara mengatasi asap dapur mengepul seketika agar pandangan dan pernapasan tidak terganggu.",
+            "2. Menyerap partikel minyak mikro sebelum menempel pada dinding, plafon, dan kitchen set.",
+            "3. Menetralkan aroma masakan tajam berkat filter karbon aktif cooker hood sehingga tidak menyebar ke ruang keluarga.",
+            "4. Mengurangi hawa panas dan kelembapan berlebih yang dihasilkan oleh kompor.",
+            "5. Memberikan pencahayaan tambahan pada area kompor sekaligus meningkatkan nilai estetika interior dapur."
+          ],
+          "keywords_to_include": [
+            "Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak",
+            "cara mengatasi asap dapur mengepul",
+            "filter karbon aktif cooker hood"
+          ],
+          "subsections": []
+        },
+        {
+          "id": "section-3",
+          "heading": "Panduan Memilih Sistem dan Merawat Penghisap Asap Dapur",
+          "level": "h2",
+          "target_word_count": 100,
+          "key_points": [
+            "Memilih antara sistem cooker hood resirkulasi vs ducted berdasarkan ketersediaan jalur ventilasi luar ruangan.",
+            "Menyesuaikan kapasitas daya hisap m3 per jam dengan dimensi dapur agar sirkulasi optimal.",
+            "Tips perawatan berkala seperti mencuci filter grease aluminium dan mengganti filter karbon tepat waktu."
+          ],
+          "keywords_to_include": [
+            "cooker hood resirkulasi vs ducted",
+            "daya hisap m3 per jam",
+            "penghisap asap dapur"
+          ],
+          "subsections": []
+        },
+        {
+          "id": "section-4",
+          "heading": "Kesimpulan Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak",
+          "level": "h2",
+          "target_word_count": 70,
+          "key_points": [
+            "Menegaskan kembali bahwa cooker hood adalah investasi krusial untuk kebersihan, kesehatan, dan kenyamanan hunian.",
+            "Rekomendasi tindakan untuk memilih spesifikasi alat yang tepat sesuai kebutuhan harian memasak."
+          ],
+          "keywords_to_include": [
+            "Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak"
+          ],
+          "subsections": []
+        }
+      ]
+    },
+    "serp_data": {
+      "search_intent": "Informational",
+      "primary_audience": "Pemilik rumah baru, penghuni apartemen, dan pegiat renovasi dapur yang ingin meningkatkan sirkulasi udara, kebersihan dinding/furnitur, serta kenyamanan saat memasak.",
+      "core_angle": "Panduan edukasi mendalam berbasis kesehatan dan efisiensi ruang: mengupas dampak residu asap/minyak pada kualitas udara dalam ruangan (IAQ), panduan memilih sistem ducted vs resirkulasi, serta rumus hitung daya hisap ideal.",
+      "lsi_keywords": [
+        "penghisap asap dapur",
+        "fungsi exhaust hood dapur",
+        "cooker hood resirkulasi vs ducted",
+        "filter karbon aktif cooker hood",
+        "daya hisap m3 per jam",
+        "cara mengatasi asap dapur mengepul"
+      ],
+      "semantic_entities": [
+        "Cooker Hood",
+        "Indoor Air Quality (IAQ)",
+        "Grease Filter",
+        "Ventilasi Dapur",
+        "Partikulat PM2.5"
+      ],
+      "paa_questions": [
+        "Apakah cooker hood wajib ada di setiap dapur?",
+        "Apa perbedaan cooker hood sistem ducting dan resirkulasi?",
+        "Berapa kapasitas daya hisap cooker hood yang ideal untuk dapur rumah?",
+        "Bagaimana cara membersihkan filter minyak cooker hood agar tidak cepat rusak?"
+      ],
+      "content_gaps": [
+        "Rumus praktis menghitung kebutuhan kapasitas hisap (m³/h) berdasarkan volume ruangan dapur.",
+        "Analisis perbandingan biaya perawatan jangka panjang antara sistem cerobong (ducted) dan filter karbon (recirculating).",
+        "Penjelasan risiko kesehatan dari paparan minyak panas/asap masakan terhadap kualitas udara dalam ruangan (Indoor Air Quality)."
+      ],
+      "suggested_title": "Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak & Tips Memilihnya"
+    },
+    "content_markdown": "# Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak\n\n## Kondisi Udara Ruang Masak dan Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak\n\nSetiap kali kompor menyala, asap, uap minyak panas, dan aroma menyengat langsung memenuhi ruang dapur dalam hitungan menit. Tanpa sirkulasi udara yang memadai, partikel berbahaya ini mengendap di permukaan dapur, meresap ke dinding, bahkan terhirup oleh seluruh penghuni rumah. Memahami [Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak](https://risupkitchen.com/blog/macam-macam-cooker-hood/) menjadi langkah awal yang krusial bagi siapa pun yang ingin menciptakan lingkungan masak yang sehat dan nyaman. Alat ini bekerja dengan menyedot udara kotor secara langsung dari sumbernya, lalu menyaringnya sebelum dibuang keluar atau disirkulasikan kembali. Hasilnya, kualitas udara di dalam rumah tetap terjaga, risiko gangguan pernapasan berkurang, dan aktivitas memasak pun terasa jauh lebih menyenangkan.\n\n## 5 Alasan Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak\n\nBanyak orang masih menganggap cooker hood sekadar aksesori dapur biasa. Padahal, ada sederet alasan konkret mengapa perangkat tersebut layak menjadi investasi utama di ruang masak Anda.\n\n**1. Mengatasi asap yang mengepul seketika**\nSaat menggoreng atau menumis dengan api besar, asap bisa langsung memenuhi dapur dalam hitungan detik. Alat ini menyedot asap tepat dari sumbernya sehingga pandangan tetap jernih dan saluran pernapasan tidak terganggu selama memasak berlangsung.\n\n**2. Menyerap partikel minyak mikro**\nUap panas yang naik dari wajan membawa partikel minyak berukuran sangat kecil. Tanpa penyaring yang tepat, partikel ini akan menempel pada dinding, plafon, dan permukaan kitchen set, membuatnya cepat kusam dan lengket. Filter khusus pada perangkat tersebut menangkap partikel sebelum sempat mengendap di mana pun.\n\n**3. Menetralkan aroma masakan tajam**\nFilter karbon aktif yang tertanam di dalam unit bekerja menyerap bau menyengat dari bumbu atau ikan goreng, sehingga aroma tidak menyebar ke ruang keluarga maupun kamar tidur dan mengganggu kenyamanan hunian.\n\n**4. Mengurangi panas dan kelembapan berlebih**\nKompor yang menyala dalam waktu lama menghasilkan hawa panas dan uap air yang membuat dapur terasa pengap. Sirkulasi udara yang dihasilkan alat ini membantu menjaga suhu dan kelembapan tetap pada level yang nyaman bagi seluruh penghuni.\n\n**5. Pencahayaan tambahan sekaligus nilai estetika**\nSebagian besar model dilengkapi lampu LED di bagian bawah unit yang menerangi area kompor secara langsung. Selain fungsional, desainnya yang modern turut mempercantik tampilan dapur secara keseluruhan dan meningkatkan nilai estetika ruangan.\n\nUntuk memahami lebih jauh berbagai tipe yang tersedia, Anda bisa membaca panduan lengkap [Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak](https://risupkitchen.com/blog/macam-macam-cooker-hood/) sebelum memutuskan pilihan terbaik sesuai kebutuhan.\n\n## Panduan Memilih Sistem dan Merawat Penghisap Asap Dapur\n\nSebelum membeli, pertimbangkan terlebih dahulu apakah dapur Anda memiliki jalur ventilasi ke luar ruangan. Jika ada, sistem *ducted* lebih efektif karena membuang udara kotor langsung keluar. Jika tidak, pilih sistem resirkulasi yang menyaring udara melalui filter karbon aktif. Selanjutnya, sesuaikan kapasitas daya hisap—umumnya diukur dalam m³/jam—dengan luas dapur agar sirkulasi udara benar-benar optimal. Untuk perawatan rutin, cuci filter grease aluminium setiap satu hingga dua bulan menggunakan air sabun hangat. Filter karbon perlu diganti setiap tiga hingga enam bulan sekali agar performanya tidak menurun drastis dan tetap bekerja maksimal.\n\n## Kesimpulan Pentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak\n\nPentingnya Cooker Hood di Dapur untuk Kenyamanan Memasak tidak bisa diabaikan—alat ini adalah investasi nyata untuk kebersihan udara, kesehatan keluarga, dan kualitas hunian jangka panjang. Pilih spesifikasi yang sesuai dengan intensitas memasak harian dan luas dapur Anda. Untuk referensi produk berkualitas dengan berbagai pilihan spesifikasi, kunjungi [Official Website](https://risupkitchen.com/) dan temukan solusi terbaik untuk dapur Anda.",
+    "content_html": "",
+    "status": "completed",
+    "word_count": 555,
+    "seo_score": 100,
+    "seo_audit": {
+      "score": 100,
+      "word_count": 555,
+      "reading_time_minutes": 3,
+      "keyword_density": 1.26,
+      "keyword_count": 7,
+      "checklist": [
+        {
+          "rule": "Text Length",
+          "passed": true,
+          "message": "555 kata (Sesuai SOP Backlink: 500–599 kata)"
+        },
+        {
+          "rule": "Keyphrase in Introduction",
+          "passed": true,
+          "message": "Keyphrase ditemukan di 150 kata pertama"
+        },
+        {
+          "rule": "Keyphrase Density",
+          "passed": true,
+          "message": "Keyphrase ditemukan 7 kali (1.26% - Sangat Ideal & Natural)"
+        },
+        {
+          "rule": "Keyphrase in Subheadings",
+          "passed": true,
+          "message": "3 sub-heading mengandung keyphrase (Sangat Baik)"
+        },
+        {
+          "rule": "Image Status",
+          "passed": true,
+          "message": "Mode Teks Murni (Gambar ditambahkan saat posting ke WordPress)"
+        },
+        {
+          "rule": "Single Title (H1)",
+          "passed": true,
+          "message": "Hanya ada 1 tag judul utama, struktur H2/H3 rapi"
+        },
+        {
+          "rule": "Links in Content",
+          "passed": true,
+          "message": "3 link aktif terpasang secara natural"
+        },
+        {
+          "rule": "Keyphrase in Conclusion",
+          "passed": true,
+          "message": "Keyphrase ditegaskan kembali di bagian kesimpulan"
+        }
+      ]
+    },
+    "include_image_placeholder": false,
+    "target_link_1_url": "https://risupkitchen.com/blog/macam-macam-cooker-hood/",
+    "target_link_1_anchor": null,
+    "target_link_2_url": "https://risupkitchen.com/",
+    "target_link_2_anchor": null,
+    "product_name": null,
+    "created_at": "2026-08-22T06:23:50.159907",
+    "updated_at": "2026-08-22T06:25:26.490632"
   }
 }

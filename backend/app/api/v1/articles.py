@@ -57,6 +57,7 @@ async def generate_outline_endpoint(
         "word_count": 0,
         "seo_score": 0,
         "seo_audit": {},
+        "include_image_placeholder": req.include_image_placeholder,
         "target_link_1_url": req.target_link_1_url,
         "target_link_1_anchor": req.target_link_1_anchor,
         "target_link_2_url": req.target_link_2_url,
@@ -153,13 +154,14 @@ async def continue_writing_endpoint(
     article["status"] = "generating"
     article["updated_at"] = datetime.utcnow()
 
-    # Link & product updates if provided
+    # Link & product & image updates if provided
     link_1_url = req.target_link_1_url or article.get("target_link_1_url")
     link_1_anchor = req.target_link_1_anchor or article.get("target_link_1_anchor")
     link_2_url = req.target_link_2_url or article.get("target_link_2_url")
     link_2_anchor = req.target_link_2_anchor or article.get("target_link_2_anchor")
     product_name = req.product_name or article.get("product_name")
     art_type = req.article_type or article.get("article_type", "backlink_article")
+    include_image = req.include_image_placeholder if req.include_image_placeholder is not None else article.get("include_image_placeholder", False)
 
     storage.save_articles()
 
@@ -174,6 +176,7 @@ async def continue_writing_endpoint(
                 tone=req.tone or article["tone"],
                 brand_voice=req.brand_voice_instructions or article.get("brand_voice_instructions"),
                 secondary_keywords=article.get("secondary_keywords", []),
+                include_image_placeholder=include_image,
                 target_link_1_url=link_1_url,
                 target_link_1_anchor=link_1_anchor,
                 target_link_2_url=link_2_url,
@@ -236,7 +239,8 @@ async def update_article_content(article_id: str, req: UpdateArticleContentReque
             content_markdown=req.content_markdown,
             target_keyword=article["target_keyword"],
             secondary_keywords=article.get("secondary_keywords", []),
-            article_type=article.get("article_type", "backlink_article")
+            article_type=article.get("article_type", "backlink_article"),
+            include_image_placeholder=article.get("include_image_placeholder", False)
         )
         article["word_count"] = seo["word_count"]
         article["seo_score"] = seo["score"]

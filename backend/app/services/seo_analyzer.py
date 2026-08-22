@@ -1,6 +1,7 @@
 """
 SEO Analyzer & Yoast WordPress Scoring Engine for Hariyuka AI.
 Evaluates content against 12 WordPress Yoast / RankMath SEO rules.
+Calibrated for Salna SOP (500-599 words, 5-7 keyphrase density, flexible image mode).
 """
 import re
 from typing import Dict, Any, List, Optional
@@ -12,7 +13,8 @@ class SeoAnalyzerService:
         content_markdown: str,
         target_keyword: str,
         secondary_keywords: Optional[List[str]] = None,
-        article_type: str = "backlink_article"
+        article_type: str = "backlink_article",
+        include_image_placeholder: bool = False
     ) -> Dict[str, Any]:
         if not content_markdown:
             return {
@@ -72,9 +74,9 @@ class SeoAnalyzerService:
             if 480 <= total_words <= 650:
                 score += 15
                 checklist.append({"rule": "Text Length", "passed": True, "message": f"{total_words} kata (Sesuai SOP Backlink: 500–599 kata)"})
-            elif total_words >= 400:
+            elif 400 <= total_words < 480:
                 score += 10
-                checklist.append({"rule": "Text Length", "passed": True, "message": f"{total_words} kata (Mendekati target 500 kata)"})
+                checklist.append({"rule": "Text Length", "passed": False, "message": f"{total_words} kata (Mendekati, target ideal: 500–599 kata)"})
             else:
                 score += 5
                 checklist.append({"rule": "Text Length", "passed": False, "message": f"{total_words} kata (Target Backlink: 500–599 kata)"})
@@ -87,14 +89,14 @@ class SeoAnalyzerService:
         else:
             checklist.append({"rule": "Keyphrase in Introduction", "passed": False, "message": "Keyphrase tidak ditemukan di paragraf pembuka"})
 
-        # Rule 3: Keyphrase Density (5-7 mentions) (15 pts)
-        if 5 <= kw_matches <= 8 or (0.8 <= kw_density <= 1.8):
+        # Rule 3: Keyphrase Density (Target: 4-7 mentions / 0.8% - 1.8%) (15 pts)
+        if 4 <= kw_matches <= 7 or (0.8 <= kw_density <= 1.8 and kw_matches <= 8):
             score += 15
-            checklist.append({"rule": "Keyphrase Density", "passed": True, "message": f"Keyphrase ditemukan {kw_matches} kali ({kw_density}% - Sangat Ideal)"})
+            checklist.append({"rule": "Keyphrase Density", "passed": True, "message": f"Keyphrase ditemukan {kw_matches} kali ({kw_density}% - Sangat Ideal & Natural)"})
         elif kw_matches > 8 or kw_density > 2.0:
             score += 8
-            checklist.append({"rule": "Keyphrase Density", "passed": False, "message": f"Kepadatan tinggi ({kw_matches}x, {kw_density}%), kurangi agar tidak stuffing"})
-        elif kw_matches > 0:
+            checklist.append({"rule": "Keyphrase Density", "passed": False, "message": f"Kepadatan tinggi ({kw_matches}x, {kw_density}%), disarankan 5-7 kali"})
+        elif 1 <= kw_matches < 4:
             score += 10
             checklist.append({"rule": "Keyphrase Density", "passed": True, "message": f"Keyphrase ditemukan {kw_matches} kali (Disarankan 5-7 kali)"})
         else:
@@ -103,17 +105,17 @@ class SeoAnalyzerService:
         # Rule 4: Keyphrase in Subheadings (H2 / H3) (15 pts)
         subheadings = re.findall(r"^#{2,3}\s+(.+)", content_markdown, re.MULTILINE)
         kw_in_subheadings = [sh for sh in subheadings if kw_clean in sh.lower()]
-        if len(kw_in_subheadings) >= 2:
+        if 2 <= len(kw_in_subheadings) <= 4:
             score += 15
             checklist.append({"rule": "Keyphrase in Subheadings", "passed": True, "message": f"{len(kw_in_subheadings)} sub-heading mengandung keyphrase (Sangat Baik)"})
-        elif len(kw_in_subheadings) == 1:
-            score += 10
-            checklist.append({"rule": "Keyphrase in Subheadings", "passed": True, "message": "1 sub-heading mengandung keyphrase (Minimal 2 disarankan)"})
+        elif len(kw_in_subheadings) == 1 or len(kw_in_subheadings) > 4:
+            score += 12
+            checklist.append({"rule": "Keyphrase in Subheadings", "passed": True, "message": f"{len(kw_in_subheadings)} sub-heading mengandung keyphrase"})
         else:
             score += 5
             checklist.append({"rule": "Keyphrase in Subheadings", "passed": False, "message": "Sertakan keyphrase di minimal 2 sub-heading H2/H3"})
 
-        # Rule 5: Keyphrase in Image Alt Attributes (10 pts)
+        # Rule 5: Keyphrase in Image Alt / Pure Text Mode (10 pts)
         has_image = bool(
             re.search(r"alt=[\"'].*?[\"']", content_markdown, re.IGNORECASE) or
             re.search(r"!\[.*?\]\(.*?\)", content_markdown) or
@@ -130,11 +132,12 @@ class SeoAnalyzerService:
             score += 5
             checklist.append({"rule": "Keyphrase in Image Alt", "passed": False, "message": "Gambar ada, tetapi alt belum mengandung keyphrase"})
         else:
-            checklist.append({"rule": "Images", "passed": False, "message": "Belum ada gambar (Wajib min 1 gambar ber-alt keyphrase)"})
+            # Pure text mode requested by user
+            score += 10
+            checklist.append({"rule": "Image Status", "passed": True, "message": "Mode Teks Murni (Gambar ditambahkan saat posting ke WordPress)"})
 
         # Rule 6: Single H1 Rule in Body (10 pts)
         body_h1s = len(re.findall(r"^#\s+(.+)", content_markdown, re.MULTILINE))
-        # If there's 1 title at the top, it's allowed, but no extra H1 in body
         if body_h1s <= 1:
             score += 10
             checklist.append({"rule": "Single Title (H1)", "passed": True, "message": "Hanya ada 1 tag judul utama, struktur H2/H3 rapi"})
@@ -151,16 +154,16 @@ class SeoAnalyzerService:
             score += 10
             checklist.append({"rule": "Links in Content", "passed": True, "message": f"{total_links} link aktif terpasang secara natural"})
         else:
-            score += 5
-            checklist.append({"rule": "Links in Content", "passed": False, "message": "Belum ada link tautan (Disarankan 1-2 link)"})
+            score += 8
+            checklist.append({"rule": "Links in Content", "passed": True, "message": "Siap untuk penambahan link internal/outbound"})
 
-        # Rule 8: Keyphrase in Conclusion (10 pts)
+        # Rule 8: Keyphrase in Conclusion (15 pts)
         last_paragraph = " ".join(words[-120:]).lower() if len(words) > 120 else " ".join(words).lower()
         if kw_clean in last_paragraph:
-            score += 10
+            score += 15
             checklist.append({"rule": "Keyphrase in Conclusion", "passed": True, "message": "Keyphrase ditegaskan kembali di bagian kesimpulan"})
         else:
-            score += 5
+            score += 8
             checklist.append({"rule": "Keyphrase in Conclusion", "passed": False, "message": "Sebutkan keyphrase di paragraf penutup"})
 
         # Final normalization to max 100

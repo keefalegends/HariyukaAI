@@ -32,5 +32,39 @@
     ],
     "error_message": null,
     "updated_at": "2026-08-22T04:47:45.969781"
+  },
+  "fd10843d-d4c9-45b1-a5a7-6382e300d653": {
+    "id": "fd10843d-d4c9-45b1-a5a7-6382e300d653",
+    "article_id": "9753b769-eaeb-46c0-95c4-aa476d25a8d5",
+    "current_step": 2,
+    "total_steps": 5,
+    "step_name": "outline_review",
+    "progress_percentage": 50,
+    "status": "waiting_user_input",
+    "logs": [
+      {
+        "time": "2026-08-22T06:13:45.624363",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": null,
+    "updated_at": "2026-08-22T06:14:10.029943"
+  },
+  "6ec3e8db-9007-4291-974c-6bf3186daae1": {
+    "id": "6ec3e8db-9007-4291-974c-6bf3186daae1",
+    "article_id": "09cdd0fa-90ef-448b-af98-01b0c0816546",
+    "current_step": 2,
+    "total_steps": 5,
+    "step_name": "outline_review",
+    "progress_percentage": 50,
+    "status": "waiting_user_input",
+    "logs": [
+      {
+        "time": "2026-08-22T06:23:50.160912",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": null,
+    "updated_at": "2026-08-22T06:24:14.182668"
   }
 }

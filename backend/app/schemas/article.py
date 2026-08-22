@@ -62,6 +62,9 @@ class GenerateOutlineRequest(BaseModel):
     brand_voice_instructions: Optional[str] = None
     competitor_urls: Optional[List[str]] = Field(default_factory=list)
 
+    # Image option (Salna SOP: False by default, pure text focus)
+    include_image_placeholder: bool = Field(False, description="Whether to include WordPress [caption] block")
+
     # Link injection parameters (Salna SOP)
     target_link_1_url: Optional[str] = Field(None, description="Contextual link 1 URL (e.g. blog link)")
     target_link_1_anchor: Optional[str] = Field(None, description="Anchor text for link 1")
@@ -77,6 +80,7 @@ class ContinueWritingRequest(BaseModel):
     article_type: Optional[Literal["pillar", "backlink_article", "backlink_product"]] = None
     tone: Optional[str] = None
     brand_voice_instructions: Optional[str] = None
+    include_image_placeholder: Optional[bool] = False
     target_link_1_url: Optional[str] = None
     target_link_1_anchor: Optional[str] = None
     target_link_2_url: Optional[str] = None
@@ -104,6 +108,7 @@ class ArticleResponse(BaseModel):
     word_count: int = 0
     seo_score: int = 0
     seo_audit: Optional[Dict[str, Any]] = None
+    include_image_placeholder: Optional[bool] = False
     target_link_1_url: Optional[str] = None
     target_link_1_anchor: Optional[str] = None
     target_link_2_url: Optional[str] = None

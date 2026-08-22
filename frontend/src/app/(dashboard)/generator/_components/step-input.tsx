@@ -77,6 +77,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
 
   // Salna Backlink SOP Link injection states
   const [showLinkSettings, setShowLinkSettings] = useState(false);
+  const [includeImagePlaceholder, setIncludeImagePlaceholder] = useState(false);
   const [link1Url, setLink1Url] = useState("");
   const [link1Anchor, setLink1Anchor] = useState("");
   const [link2Url, setLink2Url] = useState("");
@@ -127,6 +128,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
       secondary_keywords: secondaryKeywords,
       brand_voice_instructions: brandVoice.trim() || undefined,
       competitor_urls: [],
+      include_image_placeholder: includeImagePlaceholder,
       target_link_1_url: link1Url.trim() || undefined,
       target_link_1_anchor: link1Anchor.trim() || undefined,
       target_link_2_url: link2Url.trim() || undefined,
@@ -331,6 +333,26 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
                     className={`w-full ${inputShared} px-3 py-2 text-xs`}
                   />
                 </div>
+              </div>
+
+              {/* Image Caption Option Toggle */}
+              <div className="pt-2.5 border-t t-border">
+                <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={includeImagePlaceholder}
+                    onChange={(e) => setIncludeImagePlaceholder(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded border-stone-700 text-[#d97757] focus:ring-[#d97757] accent-[#d97757] cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-xs font-semibold text-stone-300">
+                      Sertakan Placeholder Gambar WordPress (`[caption]`)
+                    </span>
+                    <p className="text-[10px] text-stone-500 mt-0.5">
+                      Default tidak dicentang (Fokus teks murni 500-599 kata, gambar dapat ditambahkan sendiri saat posting ke WordPress).
+                    </p>
+                  </div>
+                </label>
               </div>
             </div>
           )}
