@@ -125,9 +125,7 @@ export default function LoginPage() {
 
         {/* Main Branding */}
         <div className="text-center py-2 space-y-2.5 flex flex-col items-center">
-          <div className="w-10 h-10 rounded-xl bg-[#d97757]/15 border border-[#d97757]/40 flex items-center justify-center p-2 text-[#d97757] shadow-lg shadow-[#d97757]/10">
-            <HariyukaLogo className="w-full h-full" />
-          </div>
+          <HariyukaLogo className="w-9 h-9" variant="white" />
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-[0.25em] text-[#f5f5f4]">
               HARIYUKA<span className="text-[#d97757]">·</span>AI

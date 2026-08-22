@@ -162,9 +162,7 @@ export function Sidebar() {
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg t-accent-bg flex items-center justify-center p-1.5 shadow-sm">
-                  <HariyukaLogo className="w-full h-full text-white" />
-                </div>
+                <HariyukaLogo className="w-6 h-6 shrink-0" variant="white" />
                 <div>
                   <h2 className={`text-sm font-semibold ${tk.textPrimary}`}>Hariyuka AI</h2>
                   <p className={`text-[10px] ${tk.textFaint}`}>Next-Gen SEO Platform</p>
@@ -277,13 +275,11 @@ export function Sidebar() {
         }`}
       >
         {/* Logo & Header Toggle */}
-        <div className="h-14 flex items-center justify-between px-3 border-b t-border shrink-0">
+        <div className="h-14 flex items-center justify-between px-3.5 border-b t-border shrink-0">
           {!collapsed ? (
             <>
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-7 h-7 rounded-lg t-accent-bg flex items-center justify-center shrink-0 shadow-sm p-1">
-                  <HariyukaLogo className="w-full h-full text-white" />
-                </div>
+                <HariyukaLogo className="w-5 h-5 shrink-0" variant="white" />
                 <span className={`font-bold text-sm tracking-tight truncate t-text-primary`}>
                   Hariyuka AI
                 </span>
@@ -301,10 +297,10 @@ export function Sidebar() {
             <div className="w-full flex justify-center">
               <button
                 onClick={() => setCollapsed(false)}
-                className="w-7 h-7 rounded-lg t-accent-bg flex items-center justify-center cursor-pointer shadow-sm hover:scale-105 transition-transform p-1"
+                className="p-1.5 rounded-lg hover:bg-stone-800/60 transition-colors cursor-pointer"
                 title="Buka Sidebar (Expand)"
               >
-                <HariyukaLogo className="w-full h-full text-white" />
+                <HariyukaLogo className="w-5 h-5 shrink-0" variant="white" />
               </button>
             </div>
           )}
