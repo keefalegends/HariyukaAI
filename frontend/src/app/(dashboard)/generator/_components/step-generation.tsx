@@ -11,6 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
+import { logTerminal, setTerminalStatus } from "@/lib/terminal-bus";
 
 interface StepGenerationProps {
   articleId: string;
@@ -49,14 +50,19 @@ export function StepGeneration({ articleId, onFinished }: StepGenerationProps) {
 
         if (eventType === "connected") {
           setLogs((prev) => [...prev, `[System] Terhubung ke real-time agentic stream.`]);
+          logTerminal("SYS", `Stream worker connected (Task: ${articleId.slice(0, 8)}...)`);
         } else if (eventType === "step_start") {
           setCurrentStep(data.step);
           setProgress(data.progress);
           setLogs((prev) => [...prev, `[Step ${data.step}] ${data.name}...`]);
+          logTerminal("JOB", `[Step ${data.step}/5] ${data.name}...`);
+          setTerminalStatus("running", data.name);
         } else if (eventType === "section_writing_start") {
           setCurrentSectionTitle(`Menulis: ${data.heading} (${data.section_index}/${data.total_sections})`);
           setProgress(data.progress);
           setLogs((prev) => [...prev, `[Claude 4.6] Menulis section: "${data.heading}"`]);
+          logTerminal("API", `Claude 4.6: Menulis "${data.heading}" (${data.section_index}/${data.total_sections})`);
+          setTerminalStatus("running", `Writing: ${data.heading}`);
         } else if (eventType === "stream_chunk") {
           setStreamedText((prev) => prev + data.chunk);
         } else if (eventType === "generation_completed") {
@@ -66,7 +72,10 @@ export function StepGeneration({ articleId, onFinished }: StepGenerationProps) {
           if (data.result?.seo_score) {
             setSeoScore(data.result.seo_score);
           }
-          setLogs((prev) => [...prev, `[Selesai] Artikel berhasil digenerate dengan skor SEO ${data.result?.seo_score || 95}/100!`]);
+          const finishMsg = `Artikel selesai (${data.result?.word_count || 550} kata, Skor SEO: ${data.result?.seo_score || 94}/100)`;
+          setLogs((prev) => [...prev, `[Selesai] ${finishMsg}`]);
+          logTerminal("OK", finishMsg);
+          setTerminalStatus("completed", "Selesai 100%");
           onFinished(data.result);
           eventSource.close();
         }

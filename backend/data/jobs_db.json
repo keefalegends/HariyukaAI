@@ -83,5 +83,22 @@
     ],
     "error_message": null,
     "updated_at": "2026-08-22T06:51:00.669390"
+  },
+  "32dc22b6-7880-4769-b66d-b2c32e967481": {
+    "id": "32dc22b6-7880-4769-b66d-b2c32e967481",
+    "article_id": "fac81ebc-b037-4b51-b0bf-7369b9dde8c9",
+    "current_step": 2,
+    "total_steps": 5,
+    "step_name": "outline_review",
+    "progress_percentage": 50,
+    "status": "waiting_user_input",
+    "logs": [
+      {
+        "time": "2026-08-22T10:39:12.534419",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": null,
+    "updated_at": "2026-08-22T10:39:36.000042"
   }
 }

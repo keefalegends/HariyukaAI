@@ -4,6 +4,7 @@ import { useState } from "react";
 import { StepInput } from "./_components/step-input";
 import { StepOutline, ArticleOutline } from "./_components/step-outline";
 import { StepGeneration } from "./_components/step-generation";
+import { logTerminal, setTerminalStatus } from "@/lib/terminal-bus";
 
 export default function GeneratorPage() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -18,6 +19,10 @@ export default function GeneratorPage() {
     setIsLoading(true);
     setTargetKeyword(formData.target_keyword);
 
+    setTerminalStatus("running", `Analisis SERP: "${formData.target_keyword}"`);
+    logTerminal("JOB", `Inisialisasi pipeline (${formData.article_type?.replace('_', ' ') || 'backlink'})...`);
+    logTerminal("JOB", `Target Keyphrase: "${formData.target_keyword}"`);
+
     try {
       const res = await fetch("http://localhost:8000/api/v1/articles/generate-outline", {
         method: "POST",
@@ -28,6 +33,7 @@ export default function GeneratorPage() {
       const data = await res.json();
       if (data.article_id) {
         setArticleId(data.article_id);
+        logTerminal("SYS", `Task ID terdaftar: ${data.article_id.slice(0, 8)}...`);
 
         // Listen for outline_ready event via SSE
         const eventSource = new EventSource(`http://localhost:8000/api/v1/stream/${data.article_id}`);
@@ -35,13 +41,20 @@ export default function GeneratorPage() {
         eventSource.onmessage = (event) => {
           try {
             const payload = JSON.parse(event.data);
+            if (payload.event === "step_start") {
+              logTerminal("API", `[Step ${payload.data?.step}] ${payload.data?.name}`);
+              setTerminalStatus("running", payload.data?.name);
+            }
             if (payload.event === "step_complete" && payload.data?.serp_data) {
               setSerpData(payload.data.serp_data);
+              logTerminal("API", `Intent: ${payload.data.serp_data.search_intent} (${payload.data.serp_data.lsi_keywords?.length || 6} LSI Entities)`);
             }
             if (payload.event === "outline_ready") {
               setOutline(payload.data.outline);
               setIsLoading(false);
               setCurrentStep(2);
+              logTerminal("SEO", `Outline ${payload.data.outline?.sections?.length || 4} Bagian H2/H3 Siap Ditinjau`);
+              setTerminalStatus("idle", "Outline siap ditinjau");
               eventSource.close();
             }
           } catch (e) {
@@ -50,55 +63,14 @@ export default function GeneratorPage() {
         };
 
         eventSource.onerror = () => {
-          // Fallback if disconnected
           setIsLoading(false);
         };
       }
     } catch (err) {
       console.error("Failed to generate outline:", err);
-      // Fallback preview outline if backend isn't running yet
-      const fallbackOutline: ArticleOutline = {
-        title: `Panduan Lengkap ${formData.target_keyword} 2026`,
-        estimated_total_words: formData.target_length || 2000,
-        sections: [
-          {
-            id: "sec-1",
-            heading: `Pengenalan dan Dasar ${formData.target_keyword}`,
-            level: "h2",
-            target_word_count: 350,
-            key_points: ["Definisi mendasar", "Mengapa topik ini penting di era sekarang"],
-            keywords_to_include: [formData.target_keyword],
-          },
-          {
-            id: "sec-2",
-            heading: "Langkah-Langkah Praktis & Strategi Terbaik",
-            level: "h2",
-            target_word_count: 600,
-            key_points: ["Tutorial bertahap", "Tips menghindari kesalahan umum"],
-            keywords_to_include: [formData.target_keyword],
-          },
-          {
-            id: "sec-3",
-            heading: "Optimasi Lanjutan dan Studi Kasus Nyata",
-            level: "h2",
-            target_word_count: 500,
-            key_points: ["Contoh penerapan langsung", "Framework evaluasi hasil"],
-            keywords_to_include: [formData.target_keyword],
-          },
-          {
-            id: "sec-4",
-            heading: "Kesimpulan dan Action Plan",
-            level: "h2",
-            target_word_count: 300,
-            key_points: ["Ringkasan takeaways", "Langkah selanjutnya"],
-            keywords_to_include: [formData.target_keyword],
-          },
-        ],
-      };
-      setOutline(fallbackOutline);
-      setArticleId(`art-demo-${Date.now()}`);
+      logTerminal("ERR", `Koneksi backend gagal: ${String(err)}`);
+      setTerminalStatus("error", "Koneksi backend gagal");
       setIsLoading(false);
-      setCurrentStep(2);
     }
   };
 
@@ -106,6 +78,9 @@ export default function GeneratorPage() {
   const handleOutlineContinue = async (updatedOutline: ArticleOutline, customTitle?: string) => {
     setIsLoading(true);
     setOutline(updatedOutline);
+
+    logTerminal("JOB", `Menyetujui outline (${updatedOutline.sections?.length} bagian). Memulai penulisan...`);
+    setTerminalStatus("running", "Menulis konten...");
 
     try {
       await fetch(`http://localhost:8000/api/v1/articles/${articleId}/continue-writing`, {
@@ -118,6 +93,7 @@ export default function GeneratorPage() {
       });
     } catch (err) {
       console.warn("Backend continue writing notice:", err);
+      logTerminal("ERR", `Notice continue writing: ${String(err)}`);
     }
 
     setIsLoading(false);
@@ -133,8 +109,8 @@ export default function GeneratorPage() {
       {currentStep === 2 && outline && (
         <StepOutline
           initialOutline={outline}
-          serpData={serpData}
           targetKeyword={targetKeyword}
+          serpData={serpData}
           onContinue={handleOutlineContinue}
           onBack={() => setCurrentStep(1)}
           isLoading={isLoading}
@@ -144,8 +120,9 @@ export default function GeneratorPage() {
       {currentStep === 3 && (
         <StepGeneration
           articleId={articleId}
-          onFinished={(result) => {
-            console.log("Generation finished:", result);
+          onFinished={() => {
+            logTerminal("OK", "Pipeline selesai! Artikel siap di editor.");
+            setTerminalStatus("completed", "Artikel selesai");
           }}
         />
       )}

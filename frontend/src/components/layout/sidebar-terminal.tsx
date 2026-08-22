@@ -14,13 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
-
-interface LogEntry {
-  id: string;
-  time: string;
-  type: "SYS" | "API" | "JOB" | "SEO" | "OK";
-  message: string;
-}
+import { TerminalLog, getStoredTerminalLogs, TerminalStatus } from "@/lib/terminal-bus";
 
 interface SidebarTerminalProps {
   collapsed?: boolean;
@@ -29,14 +23,16 @@ interface SidebarTerminalProps {
 export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
   const tk = useTokens();
   const [isOpen, setIsOpen] = useState(true);
-  const [isLive, setIsLive] = useState(true);
-  const [gatewayStatus, setGatewayStatus] = useState<"online" | "offline" | "connecting">("online");
-  const [logs, setLogs] = useState<LogEntry[]>([
+  const [gatewayStatus, setGatewayStatus] = useState<"online" | "offline">("online");
+  const [jobStatus, setJobStatus] = useState<TerminalStatus>("idle");
+  const [activeTask, setActiveTask] = useState<string>("daemon idle");
+  
+  const [logs, setLogs] = useState<TerminalLog[]>([
     {
       id: "1",
       time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
       type: "SYS",
-      message: "Hariyuka Daemon initialized",
+      message: "Hariyuka Daemon v1.0 online",
     },
     {
       id: "2",
@@ -54,7 +50,39 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
 
   const logEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll terminal to bottom when new logs appear
+  // Load persisted logs from session and listen to live events
+  useEffect(() => {
+    const stored = getStoredTerminalLogs();
+    if (stored && stored.length > 0) {
+      setLogs(stored);
+    }
+
+    const handleLogEvent = (e: Event) => {
+      const custom = e as CustomEvent<TerminalLog>;
+      if (custom.detail) {
+        setLogs((prev) => [...prev.slice(-30), custom.detail]);
+      }
+    };
+
+    const handleStatusEvent = (e: Event) => {
+      const custom = e as CustomEvent<{ status: TerminalStatus; activeTask?: string }>;
+      if (custom.detail) {
+        setJobStatus(custom.detail.status);
+        if (custom.detail.activeTask) {
+          setActiveTask(custom.detail.activeTask);
+        }
+      }
+    };
+
+    window.addEventListener("hariyuka:log", handleLogEvent);
+    window.addEventListener("hariyuka:status", handleStatusEvent);
+    return () => {
+      window.removeEventListener("hariyuka:log", handleLogEvent);
+      window.removeEventListener("hariyuka:status", handleStatusEvent);
+    };
+  }, []);
+
+  // Auto scroll terminal to bottom when new logs arrive
   useEffect(() => {
     if (isOpen && logEndRef.current) {
       logEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -81,28 +109,20 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const addLog = (type: LogEntry["type"], message: string) => {
-    const newEntry: LogEntry = {
+  const handleClearLogs = () => {
+    const resetLog: TerminalLog = {
       id: String(Date.now()),
       time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-      type,
-      message,
+      type: "SYS",
+      message: "Terminal buffer cleared",
     };
-    setLogs((prev) => [...prev.slice(-15), newEntry]);
+    setLogs([resetLog]);
+    try {
+      sessionStorage.removeItem("hariyuka_terminal_logs");
+    } catch (e) {}
   };
 
-  const handleClearLogs = () => {
-    setLogs([
-      {
-        id: String(Date.now()),
-        time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-        type: "SYS",
-        message: "Terminal buffer cleared",
-      },
-    ]);
-  };
-
-  const getTypeColor = (type: LogEntry["type"]) => {
+  const getTypeColor = (type: TerminalLog["type"]) => {
     switch (type) {
       case "SYS":
         return "text-[#a8a29e]";
@@ -114,6 +134,8 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
         return "text-[#d97757]";
       case "OK":
         return "text-emerald-400";
+      case "ERR":
+        return "text-red-400";
       default:
         return "text-stone-400";
     }
@@ -127,12 +149,16 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="relative p-2 rounded-lg t-bg-tag hover:border-[#d97757] transition-all text-stone-400 cursor-pointer"
-          title={`Background Terminal: ${gatewayStatus.toUpperCase()}`}
+          title={`Background Terminal: ${jobStatus.toUpperCase()} (${gatewayStatus.toUpperCase()})`}
         >
           <Terminal className="w-4 h-4" />
           <span
             className={`w-2 h-2 rounded-full absolute top-1 right-1 ${
-              gatewayStatus === "online" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"
+              jobStatus === "running"
+                ? "bg-amber-400 animate-pulse shadow-sm shadow-amber-400/50"
+                : gatewayStatus === "online"
+                ? "bg-emerald-500 shadow-sm"
+                : "bg-red-500"
             }`}
           />
         </button>
@@ -151,7 +177,11 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
         >
           <span
             className={`w-1.5 h-1.5 rounded-full ${
-              gatewayStatus === "online" ? "bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/50" : "bg-red-400"
+              jobStatus === "running"
+                ? "bg-amber-400 animate-pulse shadow-sm shadow-amber-400/50"
+                : gatewayStatus === "online"
+                ? "bg-emerald-400 shadow-sm shadow-emerald-400/50"
+                : "bg-red-400"
             }`}
           />
           <Terminal className="w-3 h-3 text-[#d97757]" />
@@ -188,7 +218,7 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
       {isOpen && (
         <div className="p-2.5 font-mono text-[10px] leading-tight space-y-1.5 max-h-[140px] overflow-y-auto bg-[#0a0908] scrollbar-thin">
           {logs.map((log) => (
-            <div key={log.id} className="flex items-start gap-1.5 break-all">
+            <div key={log.id} className="flex items-start gap-1.5 break-all animate-in fade-in duration-100">
               <span className="text-[#57534e] shrink-0">{log.time}</span>
               <span className={`font-bold shrink-0 ${getTypeColor(log.type)}`}>
                 [{log.type}]
@@ -197,11 +227,20 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
             </div>
           ))}
 
-          {/* Active blinking prompt cursor */}
+          {/* Active status & prompt cursor */}
           <div className="flex items-center gap-1.5 pt-0.5 text-[#78716c]">
-            <span className="text-emerald-500 font-bold">❯</span>
-            <span className="text-[9px] text-[#78716c]">daemon idle</span>
-            <span className="w-1.5 h-3 bg-[#d97757] animate-pulse inline-block" />
+            {jobStatus === "running" ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin text-amber-400 shrink-0" />
+                <span className="text-[9px] text-amber-300 font-semibold">{activeTask}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-emerald-500 font-bold">❯</span>
+                <span className="text-[9px] text-[#78716c]">{activeTask}</span>
+                <span className="w-1.5 h-3 bg-[#d97757] animate-pulse inline-block" />
+              </>
+            )}
           </div>
 
           <div ref={logEndRef} />
