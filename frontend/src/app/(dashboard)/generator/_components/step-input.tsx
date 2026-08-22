@@ -16,6 +16,7 @@ import {
   ShoppingBag,
   FileText,
   BookmarkCheck,
+  ShieldCheck,
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
@@ -77,6 +78,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
 
   // Salna Backlink SOP Link injection states
   const [showLinkSettings, setShowLinkSettings] = useState(false);
+  const [humanizeWriting, setHumanizeWriting] = useState(true);
   const [includeImagePlaceholder, setIncludeImagePlaceholder] = useState(false);
   const [link1Url, setLink1Url] = useState("");
   const [link1Anchor, setLink1Anchor] = useState("");
@@ -128,6 +130,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
       secondary_keywords: secondaryKeywords,
       brand_voice_instructions: brandVoice.trim() || undefined,
       competitor_urls: [],
+      humanize_writing: humanizeWriting,
       include_image_placeholder: includeImagePlaceholder,
       target_link_1_url: link1Url.trim() || undefined,
       target_link_1_anchor: link1Anchor.trim() || undefined,
@@ -358,7 +361,42 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
           )}
         </div>
 
-        {/* ─── 5. BAHASA & TONE ─── */}
+        {/* ─── 5. HUMANIZE WRITING (ANTI-AI DETECTOR MODE) ─── */}
+        <div
+          onClick={() => setHumanizeWriting(!humanizeWriting)}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
+            humanizeWriting
+              ? "bg-[#d97757]/10 border-[#d97757]/60 shadow-sm shadow-[#d97757]/5"
+              : "t-bg-tag t-border hover:border-stone-600"
+          }`}
+        >
+          <div className="pt-0.5">
+            <input
+              type="checkbox"
+              checked={humanizeWriting}
+              onChange={(e) => setHumanizeWriting(e.target.checked)}
+              className="w-4 h-4 rounded border-stone-700 text-[#d97757] focus:ring-[#d97757] accent-[#d97757] cursor-pointer"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className={`w-4 h-4 ${humanizeWriting ? "text-[#d97757]" : "text-stone-400"}`} />
+              <span className={`text-xs font-bold ${humanizeWriting ? "text-[#d97757]" : "t-text-primary"}`}>
+                Humanize Writing (Bypass AI Detector Mode)
+              </span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-semibold ${
+                humanizeWriting ? "bg-[#d97757]/20 text-[#d97757] border border-[#d97757]/30" : "bg-stone-800 text-stone-400"
+              }`}>
+                Target Skor AI &lt; 30%
+              </span>
+            </div>
+            <p className={`text-[11px] mt-1 ${tk.textMuted} leading-relaxed`}>
+              Mengoptimasi variasi ritme kalimat (<em>sentence burstiness</em>), membuang frasa klise robotik, dan meniru gaya bercerita penutur asli untuk lolos detektor AI.
+            </p>
+          </div>
+        </div>
+
+        {/* ─── 6. BAHASA & TONE ─── */}
         <div className="grid grid-cols-2 gap-3">
           {[
             { label: "Bahasa", icon: Globe, value: language, onChange: setLanguage, options: [{v:"id",l:"Indonesia"},{v:"en",l:"English"},{v:"ms",l:"Melayu"}] },

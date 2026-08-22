@@ -1,7 +1,7 @@
 """
 Agentic Pipeline Orchestrator for Hariyuka AI.
 Manages the 5-step lifecycle: SERP -> Outline (Pause) -> Section Writing -> SEO Polish -> Live Stream.
-Updated with Salna's Yoast WordPress SEO SOP.
+Updated with Salna's Yoast WordPress SEO SOP & Humanizer Mode.
 """
 import asyncio
 import logging
@@ -140,6 +140,7 @@ class ArticlePipelineOrchestrator:
         tone: str = "authoritative",
         brand_voice: Optional[str] = None,
         secondary_keywords: Optional[List[str]] = None,
+        humanize_writing: bool = True,
         include_image_placeholder: bool = False,
         target_link_1_url: Optional[str] = None,
         target_link_1_anchor: Optional[str] = None,
@@ -148,10 +149,11 @@ class ArticlePipelineOrchestrator:
         product_name: Optional[str] = None,
         product_promotion_context: Optional[str] = None,
     ) -> Dict[str, Any]:
-        logger.info(f"[{article_id}] Starting Phase B: Multi-pass Section Writing ({article_type})")
+        logger.info(f"[{article_id}] Starting Phase B: Multi-pass Section Writing ({article_type}) - Humanize: {humanize_writing}")
+        step_desc = "Menulis Bagian per Bagian (Humanize Anti-AI Mode)" if humanize_writing else "Menulis Konten Bagian per Bagian"
         await self.emit_event(article_id, "step_start", {
             "step": 3,
-            "name": "Menulis Konten Bagian per Bagian (Multi-Pass)",
+            "name": step_desc,
             "progress": 55
         })
 
@@ -186,7 +188,7 @@ class ArticlePipelineOrchestrator:
                 "progress": section_progress
             })
 
-            # Claude 4.6 Section Writing with link & image injection
+            # Claude 4.6 Section Writing with Humanize, link & image injection
             section_text = await ai_router.write_section(
                 article_title=title,
                 target_keyword=target_keyword,
@@ -208,7 +210,8 @@ class ArticlePipelineOrchestrator:
                 link_2_anchor=target_link_2_anchor,
                 product_name=product_name,
                 product_promotion_context=product_promotion_context,
-                include_image_placeholder=include_image_placeholder
+                include_image_placeholder=include_image_placeholder,
+                humanize_writing=humanize_writing,
             )
 
             written_sections.append(section_text)
@@ -232,7 +235,7 @@ class ArticlePipelineOrchestrator:
         logger.info(f"[{article_id}] Starting Step 4: Final Yoast SEO Compliance Polish")
         await self.emit_event(article_id, "step_start", {
             "step": 4,
-            "name": "Audit Standar Yoast WordPress (Density, Links & Word Count)",
+            "name": "Audit Standar Yoast & Anti-AI Detector Polish",
             "progress": 85
         })
 
@@ -242,7 +245,8 @@ class ArticlePipelineOrchestrator:
             article_type=article_type,
             secondary_keywords=secondary_keywords or [],
             tone=tone,
-            include_image_placeholder=include_image_placeholder
+            include_image_placeholder=include_image_placeholder,
+            humanize_writing=humanize_writing,
         )
 
         # ----------------------------------------------------------------------
@@ -269,7 +273,8 @@ class ArticlePipelineOrchestrator:
             "content_markdown": polished_markdown,
             "word_count": seo_audit["word_count"],
             "seo_score": seo_audit["score"],
-            "seo_audit": seo_audit
+            "seo_audit": seo_audit,
+            "humanize_writing": humanize_writing
         }
 
         await self.emit_event(article_id, "generation_completed", {

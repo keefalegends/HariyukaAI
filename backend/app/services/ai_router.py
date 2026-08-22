@@ -1,11 +1,7 @@
 """
 AI Router Service for 9Router Proxy.
 Integrates Gemini 3.7 (SERP/Outline) and Claude 4.6 (Writer/SEO Polish).
-Updated with Salna's Yoast WordPress SEO SOP:
-- Strict Word Count (500-599 words for backlink, 1500-1599 for pillar)
-- Strict Keyphrase Density (5 to 7 mentions total, ~1.0-1.4%)
-- Pure text output by default (image placeholder optional)
-- H2 & H3 hierarchy only
+Updated with Salna's Yoast WordPress SEO SOP & Humanizer Anti-AI Detector Mode.
 """
 import re
 import json
@@ -155,12 +151,6 @@ Return a valid JSON object matching this schema exactly:
         brand_voice: Optional[str] = None,
         product_name: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """
-        Step 2: Generate outline calibrated for strict word counts:
-        - 'pillar': 1500 - 1599 words (5-6 sections)
-        - 'backlink_article': 500 - 599 words (3-4 sections with ~550 total words)
-        - 'backlink_product': 500 - 599 words (3-4 sections with ~550 total words)
-        """
         if article_type == "pillar":
             exact_target = target_word_count if (target_word_count and 1450 <= target_word_count <= 1650) else 1550
             section_breakdown = f"""
@@ -174,9 +164,9 @@ Total: ~1550 words
         else:
             exact_target = 550
             section_breakdown = f"""
-1. Section 1 (H2 Pembuka & Konteks Masalah): ~120 words (introduce keyphrase in first sentence)
-2. Section 2 (H2 5 Alasan / Tips Praktis {target_keyword}): ~280 words (5 actionable points)
-3. Section 3 (H2 Pertimbangan / Perawatan demi Hasil Optimal): ~100 words
+1. Section 1 (H2 Pembuka & Konteks Lapangan): ~120 words
+2. Section 2 (H2 5 Alasan / Tips Praktis {target_keyword}): ~280 words
+3. Section 3 (H2 Perawatan / Solusi Penting): ~100 words
 4. Section 4 (H2 Kesimpulan {target_keyword}): ~70 words
 Total: ~550 words (strictly 500-599 words)
 """
@@ -260,7 +250,7 @@ Output valid JSON matching this schema:
         return self.extract_json(raw)
 
     # --------------------------------------------------------------------------
-    # STEP 3: Multi-Pass Section Writer (Claude 4.6 / Sonnet) - Salna SOP
+    # STEP 3: Multi-Pass Section Writer (Claude 4.6 / Sonnet) - Humanizer Enabled
     # --------------------------------------------------------------------------
     async def write_section(
         self,
@@ -285,9 +275,10 @@ Output valid JSON matching this schema:
         product_name: Optional[str] = None,
         product_promotion_context: Optional[str] = None,
         include_image_placeholder: bool = False,
+        humanize_writing: bool = True,
     ) -> str:
         """
-        Step 3: Write section with strict word length and keyphrase frequency limits.
+        Step 3: Write section with burstiness and anti-AI detection patterns.
         """
         is_first_section = (section_index == 1)
         is_last_section = (section_index == total_sections)
@@ -295,33 +286,46 @@ Output valid JSON matching this schema:
         link_instructions = ""
         if link_1_url and (is_first_section or section_index == 2):
             anchor = link_1_anchor or target_keyword
-            link_instructions += f"\n- CONTEXTUAL LINK REQUIREMENT: Naturally wrap `[{anchor}]({link_1_url})` into the body of this section."
+            link_instructions += f"\n- CONTEXTUAL LINK: Naturally wrap `[{anchor}]({link_1_url})` into the body."
 
         if link_2_url and is_last_section:
             anchor = link_2_anchor or (product_name or "Official Website")
-            link_instructions += f"\n- BRAND/PRODUCT LINK REQUIREMENT: In this concluding section, naturally mention `[{anchor}]({link_2_url})`."
+            link_instructions += f"\n- BRAND/PRODUCT LINK: In this conclusion, naturally mention `[{anchor}]({link_2_url})`."
 
         product_instruction = ""
         if article_type == "backlink_product" and product_name:
-            product_instruction = f"\n- PRODUCT SOFT-SELL: Naturally weave in **{product_name}** ({product_promotion_context or 'rekomendasi peralatan modern yang terpercaya'}) as an actionable solution."
+            product_instruction = f"\n- PRODUCT SOFT-SELL: Naturally weave in **{product_name}** ({product_promotion_context or 'rekomendasi peralatan terpercaya'}) as an actionable solution."
 
-        # Only embed image caption if explicitly requested
         image_instruction = ""
         if include_image_placeholder and (section_index == 2 or (is_first_section and "pengenalan" not in section_heading.lower())):
             image_instruction = f"""
-- OPTIONAL WORDPRESS IMAGE EMBED: Right under the `{section_level.upper()} {section_heading}` heading, include:
+- WORDPRESS IMAGE EMBED: Right under `{section_level.upper()} {section_heading}`, include:
 [caption id="attachment_8609" align="alignnone" width="885"]<img class="wp-image-8609" src="https://placehold.co/885x590/292524/d97757?text={target_keyword.replace(' ', '+')}" alt="{target_keyword}" width="885" height="590" /> {target_keyword}[/caption]
 """
 
-        system_prompt = (
-            "You are an Elite SEO Copywriter writing in natural, flowing Indonesian.\n"
-            "STRICT RULES:\n"
-            "1. ONLY use H2 (##) or H3 (###). NEVER output H1 (#).\n"
-            f"2. Word Count Target: You MUST write approximately {target_word_count} words for this section. Write rich, practical, and informative paragraphs.\n"
-            "3. KEYPHRASE DENSITY CONTROL: Mention the exact focus keyphrase AT MOST 1 or 2 times in this section. DO NOT repeat the keyphrase in every sentence! Use natural pronouns ('alat ini', 'hal ini', 'solusi tersebut').\n"
-            "4. If this is Section 1 (Intro), mention the keyphrase in the very first sentence.\n"
-            "5. NO AI cliches or robotic filler."
-        )
+        # Humanizer & Anti-AI Detector directives
+        humanizer_directives = ""
+        if humanize_writing:
+            humanizer_directives = """
+HUMANIZER & ANTI-AI DETECTOR INSTRUCTIONS:
+1. BURSTINESS (VARY SENTENCE LENGTHS DRAMATICALLY):
+   - Mix ultra-short sentences (3-6 words: "Jangan buru-buru beli.", "Kuncinya sederhana.", "Faktanya jelas.") with medium and rich compound sentences.
+   - Do NOT write sentences of uniform length. Break robotic cadence.
+2. ABSOLUTELY FORBIDDEN AI SIGNATURE CLICHES:
+   - NEVER use: "Hal yang perlu dipahami sejak awal adalah...", "Berikut adalah beberapa tips/langkah...", "Merupakan langkah krusial...", "Tidak dapat dipungkiri bahwa...", "Memegang peranan penting dalam...", "Dalam era modern saat ini...", "Mari kita telusuri lebih dalam..."
+3. NATURAL NATIVE CONJUNCTIONS & EXPERIENTIAL VOICE:
+   - Use natural Indonesian transitions: "Padahal,", "Untungnya,", "Bahkan,", "Sebaliknya,", "Malah seringkali,".
+   - Write like an experienced practitioner sharing practical on-the-ground insights directly with the reader.
+"""
+
+        system_prompt = f"""You are an Elite Human SEO Copywriter writing in natural, engaging Indonesian.
+{humanizer_directives}
+RULES:
+1. ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
+2. Word count target for this section: EXACTLY ~{target_word_count} words. Write rich, practical paragraphs.
+3. KEYPHRASE DENSITY: Mention the exact focus keyphrase AT MOST 1 or 2 times in this section. Use natural pronouns ('alat ini', 'langkah tersebut') elsewhere.
+4. If this is Section 1, mention keyphrase in the very first sentence.
+"""
 
         user_prompt = f"""
 Article Title: {article_title}
@@ -349,7 +353,7 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         return await self.complete(
             model=self.model_writer,
             messages=messages,
-            temperature=0.65,
+            temperature=0.75 if humanize_writing else 0.65,
         )
 
     # --------------------------------------------------------------------------
@@ -363,34 +367,36 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         secondary_keywords: Optional[List[str]] = None,
         tone: str = "authoritative",
         include_image_placeholder: bool = False,
+        humanize_writing: bool = True,
     ) -> str:
-        """
-        Step 4: Audit and polish full article to ensure:
-        - Word count strictly fits target (500-599 for backlink, 1500-1599 for pillar)
-        - Keyphrase appears strictly 5 to 7 times total (density ~1.0-1.4%)
-        - If include_image_placeholder is False, strip all [caption] blocks.
-        """
         target_min = 1500 if article_type == "pillar" else 510
         target_max = 1590 if article_type == "pillar" else 585
         target_range = f"{target_min} – {target_max} kata"
 
         image_rule = "Ensure no [caption] or img tags exist; output clean pure text markdown." if not include_image_placeholder else "Preserve [caption] block intact."
 
-        system_prompt = (
-            "You are a Master SEO Editor polishing an Indonesian article for Yoast WordPress Green Light.\n"
-            "CRITICAL CALIBRATION REQUIREMENTS:\n"
-            f"1. STRICT WORD COUNT: The final text length MUST be between {target_range}. "
-            "If currently under 500 words, expand paragraphs with helpful details and actionable explanations. "
-            "If over 600 words, tighten sentences.\n"
-            "2. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY): "
-            f"Count the exact occurrences of '{target_keyword}'. It MUST appear between 5 and 7 times total across the entire article! "
-            "If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut'). "
-            "It must appear in the first sentence, in 2-3 subheadings, and in the conclusion.\n"
-            "3. SINGLE H1 RULE: The body MUST only contain ## H2 and ### H3. Remove any extra # H1 tags.\n"
-            f"4. IMAGE RULE: {image_rule}\n"
-            "5. Preserve all markdown links `[anchor](url)`.\n"
-            "Output only the final polished article in Markdown."
-        )
+        humanizer_polish = ""
+        if humanize_writing:
+            humanizer_polish = """
+6. ANTI-AI POLISH PASS:
+   - Break any monotonous robotic sentences into bursty short-and-long rhythms.
+   - Replace any remaining AI filler ('Hal yang perlu dipahami', 'Berikut lima tips', 'Merupakan langkah krusial') with natural human storytelling.
+   - Ensure the prose reads 100% human-crafted and passes AI detectors with <30% score.
+"""
+
+        system_prompt = f"""You are a Master SEO & Human Writing Editor polishing an Indonesian article for Yoast WordPress Green Light.
+CALIBRATION REQUIREMENTS:
+1. STRICT WORD COUNT: The final text length MUST be between {target_range}.
+   If currently under 500 words, expand paragraphs with helpful details and actionable explanations.
+2. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
+   Count occurrences of '{target_keyword}'. It MUST appear between 5 and 7 times total across the entire article!
+   If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
+3. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
+4. IMAGE RULE: {image_rule}
+5. Preserve all markdown links `[anchor](url)`.
+{humanizer_polish}
+Output only the final polished article in Markdown.
+"""
 
         user_prompt = f"""
 Target Keyphrase: "{target_keyword}"
@@ -409,7 +415,7 @@ Return the final polished markdown:
         return await self.complete(
             model=self.model_seo,
             messages=messages,
-            temperature=0.25,
+            temperature=0.35 if humanize_writing else 0.25,
         )
 
 

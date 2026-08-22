@@ -1,7 +1,7 @@
 """
 Article API Endpoints for Hariyuka AI.
 Handles Outline Creation, Editing, Multi-pass Writing, and Article CRUD with Persistent Storage.
-Updated with Salna's Yoast WordPress SEO SOP.
+Updated with Salna's Yoast WordPress SEO SOP & Humanizer Mode.
 """
 import uuid
 import asyncio
@@ -57,6 +57,7 @@ async def generate_outline_endpoint(
         "word_count": 0,
         "seo_score": 0,
         "seo_audit": {},
+        "humanize_writing": req.humanize_writing,
         "include_image_placeholder": req.include_image_placeholder,
         "target_link_1_url": req.target_link_1_url,
         "target_link_1_anchor": req.target_link_1_anchor,
@@ -154,7 +155,7 @@ async def continue_writing_endpoint(
     article["status"] = "generating"
     article["updated_at"] = datetime.utcnow()
 
-    # Link & product & image updates if provided
+    # Link & product & image & humanize updates if provided
     link_1_url = req.target_link_1_url or article.get("target_link_1_url")
     link_1_anchor = req.target_link_1_anchor or article.get("target_link_1_anchor")
     link_2_url = req.target_link_2_url or article.get("target_link_2_url")
@@ -162,6 +163,7 @@ async def continue_writing_endpoint(
     product_name = req.product_name or article.get("product_name")
     art_type = req.article_type or article.get("article_type", "backlink_article")
     include_image = req.include_image_placeholder if req.include_image_placeholder is not None else article.get("include_image_placeholder", False)
+    humanize = req.humanize_writing if req.humanize_writing is not None else article.get("humanize_writing", True)
 
     storage.save_articles()
 
@@ -176,6 +178,7 @@ async def continue_writing_endpoint(
                 tone=req.tone or article["tone"],
                 brand_voice=req.brand_voice_instructions or article.get("brand_voice_instructions"),
                 secondary_keywords=article.get("secondary_keywords", []),
+                humanize_writing=humanize,
                 include_image_placeholder=include_image,
                 target_link_1_url=link_1_url,
                 target_link_1_anchor=link_1_anchor,

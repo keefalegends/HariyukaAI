@@ -1,6 +1,6 @@
 """
 Pydantic Schemas for Hariyuka AI Articles, Outlines, and Generation Pipeline.
-Updated with Salna's Yoast WordPress SEO SOP (Pillar, Backlink Article, Backlink Product).
+Updated with Humanizer / Anti-AI Bypass mode.
 """
 from typing import List, Optional, Dict, Any, Literal
 from pydantic import BaseModel, Field
@@ -62,6 +62,9 @@ class GenerateOutlineRequest(BaseModel):
     brand_voice_instructions: Optional[str] = None
     competitor_urls: Optional[List[str]] = Field(default_factory=list)
 
+    # Humanizer / Anti-AI Detector mode
+    humanize_writing: bool = Field(True, description="Enable burstiness & natural human writing style to bypass AI detectors")
+
     # Image option (Salna SOP: False by default, pure text focus)
     include_image_placeholder: bool = Field(False, description="Whether to include WordPress [caption] block")
 
@@ -80,6 +83,7 @@ class ContinueWritingRequest(BaseModel):
     article_type: Optional[Literal["pillar", "backlink_article", "backlink_product"]] = None
     tone: Optional[str] = None
     brand_voice_instructions: Optional[str] = None
+    humanize_writing: Optional[bool] = True
     include_image_placeholder: Optional[bool] = False
     target_link_1_url: Optional[str] = None
     target_link_1_anchor: Optional[str] = None
@@ -108,6 +112,7 @@ class ArticleResponse(BaseModel):
     word_count: int = 0
     seo_score: int = 0
     seo_audit: Optional[Dict[str, Any]] = None
+    humanize_writing: Optional[bool] = False
     include_image_placeholder: Optional[bool] = False
     target_link_1_url: Optional[str] = None
     target_link_1_anchor: Optional[str] = None
