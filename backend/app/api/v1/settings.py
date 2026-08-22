@@ -195,7 +195,7 @@ async def get_dashboard_stats():
     avg_score = round(sum(scores) / len(scores), 1) if scores else 0
     completed = len([a for a in articles if a.get("status") == "completed"])
     
-    sorted_recent = sorted(articles, key=lambda x: x.get("created_at", ""), reverse=True)[:5]
+    sorted_recent = sorted(articles, key=lambda x: str(x.get("created_at") or ""), reverse=True)[:5]
 
     return {
         "total_articles": total_articles,

@@ -29,22 +29,25 @@ async def stream_article_generation(article_id: str):
         }
         yield f"data: {json.dumps(init_event)}\n\n"
 
-        while True:
-            try:
-                # Wait for next event in queue with timeout
-                event = await asyncio.wait_for(queue.get(), timeout=60.0)
-                payload = json.dumps(event)
-                yield f"data: {payload}\n\n"
+        try:
+            while True:
+                try:
+                    # Wait for next event in queue with timeout
+                    event = await asyncio.wait_for(queue.get(), timeout=60.0)
+                    payload = json.dumps(event)
+                    yield f"data: {payload}\n\n"
 
-                # If generation is completed or failed, close the stream
-                if event.get("event") in ["generation_completed", "error", "failed"]:
+                    # If generation is completed or failed, close the stream
+                    if event.get("event") in ["generation_completed", "error", "failed"]:
+                        break
+                except asyncio.TimeoutError:
+                    # Send heartbeat ping to keep SSE connection alive
+                    yield f"data: {json.dumps({'event': 'ping'})}\n\n"
+                except Exception as e:
+                    logger.error(f"Error streaming events for article {article_id}: {e}")
                     break
-            except asyncio.TimeoutError:
-                # Send heartbeat ping to keep SSE connection alive
-                yield f"data: {json.dumps({'event': 'ping'})}\n\n"
-            except Exception as e:
-                logger.error(f"Error streaming events for article {article_id}: {e}")
-                break
+        finally:
+            orchestrator.cleanup_event_queue(article_id)
 
     return StreamingResponse(
         event_generator(),

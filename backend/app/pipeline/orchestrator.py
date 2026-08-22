@@ -43,6 +43,11 @@ class ArticlePipelineOrchestrator:
         event = PipelineEvent(event_type, data)
         await queue.put(event.to_dict())
 
+    def cleanup_event_queue(self, article_id: str):
+        """Remove completed or closed stream queue to prevent memory leaks."""
+        if article_id in self.active_streams:
+            del self.active_streams[article_id]
+
     # --------------------------------------------------------------------------
     # PHASE A: GENERATE OUTLINE (Steps 1 & 2)
     # --------------------------------------------------------------------------

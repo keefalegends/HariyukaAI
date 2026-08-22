@@ -9,6 +9,8 @@ import {
   ArrowRight,
   Terminal,
   ShieldCheck,
+  AlertTriangle,
+  RotateCcw,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 import { logTerminal, setTerminalStatus } from "@/lib/terminal-bus";
@@ -34,6 +36,7 @@ export function StepGeneration({ articleId, onFinished }: StepGenerationProps) {
   const [currentSectionTitle, setCurrentSectionTitle] = useState("Memulai penulisan section...");
   const [logs, setLogs] = useState<string[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [seoScore, setSeoScore] = useState<number | null>(null);
   const streamBottomRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +68,13 @@ export function StepGeneration({ articleId, onFinished }: StepGenerationProps) {
           setTerminalStatus("running", `Writing: ${data.heading}`);
         } else if (eventType === "stream_chunk") {
           setStreamedText((prev) => prev + data.chunk);
+        } else if (eventType === "error" || eventType === "failed") {
+          const errText = data?.message || data?.error_detail || "Terjadi kesalahan pada saat proses pembuatan artikel.";
+          setErrorMessage(errText);
+          setLogs((prev) => [...prev, `[ERROR] ${errText}`]);
+          logTerminal("ERR", errText);
+          setTerminalStatus("error", "Gagal");
+          eventSource.close();
         } else if (eventType === "generation_completed") {
           setIsCompleted(true);
           setProgress(100);
@@ -168,6 +178,37 @@ export function StepGeneration({ articleId, onFinished }: StepGenerationProps) {
           })}
         </div>
       </div>
+
+      {/* Error Banner */}
+      {errorMessage && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-red-500/20 border border-red-500/40 flex items-center justify-center shrink-0 text-red-400">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-300">Proses Pembuatan Artikel Gagal</p>
+              <p className="text-xs text-red-400/90 mt-0.5">{errorMessage}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-500 text-white transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Coba Lagi</span>
+            </button>
+            <Link
+              href="/generator"
+              className={`px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors ${tk.outlineBtn}`}
+            >
+              Kembali
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Completion Banner */}
       {isCompleted && (

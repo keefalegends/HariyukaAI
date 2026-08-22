@@ -86,10 +86,24 @@ class AIRouterService:
     @staticmethod
     def extract_json(raw_text: str) -> Dict[str, Any]:
         text = raw_text.strip()
+        
+        # 1. Check for markdown code fences
         match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
         if match:
             text = match.group(1).strip()
-        return json.loads(text)
+        else:
+            # 2. Bracket locator fallback (find outer { ... } or [ ... ])
+            start_idx = text.find("{")
+            end_idx = text.rfind("}")
+            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                text = text[start_idx:end_idx + 1].strip()
+
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            # 3. Trailing comma cleanup
+            cleaned = re.sub(r",\s*([\]}])", r"\1", text)
+            return json.loads(cleaned)
 
     # --------------------------------------------------------------------------
     # STEP 1: SERP Scraping & Intent Analysis (Gemini 3.7)

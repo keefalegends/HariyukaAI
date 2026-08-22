@@ -123,6 +123,11 @@ async def generate_outline_endpoint(
             job_record["error_message"] = str(e)
             job_record["updated_at"] = datetime.utcnow()
             storage.save_jobs()
+            await orchestrator.emit_event(article_id, "error", {
+                "step": 1,
+                "message": f"Gagal membuat outline: {str(e)}",
+                "error_detail": str(e)
+            })
 
     background_tasks.add_task(process_outline_task)
 
@@ -198,6 +203,11 @@ async def continue_writing_endpoint(
             article["status"] = "failed"
             article["updated_at"] = datetime.utcnow()
             storage.save_articles()
+            await orchestrator.emit_event(article_id, "error", {
+                "step": 3,
+                "message": f"Gagal menulis artikel: {str(e)}",
+                "error_detail": str(e)
+            })
 
     background_tasks.add_task(process_writing_task)
 
@@ -208,6 +218,13 @@ async def continue_writing_endpoint(
     }
 
 
+def _get_sort_key(item: Dict[str, Any]) -> str:
+    val = item.get("created_at")
+    if isinstance(val, datetime):
+        return val.isoformat()
+    return str(val or "")
+
+
 @router.get("", response_model=List[ArticleResponse])
 async def list_articles(
     status: Optional[str] = None,
@@ -216,8 +233,8 @@ async def list_articles(
     """List all user articles with optional status filtering."""
     articles = list(storage.articles.values())
     if status:
-        articles = [a for a in articles if a["status"] == status]
-    return sorted(articles, key=lambda x: x.get("created_at", datetime.min), reverse=True)[:limit]
+        articles = [a for a in articles if a.get("status") == status]
+    return sorted(articles, key=_get_sort_key, reverse=True)[:limit]
 
 
 @router.get("/{article_id}", response_model=ArticleResponse)

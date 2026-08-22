@@ -102,6 +102,8 @@ export function StepOutline({
     0
   );
 
+  const hasEmptyHeadings = outline.sections.some((s) => !s.heading.trim());
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       {/* Header */}
@@ -263,15 +265,18 @@ export function StepOutline({
 
         <button
           type="button"
-          disabled={isLoading || outline.sections.length === 0}
+          disabled={isLoading || outline.sections.length === 0 || hasEmptyHeadings}
           onClick={() => onContinue({ ...outline, title }, title)}
           className={`t-accent-bg flex items-center gap-2 py-2 px-5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+          title={hasEmptyHeadings ? "Ada judul subheading yang masih kosong" : undefined}
         >
           {isLoading ? (
             <>
               <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               <span>Memulai penulisan...</span>
             </>
+          ) : hasEmptyHeadings ? (
+            <span>Lengkapi Judul Subheading</span>
           ) : (
             <>
               <span>Lanjutkan Penulisan</span>

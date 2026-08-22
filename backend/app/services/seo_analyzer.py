@@ -11,7 +11,7 @@ class SeoAnalyzerService:
     @staticmethod
     def analyze(
         content_markdown: str,
-        target_keyword: str,
+        target_keyword: Optional[str] = "",
         secondary_keywords: Optional[List[str]] = None,
         article_type: str = "backlink_article",
         include_image_placeholder: bool = False
@@ -27,7 +27,7 @@ class SeoAnalyzerService:
             }
 
         secondary_keywords = secondary_keywords or []
-        kw_clean = target_keyword.strip().lower()
+        kw_clean = (target_keyword or "").strip().lower()
 
         # Clean text for accurate word count
         # Strip wordpress captions, markdown links, tags
