@@ -11,6 +11,9 @@ import {
   Plus,
   Loader2,
   ArrowUpRight,
+  Trash2,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
@@ -19,6 +22,7 @@ interface ArticleItem {
   id: string;
   title: string;
   target_keyword: string;
+  article_type?: string;
   language: string;
   status: string;
   word_count: number;
@@ -32,6 +36,10 @@ export default function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Delete modal state
+  const [articleToDelete, setArticleToDelete] = useState<ArticleItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -51,6 +59,23 @@ export default function ArticlesPage() {
 
     fetchArticles();
   }, []);
+
+  const handleDeleteConfirm = async () => {
+    if (!articleToDelete) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/articles/${articleToDelete.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setArticles((prev) => prev.filter((a) => a.id !== articleToDelete.id));
+      }
+    } catch (err) {
+      console.error("Delete article error:", err);
+    }
+    setIsDeleting(false);
+    setArticleToDelete(null);
+  };
 
   const filteredArticles = articles.filter((a) => {
     const matchesSearch =
@@ -80,6 +105,12 @@ export default function ArticlesPage() {
             <Loader2 className="w-3.5 h-3.5 animate-spin" /> Menulis...
           </span>
         );
+      case "failed":
+        return (
+          <span className={`inline-flex items-center gap-1 font-semibold ${tk.statusFailed}`}>
+            Gagal
+          </span>
+        );
       default:
         return (
           <span className={`inline-flex items-center gap-1 font-semibold ${tk.statusDraft}`}>
@@ -91,6 +122,72 @@ export default function ArticlesPage() {
 
   return (
     <div className="space-y-6">
+      {/* ─── DELETE CONFIRMATION MODAL ─── */}
+      {articleToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-in fade-in"
+            onClick={() => !isDeleting && setArticleToDelete(null)}
+          />
+          <div
+            className={`relative z-10 w-full max-w-sm rounded-2xl border p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 ${tk.cardBg}`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className={`text-sm font-semibold ${tk.textPrimary}`}>Hapus Artikel?</h3>
+                  <p className={`text-[10px] ${tk.textFaint}`}>Tindakan Permanen</p>
+                </div>
+              </div>
+              <button
+                disabled={isDeleting}
+                onClick={() => setArticleToDelete(null)}
+                className={`p-1.5 rounded-lg transition-colors ${tk.navInactive}`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className={`text-xs leading-relaxed ${tk.textMuted}`}>
+              Apakah Anda yakin ingin menghapus artikel{" "}
+              <strong className={tk.textPrimary}>"{articleToDelete.title}"</strong>? Artikel akan dihapus permanen dari database disk.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t t-border">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setArticleToDelete(null)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer ${tk.outlineBtn}`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-500 text-white shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Menghapus...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Hapus Artikel</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -102,45 +199,44 @@ export default function ArticlesPage() {
 
         <Link
           href="/generator"
-          className="t-accent-bg flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors w-fit"
+          className="t-accent-bg flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all active:scale-95 shrink-0 self-start md:self-auto"
         >
-          <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
           <span>Buat Artikel Baru</span>
         </Link>
       </div>
 
-      {/* Filter & Search Bar */}
+      {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="relative w-full sm:w-72">
+        <div className="relative w-full sm:w-80">
           <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 ${tk.textFaint}`} />
           <input
             type="text"
+            placeholder="Cari berdasarkan judul atau keyword..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari berdasarkan judul atau keyword..."
-            className={`w-full t-input border rounded-lg pl-8 pr-3 py-1.5 text-xs t-border-focus transition-colors`}
+            className="t-input w-full border rounded-lg pl-8 pr-3 py-1.5 text-xs t-border-focus transition-colors"
           />
         </div>
 
-        <div className="flex items-center gap-1.5 w-full sm:w-auto">
-          {["all", "completed", "generating", "outline_pending"].map((st) => (
+        {/* Status Filter Buttons */}
+        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+          {[
+            { id: "all", label: "Semua" },
+            { id: "completed", label: "Selesai" },
+            { id: "generating", label: "Menulis" },
+            { id: "outline_pending", label: "Review" },
+          ].map((tab) => (
             <button
-              key={st}
-              type="button"
-              onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                statusFilter === st
-                  ? "t-accent-bg border-transparent"
-                  : tk.outlineBtn
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                statusFilter === tab.id
+                  ? "t-accent-bg font-semibold shadow-sm"
+                  : `${tk.tagBg} ${tk.textFaint} hover:t-text-primary`
               }`}
             >
-              {st === "all"
-                ? "Semua"
-                : st === "completed"
-                ? "Selesai"
-                : st === "generating"
-                ? "Menulis"
-                : "Review"}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -226,13 +322,23 @@ export default function ArticlesPage() {
                     })}
                   </td>
                   <td className="py-3.5 px-5 text-right">
-                    <Link
-                      href={`/articles/${art.id}`}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${tk.outlineBtn}`}
-                    >
-                      <span>Buka</span>
-                      <ArrowUpRight className="w-3 h-3" />
-                    </Link>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Link
+                        href={`/articles/${art.id}`}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${tk.outlineBtn}`}
+                      >
+                        <span>Buka</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setArticleToDelete(art)}
+                        className="p-1 rounded-md text-stone-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                        title="Hapus artikel"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

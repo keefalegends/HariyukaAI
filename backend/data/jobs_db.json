@@ -1,0 +1,36 @@
+{
+  "5de09790-f7a6-4e93-b91e-cbe3b771761e": {
+    "id": "5de09790-f7a6-4e93-b91e-cbe3b771761e",
+    "article_id": "0f37ed9d-28d1-467c-b43d-c1c7971dac43",
+    "current_step": 1,
+    "total_steps": 5,
+    "step_name": "serp_analysis",
+    "progress_percentage": 10,
+    "status": "failed",
+    "logs": [
+      {
+        "time": "2026-08-22T04:44:36.990536",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": "Error code: 401 - {'error': 'API key required for remote API access'}",
+    "updated_at": "2026-08-22T04:44:38.657839"
+  },
+  "18522a4f-4cc5-4abb-87b0-fb9e36201eb1": {
+    "id": "18522a4f-4cc5-4abb-87b0-fb9e36201eb1",
+    "article_id": "e9207521-63d7-4081-9edf-d80757938797",
+    "current_step": 2,
+    "total_steps": 5,
+    "step_name": "outline_review",
+    "progress_percentage": 50,
+    "status": "waiting_user_input",
+    "logs": [
+      {
+        "time": "2026-08-22T04:47:21.111792",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": null,
+    "updated_at": "2026-08-22T04:47:45.969781"
+  }
+}

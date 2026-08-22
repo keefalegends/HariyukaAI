@@ -20,7 +20,7 @@ export default function SettingsPage() {
   const tk = useTokens();
   const [baseUrl, setBaseUrl] = useState("http://202.10.47.200:20128/v1");
   const [apiKey, setApiKey] = useState("sk-fc0b27cf63ed9f2a-hilooi-b3a32928");
-  const [serpModel, setSerpModel] = useState("gemini/gemini-3.7-flash");
+  const [serpModel, setSerpModel] = useState("ag/gemini-3.7-flash-high");
   const [writerModel, setWriterModel] = useState("ag/claude-sonnet-4-6");
 
   const [isTesting, setIsTesting] = useState(false);
@@ -44,7 +44,7 @@ export default function SettingsPage() {
         if (res.ok) {
           const data = await res.json();
           if (data.models) {
-            setSerpModel(data.models.serp_extractor || "gemini/gemini-3.7-flash");
+            setSerpModel(data.models.serp_extractor || "ag/gemini-3.7-flash-high");
             setWriterModel(data.models.section_writer || "ag/claude-sonnet-4-6");
           }
         }

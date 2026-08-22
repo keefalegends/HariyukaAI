@@ -1,6 +1,7 @@
 """
 Agentic Pipeline Orchestrator for Hariyuka AI.
 Manages the 5-step lifecycle: SERP -> Outline (Pause) -> Section Writing -> SEO Polish -> Live Stream.
+Updated with Salna's Yoast WordPress SEO SOP.
 """
 import asyncio
 import logging
@@ -50,16 +51,14 @@ class ArticlePipelineOrchestrator:
         article_id: str,
         target_keyword: str,
         title: Optional[str] = None,
+        article_type: str = "backlink_article",
         language: str = "id",
         tone: str = "authoritative",
-        target_length: int = 2000,
+        target_length: Optional[int] = None,
         brand_voice: Optional[str] = None,
-        competitor_urls: Optional[List[str]] = None
+        competitor_urls: Optional[List[str]] = None,
+        product_name: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """
-        Executes Step 1 (SERP & Intent) and Step 2 (Outline Generation).
-        Pauses and returns the structured outline for the user to review.
-        """
         logger.info(f"[{article_id}] Starting Phase 1: SERP Scraping & Intent Analysis")
         await self.emit_event(article_id, "step_start", {
             "step": 1,
@@ -96,10 +95,10 @@ class ArticlePipelineOrchestrator:
         })
 
         # 3. Step 2: Interactive Outline Generator (Gemini 3.7)
-        logger.info(f"[{article_id}] Starting Step 2: Outline Generation")
+        logger.info(f"[{article_id}] Starting Step 2: Outline Generation ({article_type})")
         await self.emit_event(article_id, "step_start", {
             "step": 2,
-            "name": "Membuat Kerangka Artikel (H2/H3)",
+            "name": f"Menyusun Kerangka Artikel H2/H3 (SOP {article_type.replace('_', ' ').title()})",
             "progress": 40
         })
 
@@ -107,9 +106,11 @@ class ArticlePipelineOrchestrator:
             target_keyword=target_keyword,
             title=final_title,
             serp_analysis=serp_data,
+            article_type=article_type,
             tone=tone,
             target_word_count=target_length,
-            brand_voice=brand_voice
+            brand_voice=brand_voice,
+            product_name=product_name
         )
 
         await self.emit_event(article_id, "outline_ready", {
@@ -135,15 +136,18 @@ class ArticlePipelineOrchestrator:
         title: str,
         target_keyword: str,
         outline: Dict[str, Any],
+        article_type: str = "backlink_article",
         tone: str = "authoritative",
         brand_voice: Optional[str] = None,
-        secondary_keywords: Optional[List[str]] = None
+        secondary_keywords: Optional[List[str]] = None,
+        target_link_1_url: Optional[str] = None,
+        target_link_1_anchor: Optional[str] = None,
+        target_link_2_url: Optional[str] = None,
+        target_link_2_anchor: Optional[str] = None,
+        product_name: Optional[str] = None,
+        product_promotion_context: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """
-        Executes Step 3 (Multi-Pass Section Writing), Step 4 (SEO Polish),
-        and streams output live to Tiptap editor.
-        """
-        logger.info(f"[{article_id}] Starting Phase B: Multi-pass Section Writing")
+        logger.info(f"[{article_id}] Starting Phase B: Multi-pass Section Writing ({article_type})")
         await self.emit_event(article_id, "step_start", {
             "step": 3,
             "name": "Menulis Konten Bagian per Bagian (Multi-Pass)",
@@ -169,7 +173,7 @@ class ArticlePipelineOrchestrator:
             sec_level = sec.get("level", "h2")
             key_points = sec.get("key_points", [])
             sec_keywords = sec.get("keywords_to_include", [target_keyword])
-            target_words = sec.get("target_word_count", 300)
+            target_words = sec.get("target_word_count", 200)
             subsections = sec.get("subsections", [])
 
             # Update progress
@@ -181,10 +185,13 @@ class ArticlePipelineOrchestrator:
                 "progress": section_progress
             })
 
-            # Claude 4.6 Section Writing
+            # Claude 4.6 Section Writing with link & image injection
             section_text = await ai_router.write_section(
                 article_title=title,
                 target_keyword=target_keyword,
+                article_type=article_type,
+                section_index=idx + 1,
+                total_sections=total_sections,
                 section_heading=sec_heading,
                 section_level=sec_level,
                 key_points=key_points,
@@ -193,7 +200,13 @@ class ArticlePipelineOrchestrator:
                 tone=tone,
                 brand_voice=brand_voice,
                 previous_sections_summary=previous_summary,
-                subsections_info=subsections
+                subsections_info=subsections,
+                link_1_url=target_link_1_url,
+                link_1_anchor=target_link_1_anchor,
+                link_2_url=target_link_2_url,
+                link_2_anchor=target_link_2_anchor,
+                product_name=product_name,
+                product_promotion_context=product_promotion_context
             )
 
             written_sections.append(section_text)
@@ -205,26 +218,26 @@ class ArticlePipelineOrchestrator:
                 "section_id": sec.get("id", f"section-{idx}")
             })
 
-            # Update context chain summary (last 150 words of recent section)
+            # Update context chain summary
             words = section_text.split()
-            previous_summary = f"Previous section '{sec_heading}' covered: " + " ".join(words[-60:])
+            previous_summary = f"Section '{sec_heading}' covered: " + " ".join(words[-50:])
 
-            # Small delay to keep event stream smooth
             await asyncio.sleep(0.2)
 
         # ----------------------------------------------------------------------
         # Step 4: SEO Optimization & Polish (Claude 4.6)
         # ----------------------------------------------------------------------
-        logger.info(f"[{article_id}] Starting Step 4: Final SEO Optimization & Formatting Polish")
+        logger.info(f"[{article_id}] Starting Step 4: Final Yoast SEO Compliance Polish")
         await self.emit_event(article_id, "step_start", {
             "step": 4,
-            "name": "Optimasi SEO & Penyempurnaan Format E-E-A-T",
+            "name": "Audit Standar Yoast WordPress (Density, Links & Word Count)",
             "progress": 85
         })
 
         polished_markdown = await ai_router.polish_and_optimize_seo(
             full_article_markdown=full_content_markdown,
             target_keyword=target_keyword,
+            article_type=article_type,
             secondary_keywords=secondary_keywords or [],
             tone=tone
         )
@@ -234,19 +247,21 @@ class ArticlePipelineOrchestrator:
         # ----------------------------------------------------------------------
         await self.emit_event(article_id, "step_start", {
             "step": 5,
-            "name": "Kalkulasi Skor SEO & Finalisasi",
+            "name": "Kalkulasi Skor Yoast SEO 100 Poin",
             "progress": 95
         })
 
         seo_audit = seo_analyzer.analyze(
             content_markdown=polished_markdown,
             target_keyword=target_keyword,
-            secondary_keywords=secondary_keywords or []
+            secondary_keywords=secondary_keywords or [],
+            article_type=article_type
         )
 
         final_result = {
             "article_id": article_id,
             "title": title,
+            "article_type": article_type,
             "content_markdown": polished_markdown,
             "word_count": seo_audit["word_count"],
             "seo_score": seo_audit["score"],

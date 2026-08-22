@@ -9,6 +9,10 @@ import {
   ArrowLeft,
   Save,
   Check,
+  Trash2,
+  AlertTriangle,
+  X,
+  Loader2,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 
@@ -24,6 +28,10 @@ export default function ArticleDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [seoAudit, setSeoAudit] = useState<any>(null);
+
+  // Delete modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -43,11 +51,13 @@ export default function ArticleDetailPage() {
       }
     };
 
-    fetchArticle();
+    if (articleId) {
+      fetchArticle();
+    }
   }, [articleId]);
 
-  const handleEditorChange = (text: string, html: string) => {
-    setContentMarkdown(text);
+  const handleEditorChange = (markdown: string, html: string) => {
+    setContentMarkdown(markdown);
     setContentHtml(html);
   };
 
@@ -60,6 +70,7 @@ export default function ArticleDetailPage() {
         body: JSON.stringify({
           content_markdown: contentMarkdown,
           content_html: contentHtml,
+          title: article?.title,
         }),
       });
       if (res.ok) {
@@ -75,8 +86,91 @@ export default function ArticleDetailPage() {
     setTimeout(() => setSavedSuccess(false), 2500);
   };
 
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/articles/${articleId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.push("/articles");
+        return;
+      }
+    } catch (e) {
+      console.error("Delete article error:", e);
+    }
+    setIsDeleting(false);
+    setShowDeleteModal(false);
+  };
+
   return (
     <div className="space-y-6">
+      {/* ─── DELETE CONFIRMATION MODAL ─── */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-in fade-in"
+            onClick={() => !isDeleting && setShowDeleteModal(false)}
+          />
+          <div
+            className={`relative z-10 w-full max-w-sm rounded-2xl border p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 ${tk.cardBg}`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className={`text-sm font-semibold ${tk.textPrimary}`}>Hapus Artikel?</h3>
+                  <p className={`text-[10px] ${tk.textFaint}`}>Tindakan Permanen</p>
+                </div>
+              </div>
+              <button
+                disabled={isDeleting}
+                onClick={() => setShowDeleteModal(false)}
+                className={`p-1.5 rounded-lg transition-colors ${tk.navInactive}`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className={`text-xs leading-relaxed ${tk.textMuted}`}>
+              Apakah Anda yakin ingin menghapus artikel{" "}
+              <strong className={tk.textPrimary}>"{article?.title || "ini"}"</strong>? Artikel akan dihapus permanen dari database disk.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t t-border">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setShowDeleteModal(false)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer ${tk.outlineBtn}`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleDelete}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-500 text-white shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Menghapus...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Hapus Artikel</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Header Navigation */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b t-border">
         <div className="flex items-center gap-3">
@@ -101,6 +195,15 @@ export default function ArticleDetailPage() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowDeleteModal(true)}
+            className="p-2 rounded-lg border border-red-500/20 text-stone-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+            title="Hapus Artikel"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+
           <button
             type="button"
             onClick={handleSave}
@@ -133,9 +236,10 @@ export default function ArticleDetailPage() {
         <div className="space-y-4">
           <SeoSidebar
             score={seoAudit?.score || article?.seo_score || 94}
-            wordCount={seoAudit?.word_count || article?.word_count || 1850}
-            readingTime={seoAudit?.reading_time_minutes || 9}
-            keywordDensity={seoAudit?.keyword_density || 1.4}
+            wordCount={seoAudit?.word_count || article?.word_count || 550}
+            readingTime={seoAudit?.reading_time_minutes || 3}
+            keywordDensity={seoAudit?.keyword_density || 1.2}
+            keywordCount={seoAudit?.keyword_count}
             targetKeyword={article?.target_keyword || "SEO"}
             checklist={seoAudit?.checklist}
             secondaryKeywords={seoAudit?.secondary_keywords}

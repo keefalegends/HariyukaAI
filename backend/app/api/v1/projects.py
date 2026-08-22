@@ -1,25 +1,15 @@
 """
 Projects and Brand Voice settings API for Hariyuka AI.
+Persistent storage across server restarts with zero mock projects by default.
 """
 import uuid
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from app.db.storage import storage
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
-
-MOCK_PROJECTS_DB: Dict[str, Dict[str, Any]] = {
-    "proj-default": {
-        "id": "proj-default",
-        "name": "Hariyuka AI Blog",
-        "target_domain": "hariyuka.ai",
-        "brand_voice_instructions": "Tone: Authoritative, modern, actionable, no robotic filler.",
-        "default_language": "id",
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
-    }
-}
 
 
 class ProjectCreateRequest(BaseModel):
@@ -41,7 +31,8 @@ class ProjectResponse(BaseModel):
 
 @router.get("", response_model=List[ProjectResponse])
 async def list_projects():
-    return list(MOCK_PROJECTS_DB.values())
+    projects = list(storage.projects.values())
+    return sorted(projects, key=lambda x: x.get("created_at", datetime.min), reverse=True)
 
 
 @router.post("", response_model=ProjectResponse)
@@ -56,20 +47,22 @@ async def create_project(req: ProjectCreateRequest):
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     }
-    MOCK_PROJECTS_DB[project_id] = project
+    storage.projects[project_id] = project
+    storage.save_projects()
     return project
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
 async def get_project(project_id: str):
-    if project_id not in MOCK_PROJECTS_DB:
+    if project_id not in storage.projects:
         raise HTTPException(status_code=404, detail="Proyek tidak ditemukan")
-    return MOCK_PROJECTS_DB[project_id]
+    return storage.projects[project_id]
 
 
 @router.delete("/{project_id}")
 async def delete_project(project_id: str):
-    if project_id in MOCK_PROJECTS_DB:
-        del MOCK_PROJECTS_DB[project_id]
-        return {"success": True}
+    if project_id in storage.projects:
+        del storage.projects[project_id]
+        storage.save_projects()
+        return {"success": True, "message": "Proyek berhasil dihapus"}
     raise HTTPException(status_code=404, detail="Proyek tidak ditemukan")

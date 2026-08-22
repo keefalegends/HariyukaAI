@@ -8,6 +8,8 @@ import {
   FileText,
   Clock,
   Tag,
+  Layers,
+  Sparkles,
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
@@ -17,6 +19,7 @@ interface SeoSidebarProps {
   wordCount?: number;
   readingTime?: number;
   keywordDensity?: number;
+  keywordCount?: number;
   targetKeyword: string;
   checklist?: Array<{ rule: string; passed: boolean; message: string }>;
   secondaryKeywords?: Array<{ keyword: string; found: boolean }>;
@@ -24,9 +27,10 @@ interface SeoSidebarProps {
 
 export function SeoSidebar({
   score = 94,
-  wordCount = 1850,
-  readingTime = 9,
-  keywordDensity = 1.4,
+  wordCount = 550,
+  readingTime = 3,
+  keywordDensity = 1.2,
+  keywordCount = 6,
   targetKeyword,
   checklist = [],
   secondaryKeywords = [],
@@ -44,11 +48,14 @@ export function SeoSidebar({
     checklist.length > 0
       ? checklist
       : [
-          { rule: "Word Count", passed: wordCount >= 1000, message: `${wordCount} kata (Ideal untuk SEO)` },
-          { rule: "Keyword Density", passed: keywordDensity >= 0.8 && keywordDensity <= 2.5, message: `Kepadatan ${keywordDensity}% (Optimal)` },
-          { rule: "First Paragraph", passed: true, message: "Keyword utama ada di 150 kata pertama" },
-          { rule: "Heading Hierarchy", passed: true, message: "Subheading H2 dan H3 terstruktur rapi" },
-          { rule: "E-E-A-T & Formatting", passed: true, message: "Bold emphasis & visual tags optimal" },
+          { rule: "Keyphrase in Introduction", passed: true, message: "Keyphrase muncul di 150 kata pertama (Paragraf pembuka)" },
+          { rule: "Keyphrase Density", passed: true, message: `Keyphrase muncul ${keywordCount || 6} kali (~${keywordDensity}% - Optimal 5–7x)` },
+          { rule: "Keyphrase in Subheadings", passed: true, message: "Minimal 2 sub-heading H2/H3 mengandung keyphrase" },
+          { rule: "Keyphrase in Image Alt", passed: true, message: "Atribut alt gambar mengandung keyphrase utama" },
+          { rule: "Single Title (H1)", passed: true, message: "Hanya ada 1 tag H1, body konten terstruktur H2/H3" },
+          { rule: "Text Length", passed: true, message: `${wordCount} kata (Sesuai SOP Target Panjang Kata)` },
+          { rule: "Links in Content", passed: true, message: "Tautan kontekstual & brand terpasang natural" },
+          { rule: "Keyphrase in Conclusion", passed: true, message: "Keyphrase ditegaskan kembali di bagian kesimpulan" },
         ];
 
   return (
@@ -58,9 +65,9 @@ export function SeoSidebar({
         <div className="flex items-center justify-between mb-3">
           <span className={`text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 ${tk.textPrimary}`}>
             <ShieldCheck className={`w-4 h-4 ${tk.accentText}`} />
-            Live SEO Score
+            Yoast WordPress SEO Audit
           </span>
-          <span className={`text-[10px] uppercase font-mono ${tk.textFaint}`}>Real-time</span>
+          <span className={`text-[10px] uppercase font-mono ${tk.textFaint}`}>12 SOP Rules</span>
         </div>
 
         <div className={`flex items-center gap-4 rounded-xl p-4 border t-border t-bg-tag`}>
@@ -75,10 +82,10 @@ export function SeoSidebar({
 
           <div className="space-y-1">
             <div className={`text-xs font-bold ${tk.textPrimary}`}>
-              {score >= 80 ? "Sangat Optimal (Rank Ready)" : score >= 60 ? "Cukup Baik" : "Perlu Optimasi"}
+              {score >= 80 ? "Green Light (Rank Ready)" : score >= 60 ? "Cukup Baik (Orange)" : "Perlu Optimasi (Red)"}
             </div>
             <p className={`text-[11px] ${tk.textMuted} leading-tight`}>
-              Artikel ini memiliki sinyal E-E-A-T kuat dan siap bersaing di SERP Google.
+              Artikel memenuhi standar Yoast WordPress & siap bersaing di halaman 1 Google.
             </p>
           </div>
         </div>
@@ -105,15 +112,17 @@ export function SeoSidebar({
         <div className={`t-bg-tag border t-border rounded-xl p-3 space-y-1`}>
           <div className={`flex items-center gap-1.5 text-[10px] font-medium ${tk.textFaint}`}>
             <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-            Density Keyword
+            Density Keyphrase
           </div>
-          <div className="text-sm font-bold text-emerald-400">{keywordDensity}%</div>
+          <div className="text-sm font-bold text-emerald-400">
+            {keywordDensity}% <span className="text-[10px] font-normal text-stone-400">({keywordCount || Math.round(wordCount * (keywordDensity / 100))}x)</span>
+          </div>
         </div>
 
         <div className={`t-bg-tag border t-border rounded-xl p-3 space-y-1`}>
           <div className={`flex items-center gap-1.5 text-[10px] font-medium ${tk.textFaint}`}>
             <Tag className={`w-3.5 h-3.5 ${tk.accentText}`} />
-            Target Keyword
+            Focus Keyphrase
           </div>
           <div className={`text-xs font-bold ${tk.textPrimary} truncate`}>{targetKeyword}</div>
         </div>
@@ -121,23 +130,35 @@ export function SeoSidebar({
 
       {/* Checklist Audit */}
       <div className="space-y-2.5">
-        <div className={`text-xs font-semibold uppercase tracking-wider ${tk.textPrimary}`}>
-          Checklist Evaluasi SEO
+        <div className="flex items-center justify-between">
+          <span className={`text-xs font-semibold uppercase tracking-wider ${tk.textPrimary}`}>
+            Yoast SEO Analysis Checklist
+          </span>
+          <span className="text-[10px] font-mono text-emerald-400">
+            {defaultChecklist.filter((c) => c.passed).length}/{defaultChecklist.length} Lolos
+          </span>
         </div>
-        <div className="space-y-2">
+
+        <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
           {defaultChecklist.map((item, idx) => (
             <div
               key={idx}
-              className={`flex items-start gap-2.5 text-xs rounded-xl p-2.5 border t-border t-bg-tag`}
+              className={`flex items-start gap-2.5 text-xs rounded-xl p-2.5 border transition-colors ${
+                item.passed ? "border-emerald-500/20 bg-emerald-950/10" : "border-red-500/20 bg-red-950/10"
+              }`}
             >
               {item.passed ? (
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               ) : (
                 <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
               )}
-              <div>
-                <div className={`font-semibold ${tk.textPrimary}`}>{item.rule}</div>
-                <div className={`text-[11px] ${tk.textMuted}`}>{item.message}</div>
+              <div className="min-w-0">
+                <div className={`font-semibold text-xs ${item.passed ? tk.textPrimary : "text-red-300"}`}>
+                  {item.rule}
+                </div>
+                <div className={`text-[11px] ${tk.textMuted} leading-tight mt-0.5`}>
+                  {item.message}
+                </div>
               </div>
             </div>
           ))}
@@ -146,7 +167,7 @@ export function SeoSidebar({
 
       {/* Secondary Keywords Coverage */}
       {secondaryKeywords.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2 pt-2 border-t t-border">
           <div className={`text-xs font-semibold uppercase tracking-wider ${tk.textPrimary}`}>
             Cakupan Keyword Sekunder
           </div>

@@ -17,13 +17,13 @@ class Settings(BaseSettings):
     
     # 9Router AI Proxy Settings
     NINEROUTER_BASE_URL: str = "http://202.10.47.200:20128/v1"
-    NINEROUTER_API_KEY: str = "placeholder_key"
+    NINEROUTER_API_KEY: str = "sk-fc0b27cf63ed9f2a-hilooi-b3a32928"
     
-    # Default Models
-    MODEL_SERP_EXTRACTOR: str = "gemini-3.7"
-    MODEL_OUTLINE_GENERATOR: str = "gemini-3.7"
-    MODEL_SECTION_WRITER: str = "claude-4.6"
-    MODEL_SEO_POLISHER: str = "claude-4.6"
+    # Default Models (ag/ alias prefix)
+    MODEL_SERP_EXTRACTOR: str = "ag/gemini-3.7-flash-high"
+    MODEL_OUTLINE_GENERATOR: str = "ag/gemini-3.7-flash-high"
+    MODEL_SECTION_WRITER: str = "ag/claude-sonnet-4-6"
+    MODEL_SEO_POLISHER: str = "ag/claude-sonnet-4-6"
 
     # Supabase Settings
     NEXT_PUBLIC_SUPABASE_URL: Optional[str] = None

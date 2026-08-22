@@ -1,6 +1,7 @@
 """
 Article API Endpoints for Hariyuka AI.
 Handles Outline Creation, Editing, Multi-pass Writing, and Article CRUD with Persistent Storage.
+Updated with Salna's Yoast WordPress SEO SOP.
 """
 import uuid
 import asyncio
@@ -31,7 +32,7 @@ async def generate_outline_endpoint(
     background_tasks: BackgroundTasks
 ):
     """
-    Step 1 & 2: Analyzes SERP, search intent, and creates an interactive H2/H3 outline.
+    Step 1 & 2: Analyzes SERP, search intent, and creates an interactive H2/H3 outline based on article_type.
     Pauses at Step 2 to allow user review.
     """
     article_id = str(uuid.uuid4())
@@ -43,10 +44,11 @@ async def generate_outline_endpoint(
         "project_id": req.project_id,
         "title": req.title or f"Artikel: {req.target_keyword}",
         "target_keyword": req.target_keyword,
+        "article_type": req.article_type,
         "secondary_keywords": req.secondary_keywords or [],
         "language": req.language,
         "tone": req.tone,
-        "target_length": req.target_length,
+        "target_length": req.target_length or (1550 if req.article_type == "pillar" else 550),
         "outline_json": None,
         "serp_data": None,
         "content_markdown": "",
@@ -55,6 +57,11 @@ async def generate_outline_endpoint(
         "word_count": 0,
         "seo_score": 0,
         "seo_audit": {},
+        "target_link_1_url": req.target_link_1_url,
+        "target_link_1_anchor": req.target_link_1_anchor,
+        "target_link_2_url": req.target_link_2_url,
+        "target_link_2_anchor": req.target_link_2_anchor,
+        "product_name": req.product_name,
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     }
@@ -83,11 +90,13 @@ async def generate_outline_endpoint(
                 article_id=article_id,
                 target_keyword=req.target_keyword,
                 title=req.title,
+                article_type=req.article_type,
                 language=req.language,
                 tone=req.tone,
                 target_length=req.target_length,
                 brand_voice=req.brand_voice_instructions,
-                competitor_urls=req.competitor_urls
+                competitor_urls=req.competitor_urls,
+                product_name=req.product_name
             )
             # Update Article record
             article_record["title"] = res["title"]
@@ -143,6 +152,15 @@ async def continue_writing_endpoint(
     article["outline_json"] = req.outline.model_dump()
     article["status"] = "generating"
     article["updated_at"] = datetime.utcnow()
+
+    # Link & product updates if provided
+    link_1_url = req.target_link_1_url or article.get("target_link_1_url")
+    link_1_anchor = req.target_link_1_anchor or article.get("target_link_1_anchor")
+    link_2_url = req.target_link_2_url or article.get("target_link_2_url")
+    link_2_anchor = req.target_link_2_anchor or article.get("target_link_2_anchor")
+    product_name = req.product_name or article.get("product_name")
+    art_type = req.article_type or article.get("article_type", "backlink_article")
+
     storage.save_articles()
 
     async def process_writing_task():
@@ -152,9 +170,16 @@ async def continue_writing_endpoint(
                 title=article["title"],
                 target_keyword=article["target_keyword"],
                 outline=req.outline.model_dump(),
+                article_type=art_type,
                 tone=req.tone or article["tone"],
                 brand_voice=req.brand_voice_instructions or article.get("brand_voice_instructions"),
-                secondary_keywords=article.get("secondary_keywords", [])
+                secondary_keywords=article.get("secondary_keywords", []),
+                target_link_1_url=link_1_url,
+                target_link_1_anchor=link_1_anchor,
+                target_link_2_url=link_2_url,
+                target_link_2_anchor=link_2_anchor,
+                product_name=product_name,
+                product_promotion_context=req.product_promotion_context
             )
             article["content_markdown"] = result["content_markdown"]
             article["word_count"] = result["word_count"]
@@ -206,11 +231,12 @@ async def update_article_content(article_id: str, req: UpdateArticleContentReque
     article = storage.articles[article_id]
     if req.content_markdown is not None:
         article["content_markdown"] = req.content_markdown
-        # Recalculate SEO Audit live
+        # Recalculate SEO Audit live with Yoast 12-Rules
         seo = seo_analyzer.analyze(
             content_markdown=req.content_markdown,
             target_keyword=article["target_keyword"],
-            secondary_keywords=article.get("secondary_keywords", [])
+            secondary_keywords=article.get("secondary_keywords", []),
+            article_type=article.get("article_type", "backlink_article")
         )
         article["word_count"] = seo["word_count"]
         article["seo_score"] = seo["score"]

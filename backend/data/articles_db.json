@@ -16,18 +16,47 @@
     "target_length": 2000,
     "outline_json": {
       "sections": [
-        { "level": 2, "heading": "Pengenalan Olah Tanah Sawah Menggunakan Traktor Tangan" },
-        { "level": 2, "heading": "Persiapan & Pemeriksaan Mesin Sebelum Turun ke Sawah" },
-        { "level": 2, "heading": "Panduan Langkah Demi Langkah Mengoperasikan Hand Traktor" },
-        { "level": 3, "heading": "Teknik Menghidupkan & Mengatur Gas Mesin" },
-        { "level": 3, "heading": "Pola Pembajakan (Tepi ke Tengah vs Tengah ke Tepi)" },
-        { "level": 2, "heading": "Tips Perawatan Berkala Pasca Operasional" },
-        { "level": 2, "heading": "Kesimpulan & FAQ Seputar Traktor Tangan" }
+        {
+          "level": 2,
+          "heading": "Pengenalan Olah Tanah Sawah Menggunakan Traktor Tangan"
+        },
+        {
+          "level": 2,
+          "heading": "Persiapan & Pemeriksaan Mesin Sebelum Turun ke Sawah"
+        },
+        {
+          "level": 2,
+          "heading": "Panduan Langkah Demi Langkah Mengoperasikan Hand Traktor"
+        },
+        {
+          "level": 3,
+          "heading": "Teknik Menghidupkan & Mengatur Gas Mesin"
+        },
+        {
+          "level": 3,
+          "heading": "Pola Pembajakan (Tepi ke Tengah vs Tengah ke Tepi)"
+        },
+        {
+          "level": 2,
+          "heading": "Tips Perawatan Berkala Pasca Operasional"
+        },
+        {
+          "level": 2,
+          "heading": "Kesimpulan & FAQ Seputar Traktor Tangan"
+        }
       ]
     },
     "serp_data": {
-      "lsi_keywords": ["hand traktor rotary", "bajak singkal", "kedalaman olah tanah", "traktor quick"],
-      "paa_questions": ["Berapa lama membajak sawah 1 hektar dengan traktor tangan?", "Bagaimana cara menyetel kedalaman bajak?"]
+      "lsi_keywords": [
+        "hand traktor rotary",
+        "bajak singkal",
+        "kedalaman olah tanah",
+        "traktor quick"
+      ],
+      "paa_questions": [
+        "Berapa lama membajak sawah 1 hektar dengan traktor tangan?",
+        "Bagaimana cara menyetel kedalaman bajak?"
+      ]
     },
     "content_markdown": "# Cara Menggunakan Hand Traktor Untuk Membajak Sawah: Panduan Lengkap Operator\n\n## Pengenalan Olah Tanah Sawah Menggunakan Traktor Tangan\nMekanisasi pertanian bukan sekadar tren — ini kebutuhan nyata. Petani yang masih mengandalkan tenaga hewan atau cangkul manual kehilangan 3–5 hari kerja per hektare dibanding operator yang menggunakan *two-wheel tractor*. Di sinilah efisiensi olah tanah sawah modern membuktikan nilainya. **Traktor tangan (hand traktor) memangkas waktu pembajakan hingga 60–70% dibanding metode konvensional**, sekaligus menghasilkan struktur tanah yang lebih seragam untuk pertumbuhan akar padi yang optimal.\n\nMemahami **cara menggunakan hand traktor untuk membajak sawah** secara benar bukan pilihan — ini syarat wajib bagi setiap operator. Kesalahan prosedur berdampak langsung: tanah tidak rata, bahan bakar boros, dan risiko kerusakan mesin meningkat. Panduan ini mencakup seluruh alur kerja operasional secara sistematis mulai dari persiapan, teknik pengoperasian, pola pembajakan, hingga perawatan pasca kerja.\n\n## Persiapan & Pemeriksaan Mesin Sebelum Turun ke Sawah\nSebelum memasukkan unit ke lahan berlumpur, lakukan checklist pra-operasi wajib:\n\n- **Kondisi Oli Mesin & Transmisi:** Pastikan level oli berada di antara tanda min dan max pada dipstick.\n- **V-Belt & Ketegangan:** Tekan v-belt dengan ibu jari; defleksi ideal adalah 10–15 mm.\n- **Bahan Bakar & Filter:** Pastikan solar terisi cukup dan saring endapan air pada sedimenter solar.\n- **Roda Besi & Implement (Bajak Singkal / Rotary):** Kencangkan seluruh baut pengikat blade rotary.\n\n## Panduan Langkah Demi Langkah Mengoperasikan Hand Traktor\n\n### 1. Menghidupkan Mesin Diesel\n1. Posisikan tuas transmisi pada posisi Netral (N).\n2. Naikkan tuas gas pada posisi 1/3 bukaan.\n3. Tarik tuas dekompresi dengan tangan kiri, lalu engkol mesin secara bertenaga dengan tangan kanan.\n4. Lepaskan tuas dekompresi setelah putaran mesin stabil.\n\n### 2. Pola Pembajakan yang Efisien\n- **Pola Tepi ke Tengah (In-field Method):** Traktor mulai bekerja dari pematang terluar mengelilingi petak sawah hingga berakhir di tengah.\n- **Pola Bolak-Balik (Headland Pattern):** Cocok untuk petak sawah persegi panjang dengan saluran drainase di ujung.\n\n## Tips Perawatan Berkala Pasca Operasional\nSetelah selesai membajak sawah, bersihkan sisa lumpur yang menempel pada rotary blade dan bodi traktor. Lumasi rantai penggerak dan periksa ketegangan baut secara berkala.\n\n## Kesimpulan\nPenguasaan teknik penggunaan hand traktor yang baik memastikan efisiensi bahan bakar dan kualitas lumpur tanah yang siap tanam.",
     "content_html": "",
@@ -40,19 +69,297 @@
       "reading_time_minutes": 11,
       "keyword_density": 0.18,
       "checklist": [
-        { "rule": "Word Count", "passed": true, "message": "2171 kata (Sangat Bagus untuk Ranking)" },
-        { "rule": "Keyword Density", "passed": true, "message": "Keyword ditemukan (4x, 0.18%)" },
-        { "rule": "First Paragraph", "passed": true, "message": "Keyword utama ada di 150 kata pertama" },
-        { "rule": "Heading Hierarchy", "passed": true, "message": "Subheading H2 dan H3 terstruktur rapi" },
-        { "rule": "E-E-A-T & Formatting", "passed": true, "message": "Bold emphasis & visual tags optimal" }
+        {
+          "rule": "Word Count",
+          "passed": true,
+          "message": "2171 kata (Sangat Bagus untuk Ranking)"
+        },
+        {
+          "rule": "Keyword Density",
+          "passed": true,
+          "message": "Keyword ditemukan (4x, 0.18%)"
+        },
+        {
+          "rule": "First Paragraph",
+          "passed": true,
+          "message": "Keyword utama ada di 150 kata pertama"
+        },
+        {
+          "rule": "Heading Hierarchy",
+          "passed": true,
+          "message": "Subheading H2 dan H3 terstruktur rapi"
+        },
+        {
+          "rule": "E-E-A-T & Formatting",
+          "passed": true,
+          "message": "Bold emphasis & visual tags optimal"
+        }
       ],
       "secondary_keywords": [
-        { "keyword": "traktor tangan sawah", "found": true },
-        { "keyword": "teknik olah tanah sawah", "found": true },
-        { "keyword": "perawatan hand traktor", "found": true }
+        {
+          "keyword": "traktor tangan sawah",
+          "found": true
+        },
+        {
+          "keyword": "teknik olah tanah sawah",
+          "found": true
+        },
+        {
+          "keyword": "perawatan hand traktor",
+          "found": true
+        }
       ]
     },
-    "created_at": "2026-08-21T05:30:00.000000",
-    "updated_at": "2026-08-21T05:45:00.000000"
+    "created_at": "2026-08-21T05:30:00",
+    "updated_at": "2026-08-21T05:45:00"
+  },
+  "e9207521-63d7-4081-9edf-d80757938797": {
+    "id": "e9207521-63d7-4081-9edf-d80757938797",
+    "user_id": "default-user",
+    "project_id": null,
+    "title": "Cara Agar Pemipilan jagung lebih maksimal",
+    "target_keyword": "Cara Agar Pemipilan jagung lebih maksimal",
+    "secondary_keywords": [],
+    "language": "id",
+    "tone": "authoritative",
+    "target_length": 1500,
+    "outline_json": {
+      "title": "Cara Agar Pemipilan jagung lebih maksimal",
+      "estimated_total_words": 1500,
+      "sections": [
+        {
+          "id": "section-1",
+          "heading": "Urgensi Optimasi Pemipilan Jagung dalam Menekan Susut Pascapanen",
+          "level": "h2",
+          "target_word_count": 150,
+          "key_points": [
+            "Identifikasi masalah umum susut pascapanen (post-harvest losses) akibat metode pemipilan yang tidak terstandarisasi.",
+            "Dampak kerugian butir pecah dan biji tertinggal di tongkol terhadap nilai ekonomis serta masa simpan komoditas.",
+            "Ringkasan parameter utama untuk mencapai efisiensi pemipilan maksimal: kadar air, kalibrasi alat, dan teknik operasional."
+          ],
+          "keywords_to_include": [
+            "Cara Agar Pemipilan jagung lebih maksimal",
+            "penanganan pascapanen jagung",
+            "Susut Pascapanen (Post-Harvest Losses)"
+          ],
+          "subsections": []
+        },
+        {
+          "id": "section-2",
+          "heading": "Karakteristik Fisik Bahan Baku: Kunci Awal Efisiensi Pemipilan",
+          "level": "h2",
+          "target_word_count": 400,
+          "key_points": [
+            "Pentingnya persiapan kondisi fisik tongkol jagung sebelum masuk ke unit pemipilan.",
+            "Korelasi antara kondisi biologis tongkol dengan gaya gesek mekanis yang dibutuhkan saat proses perontokan."
+          ],
+          "keywords_to_include": [
+            "Tongkol Jagung (Corn Cob)",
+            "efisiensi perontokan tongkol jagung"
+          ],
+          "subsections": [
+            {
+              "id": "section-2-1",
+              "heading": "Kontrol Kadar Air Ideal Sebelum Pemipilan",
+              "level": "h3",
+              "target_word_count": 200,
+              "key_points": [
+                "Menjelaskan rentang kadar air ideal (17% - 20%) untuk pemipilan mekanis agar biji mudah lepas tanpa hancur.",
+                "Risiko kadar air >22% (biji memar, embrio rusak, tongkol lunak dan basah) vs <15% (biji rapuh dan mudah remuk).",
+                "Penyajian tabel perbandingan kadar air jagung terhadap persentase rendemen dan risiko butir pecah.",
+                "Estimasi durasi penjemuran jagung tongkol di lantai jemur (2-4 hari tergantung intensitas matahari) sebelum dipipil."
+              ],
+              "keywords_to_include": [
+                "kadar air jagung untuk dipipil",
+                "Kadar Air (Moisture Content)",
+                "Biji Jagung Pecah (Broken Kernels)"
+              ],
+              "subsections": []
+            },
+            {
+              "id": "section-2-2",
+              "heading": "Sortasi dan Penyeragaman Ukuran Tongkol Jagung",
+              "level": "h3",
+              "target_word_count": 200,
+              "key_points": [
+                "Metode pemilahan tongkol berdasarkan keseragaman diameter dan panjang sebelum diumpankan (feeding).",
+                "Pembersihan klobot (kelobot) yang masih menempel untuk mencegah penyumbatan pada saringan silinder.",
+                "Pemisahan tongkol yang terserang jamur (Aspergillus flavus) guna menghindari kontaminasi silang mikotoksin pada batch pipilan."
+              ],
+              "keywords_to_include": [
+                "Tongkol Jagung (Corn Cob)",
+                "efisiensi perontokan tongkol jagung",
+                "penanganan pascapanen jagung"
+              ],
+              "subsections": []
+            }
+          ]
+        },
+        {
+          "id": "section-3",
+          "heading": "Panduan Teknis dan Kalibrasi Mesin Pemipil Jagung (Corn Sheller)",
+          "level": "h2",
+          "target_word_count": 450,
+          "key_points": [
+            "Pentingnya kesesuaian spesifikasi mesin dengan karakteristik varietas jagung yang diproses (hibrida vs lokal).",
+            "Penyesuaian laju pengumpanan (feeding rate) yang konstan untuk mencegah beban lebih (overload) pada drum pemipil."
+          ],
+          "keywords_to_include": [
+            "mesin pemipil jagung corn sheller",
+            "Corn Sheller (Mesin Pemipil Jagung)"
+          ],
+          "subsections": [
+            {
+              "id": "section-3-1",
+              "heading": "Pengaturan Kecepatan Putaran Silinder (RPM)",
+              "level": "h3",
+              "target_word_count": 200,
+              "key_points": [
+                "Rekomendasi rentang putaran silinder perontok optimal (500 hingga 700 RPM) sesuai kapasitas mesin.",
+                "Dampak putaran berlebih (>750 RPM): peningkatan drastis butir retak/pecah dan debu endosperma.",
+                "Dampak putaran terlalu rendah (<450 RPM): tingginya persentase biji yang tidak terpipil dan tertinggal di tongkol."
+              ],
+              "keywords_to_include": [
+                "kecepatan putaran mesin pemipil rpm",
+                "cara meminimalisir jagung pecah",
+                "efisiensi perontokan tongkol jagung"
+              ],
+              "subsections": []
+            },
+            {
+              "id": "section-3-2",
+              "heading": "Kalibrasi Celah Saringan dan Silinder (Concave Clearance)",
+              "level": "h3",
+              "target_word_count": 250,
+              "key_points": [
+                "Parameter teknis jarak celah (clearance) antara ujung gigi perontok dan saringan cekung (concave): 25-30 mm pada inlet dan 15-20 mm pada outlet.",
+                "Penyesuaian celah concave berdasarkan ukuran tongkol jagung hibrida (tongkol besar) vs jagung lokal (tongkol ramping).",
+                "Pengaturan sudut kemiringan plat pemisah untuk memastikan pemisahan tongkol kosong dan butiran pipil berjalan sempurna."
+              ],
+              "keywords_to_include": [
+                "cara meminimalisir jagung pecah",
+                "Corn Sheller (Mesin Pemipil Jagung)",
+                "Biji Jagung Pecah (Broken Kernels)"
+              ],
+              "subsections": []
+            }
+          ]
+        },
+        {
+          "id": "section-4",
+          "heading": "Standar Operasional Pemeliharaan Komponen Pemipil Jagung",
+          "level": "h2",
+          "target_word_count": 250,
+          "key_points": [
+            "SOP pembersihan harian pascaoperasional: membersihkan sisa biomassa basah yang menempel pada silinder pemipil dan kisi-kisi concave.",
+            "Pemeriksaan keausan gerigi/pembawa (peg tooth/beater) secara berkala dan jadwal penggantian komponen aus.",
+            "Pengecekan ketegangan v-belt dan pelumasan bearing/bantalan untuk menjaga kestabilan putaran mesin serta mencegah risiko panas berlebih.",
+            "Pencegahan kontaminasi oli atau pelumas pada output biji jagung bersih."
+          ],
+          "keywords_to_include": [
+            "mesin pemipil jagung corn sheller",
+            "penanganan pascapanen jagung",
+            "Susut Pascapanen (Post-Harvest Losses)"
+          ],
+          "subsections": []
+        },
+        {
+          "id": "section-5",
+          "heading": "Tanya Jawab (FAQ) Seputar Pemipilan Jagung Maksimal",
+          "level": "h2",
+          "target_word_count": 250,
+          "key_points": [
+            "Menjawab: Berapa kadar air jagung yang ideal sebelum proses pemipilan? (Penjelasan komparatif 17-20% untuk mesin vs <15% untuk simpan).",
+            "Menjawab: Mengapa jagung banyak pecah saat dipipil dengan mesin? (Faktor kadar air terlalu rendah, RPM terlalu tinggi, atau celah concave terlalu sempit).",
+            "Menjawab: Berapa kecepatan RPM silinder mesin pemipil jagung yang tepat? (Rentang 500-700 RPM disesuaikan dengan kapasitas motor penggerak).",
+            "Menjawab: Berapa lama waktu penjemuran jagung tongkol sebelum dipipil? (Faktor cuaca, metode penjemuran, dan target kadar air)."
+          ],
+          "keywords_to_include": [
+            "Cara Agar Pemipilan jagung lebih maksimal",
+            "kadar air jagung untuk dipipil",
+            "kecepatan putaran mesin pemipil rpm",
+            "cara meminimalisir jagung pecah"
+          ],
+          "subsections": []
+        }
+      ]
+    },
+    "serp_data": {
+      "search_intent": "Informational",
+      "primary_audience": "Petani jagung, operator mesin corn sheller, kelompok tani, dan pelaku usaha pengolahan pascapanen jagung yang ingin mengoptimalkan hasil rendemen dan meminimalkan susut butir (grain loss/breakage).",
+      "core_angle": "Panduan teknis dan operasional pascapanen berbasis standar kadar air presisi (17-20%), kalibrasi celah saringan/RPM mesin pemipil, dan teknik sortir tongkol guna menekan persentase butir rusak hingga di bawah 2%.",
+      "lsi_keywords": [
+        "kadar air jagung untuk dipipil",
+        "mesin pemipil jagung corn sheller",
+        "cara meminimalisir jagung pecah",
+        "penanganan pascapanen jagung",
+        "kecepatan putaran mesin pemipil rpm",
+        "efisiensi perontokan tongkol jagung"
+      ],
+      "semantic_entities": [
+        "Corn Sheller (Mesin Pemipil Jagung)",
+        "Kadar Air (Moisture Content)",
+        "Susut Pascapanen (Post-Harvest Losses)",
+        "Tongkol Jagung (Corn Cob)",
+        "Biji Jagung Pecah (Broken Kernels)"
+      ],
+      "paa_questions": [
+        "Berapa kadar air jagung yang ideal sebelum proses pemipilan?",
+        "Mengapa jagung banyak pecah saat dipipil dengan mesin?",
+        "Berapa kecepatan RPM silinder mesin pemipil jagung yang tepat?",
+        "Berapa lama waktu penjemuran jagung tongkol sebelum dipipil?"
+      ],
+      "content_gaps": [
+        "Parameter teknis spesifik mengenai kalibrasi jarak concave/celah silinder pemipil sesuai varietas ukuran tongkol jagung.",
+        "Kombinasi tabel perbandingan kadar air jagung terhadap tingkat kerusakan butir (rendemen vs butir pecah).",
+        "Panduan SOP pembersihan dan perawatan berkala gigi perontok untuk mencegah kontaminasi dan keausan mekanis."
+      ],
+      "suggested_title": "7 Cara Agar Pemipilan Jagung Lebih Maksimal: Minim Butir Pecah, Cepat, dan Bersih"
+    },
+    "content_markdown": "# Cara Agar Pemipilan Jagung Lebih Maksimal\n\n## Urgensi Optimasi Pemipilan Jagung dalam Menekan Susut Pascapanen\n\nSetiap musim panen, jutaan ton jagung kehilangan nilainya bukan di ladang, melainkan di tahap pemipilan. **Susut pascapanen akibat metode pemipilan yang tidak terstandarisasi bisa mencapai 3–8% dari total produksi**—angka yang langsung memotong margin keuntungan petani.\n\nDua masalah paling merugikan muncul berulang di lapangan:\n\n- **Butir pecah (broken kernels):** Menurunkan harga jual, mempercepat kontaminasi jamur, dan mempersingkat masa simpan secara signifikan.\n- **Biji tertinggal di tongkol:** Kehilangan hasil yang sepenuhnya bisa dicegah, namun sering diabaikan karena dianggap tidak terukur.\n\nPenanganan pascapanen yang buruk di satu titik ini berdampak berantai—dari kualitas pakan ternak hingga daya saing di pasar ekspor.\n\n**Cara agar pemipilan jagung lebih maksimal bertumpu pada tiga parameter kritis yang harus dikendalikan secara bersamaan: kadar air biji saat pemipilan, kalibrasi presisi alat pemipil, dan teknik operasional yang konsisten.** Kuasai ketiganya, susut bisa ditekan ke bawah 1%.\n\n[IMAGE: Infografis tiga parameter kritis pemipilan jagung—kadar air, kalibrasi mesin, dan teknik operasional | alt='cara agar pemipilan jagung lebih maksimal tiga parameter kritis']\n\n---\n\n## Karakteristik Fisik Bahan Baku: Kunci Awal Efisiensi Pemipilan\n\nSebelum tongkol jagung menyentuh unit pemipil, kondisi fisiknya sudah menentukan separuh keberhasilan proses. Bukan soal keberuntungan—ini soal biologi dan mekanika yang bekerja bersama.\n\n### Kadar Air Tongkol: Angka yang Tidak Bisa Dikompromikan\n\n**Kadar air biji jagung ideal untuk pemipilan mekanis berada di rentang 17–20%.** Di atas angka itu, biji terlalu lunak dan mudah pecah saat terkena gaya gesek rotor. Di bawahnya, biji terlalu keras—meningkatkan beban kerja mesin sekaligus risiko patah benih.\n\nGunakan moisture meter sebelum memasukkan tongkol ke mesin. Ini bukan prosedur opsional; ini garis pertahanan pertama efisiensi perontokan tongkol jagung.\n\n[IMAGE: Petani menggunakan moisture meter pada tongkol jagung sebelum pemipilan | alt='pengukuran kadar air jagung sebelum pemipilan dengan moisture meter']\n\n### Ukuran dan Keseragaman Tongkol\n\n**Tongkol jagung yang tidak seragam ukurannya adalah musuh utama kalibrasi mesin.** Tongkol terlalu kecil lolos dari tekanan silinder pemipil tanpa terkelupas sempurna; tongkol terlalu besar memaksa mesin bekerja di luar parameter desainnya.\n\nSortasi manual atau mekanis sebelum pemipilan bukan pemborosan waktu—itu investasi langsung pada efisiensi perontokan:\n\n- **Diameter tongkol seragam** → tekanan rotor merata → biji lepas bersih tanpa pecah\n- **Panjang tongkol konsisten** → feeding rate stabil → throughput mesin optimal\n- **Buang tongkol cacat atau berjamur** → cegah kontaminasi silang pada hasil pipilan\n\n### Kondisi Biologis Tongkol dan Gaya Gesek Mekanis\n\nAda korelasi langsung yang sering diabaikan: kondisi biologis tongkol menentukan besarnya gaya gesek yang dibutuhkan rotor pemipil.\n\nTongkol terlalu kering (kadar air di bawah 14%) memiliki ikatan biji-tongkol yang sangat rigid—rotor harus bekerja dengan torsi lebih tinggi, mempercepat keausan komponen dan meningkatkan konsumsi bahan bakar. Sebaliknya, tongkol yang baru dipanen dengan kadar air di atas 25% memiliki jaringan yang masih turgid; gaya gesek memang lebih rendah, tetapi biji yang terkelupas cenderung membawa serta serat tongkol dan menurunkan kemurnian hasil pipilan.\n\n**Kondisi biologis optimal adalah tongkol yang sudah melewati fase pengeringan awal, namun belum mencapai titik kering total.**\n\n### Perlakuan Pra-Pemipilan yang Wajib Dilakukan\n\n- Keringkan tongkol jagung di bawah sinar matahari atau dryer hingga kadar air 17–20%\n- Lakukan sortasi berdasarkan diameter dan panjang tongkol\n- Pisahkan tongkol berkulit tebal—kupas dulu sebelum masuk mesin\n- Periksa tongkol dari serangan hama atau busuk biji sebelum proses dimulai\n\nPersiapan bahan baku yang disiplin bukan langkah tambahan. **Ini fondasi dari seluruh strategi cara agar pemipilan jagung lebih maksimal.**\n\n---\n\n## Panduan Teknis dan Kalibrasi Mesin Pemipil Jagung (Corn Sheller)\n\nBahan baku yang sudah dipersiapkan dengan baik tidak akan menghasilkan output maksimal jika mesinnya salah dikalibrasi. Di sinilah banyak operator kehilangan efisiensi tanpa menyadarinya.\n\n### Sesuaikan Spesifikasi Mesin dengan Varietas Jagung\n\nTidak semua jagung diciptakan sama—dan mesin pemipil jagung yang Anda operasikan harus menyesuaikan diri dengan kenyataan ini.\n\nJagung hibrida modern umumnya memiliki biji yang lebih besar, lebih padat, dan menempel lebih kuat pada tongkol dibanding varietas lokal. Menggunakan setting standar untuk kedua jenis ini berarti salah satu pasti dirugikan.\n\n- **Jagung hibrida** → butuh putaran drum lebih tinggi (RPM lebih besar) dan celah pemipil yang sedikit lebih rapat untuk melepas biji secara menyeluruh\n- **Jagung lokal/komposit** → biji lebih kecil dan lebih mudah lepas; RPM berlebih justru meningkatkan persentase biji pecah\n- **Jagung semi-kering (kadar air 20–25%)** → memerlukan penyesuaian celah drum agar tidak memeras biji alih-alih memipisnya\n\n**Selalu baca spesifikasi teknis mesin dan cocokkan dengan data varietas yang Anda proses**—jadikan tabel kalibrasi produsen sebagai acuan pertama, bukan intuisi operator.\n\n[IMAGE: Diagram perbandingan setting RPM dan celah concave untuk jagung hibrida vs jagung lokal | alt='kalibrasi mesin pemipil jagung corn sheller untuk berbagai varietas jagung']\n\n### Kendalikan Laju Pengumpanan Secara Konsisten\n\n*Feeding rate* adalah variabel yang paling sering diabaikan, padahal dampaknya langsung terasa pada kualitas hasil dan umur mesin.\n\nMemasukkan terlalu banyak tongkol sekaligus ke dalam hopper menciptakan kondisi overload pada drum pemipil. Akibatnya:\n\n- Drum kehilangan momentum rotasi → efisiensi pemipilan turun drastis\n- Gesekan berlebih → suhu naik → komponen bearing dan sabuk aus lebih cepat\n- Biji menumpuk di saluran keluaran → persentase biji tidak terpipil meningkat\n\nPengumpanan yang terlalu lambat pun tidak ideal—mesin beroperasi di bawah kapasitas optimalnya, boros energi untuk output yang tidak proporsional.\n\n**Gunakan sistem pengumpanan bertahap dengan konveyor atau operator terlatih yang menjaga ritme konstan.** Pada skala besar, pertimbangkan *vibrating feeder* untuk memastikan aliran tongkol yang seragam ke dalam mesin.\n\n### Lakukan Pengecekan Kalibrasi Sebelum Setiap Sesi\n\nJangan asumsikan setting kemarin masih valid hari ini. Perubahan varietas, tingkat kekeringan, atau bahkan suhu lingkungan bisa menggeser performa mesin.\n\nBuat **checklist kalibrasi harian** yang mencakup:\n\n- Celah antara drum dan saringan (*concave clearance*)\n- Kecepatan putar drum (ukur dengan tachometer jika tersedia)\n- Kondisi sabuk transmisi—kendur atau retak berarti RPM aktual tidak sesuai spesifikasi\n- Kebersihan saluran keluaran biji dan sisa tongkol\n\nKalibrasi bukan prosedur sekali jalan. **Rutinitas inilah yang membedakan operator biasa dari operator yang benar-benar memahami cara agar pemipilan jagung lebih maksimal.**\n\n---\n\n## Standar Operasional Pemeliharaan Komponen Pemipil Jagung\n\nKalibrasi yang tepat tidak ada artinya jika komponen mesin pemipil jagung dibiarkan aus tanpa perawatan. Pemeliharaan rutin bukan pilihan—ini syarat mutlak untuk menekan susut pascapanen seminimal mungkin.\n\n### Pembersihan Harian Pascaoperasional\n\nSegera setelah mesin berhenti, bersihkan sisa biomassa basah yang menempel pada silinder pemipil dan kisi-kisi *concave*. Sisa tongkol, rambut jagung, dan biji pecah yang lembap adalah media tumbuh jamur sekaligus sumber korosi.\n\nGunakan sikat kawat atau kompresor udara bertekanan rendah. **Jangan biarkan residu mengering dan mengeras**—sekali mengeras, proses pembersihannya jauh lebih sulit dan berisiko merusak permukaan *concave*.\n\n### Inspeksi dan Penggantian Komponen Aus\n\n*Peg tooth* (gerigi pembawa) adalah komponen yang paling cepat aus dalam siklus penanganan pascapanen intensitas tinggi. Periksa kondisinya setiap 50–80 jam operasi.\n\n- **Tanda wajib ganti:** ujung gerigi sudah tumpul, retak, atau tingginya berkurang lebih dari 20% dari spesifikasi awal\n- **Jadwal penggantian:** lakukan penggantian satu set penuh, bukan parsial, agar distribusi gaya pemipilan tetap merata\n- Simpan catatan jam operasi setiap sesi—ini data kritis untuk menentukan interval penggantian yang akurat\n\n[IMAGE: Close-up perbandingan peg tooth baru vs peg tooth aus pada mesin pemipil jagung | alt='komponen peg tooth mesin pemipil jagung corn sheller kondisi baru dan aus']\n\n### Pengecekan V-Belt dan Pelumasan Bearing\n\nTegangan *v-belt* yang kendur menyebabkan RPM aktual turun di bawah spesifikasi, berdampak langsung pada persentase biji tidak terpipil. **Tekanan jari pada titik tengah sabuk tidak boleh menghasilkan lendutan lebih dari 10–15 mm.**\n\nLumasi *bearing* sesuai interval yang ditentukan produsen—umumnya setiap 40–60 jam. Bearing yang kering menghasilkan panas berlebih, mempercepat keausan, dan dalam kasus ekstrem menyebabkan *seizure* yang menghentikan produksi total.\n\n### Pencegahan Kontaminasi Oli pada Output Biji\n\nKebocoran pelumas dari *bearing* atau *gearbox* yang mencemari aliran biji jagung bersih akan mendiskualifikasi hasil panen dari standar mutu pasar—ini titik kritis yang sering diabaikan.\n\n- Pasang *grease fitting* yang tepat dan hindari pelumasan berlebihan (*over-greasing*)\n- Gunakan pelumas food-grade pada titik-titik yang berdekatan dengan jalur biji\n- Periksa segel *bearing* secara visual setiap hari sebelum mesin dinyalakan\n\n**Mesin pemipil jagung yang terawat bukan hanya soal umur pakai alat—ini soal menjaga kualitas output dan memastikan setiap sesi operasi benar-benar produktif.**\n\n---\n\n## Tanya Jawab (FAQ) Seputar Pemipilan Jagung Maksimal\n\nPertanyaan-pertanyaan berikut sering muncul di lapangan. Jawaban langsung ini membantu Anda menerapkan cara agar pemipilan jagung lebih maksimal tanpa trial-and-error yang membuang waktu dan hasil panen.\n\n---\n\n**Berapa kadar air jagung yang ideal sebelum proses pemipilan?**\n\n**Kadar air jagung untuk dipipil dengan mesin berkisar 17–20%**—kondisi ini membuat biji cukup elastis sehingga tidak mudah pecah saat terkena silinder. Jika jagung akan langsung disimpan atau dijual ke pasar yang mensyaratkan mutu kering, turunkan kadar air hingga di bawah 15% setelah pemipilan selesai.\n\n---\n\n**Mengapa jagung banyak pecah saat dipipil dengan mesin?**\n\nAda tiga penyebab utama yang perlu diperiksa satu per satu:\n\n- **Kadar air terlalu rendah** — biji sudah terlalu kering dan rapuh sebelum masuk mesin\n- **RPM terlalu tinggi** — benturan silinder terlalu keras untuk ukuran dan kekerasan biji\n- **Celah concave terlalu sempit** — biji terjepit, bukan terpipil\n\nIdentifikasi mana dari tiga faktor ini yang menjadi biang masalah, lalu koreksi secara sistematis—bukan sekaligus.\n\n---\n\n**Berapa kecepatan putaran mesin pemipil yang tepat?**\n\n**Kecepatan putaran mesin pemipil yang direkomendasikan berada di rentang 500–700 RPM.** Angka pastinya bergantung pada kapasitas motor penggerak dan diameter silinder. Mesin bermotor kecil yang dipaksa beroperasi di RPM tinggi justru menghasilkan lebih banyak biji pecah dan memperpendek umur bearing.\n\n---\n\n**Berapa lama waktu penjemuran jagung tongkol sebelum dipipil?**\n\nTidak ada angka tunggal—ini bergantung pada tiga variabel:\n\n- **Cuaca:** Sinar matahari penuh membutuhkan 3–5 hari; cuaca mendung bisa dua kali lipat\n- **Metode penjemuran:** Jagung yang dibalik setiap 4–6 jam kering lebih merata\n- **Target kadar air:** Ukur dengan moisture meter, bukan perkiraan visual\n\nJangan andalkan warna atau tekstur kulit klobot sebagai patokan. **Gunakan alat ukur, dan pipil hanya setelah angka kadar air benar-benar tercapai.**",
+    "content_html": "",
+    "status": "completed",
+    "word_count": 1575,
+    "seo_score": 90,
+    "seo_audit": {
+      "score": 90,
+      "word_count": 1575,
+      "reading_time_minutes": 8,
+      "keyword_density": 0.38,
+      "keyword_occurrences": 6,
+      "h2_count": 5,
+      "h3_count": 11,
+      "image_placeholders": 4,
+      "secondary_keywords": [],
+      "checklist": [
+        {
+          "rule": "Word Count",
+          "passed": true,
+          "message": "1575 kata (Sangat Bagus untuk Ranking)"
+        },
+        {
+          "rule": "Keyword Density",
+          "passed": true,
+          "message": "Keyword ditemukan (6x, 0.38%)"
+        },
+        {
+          "rule": "First Paragraph Keyword",
+          "passed": true,
+          "message": "Keyword utama ada di paragraf pembuka"
+        },
+        {
+          "rule": "Heading Structure",
+          "passed": true,
+          "message": "Struktur sub-heading rapi (5 H2, 11 H3)"
+        },
+        {
+          "rule": "Rich Media & Formatting",
+          "passed": true,
+          "message": "Media visual & bold formatting optimal (4 image tags)"
+        }
+      ]
+    },
+    "created_at": "2026-08-22T04:47:21.110794",
+    "updated_at": "2026-08-22T04:52:53.720866"
   }
 }

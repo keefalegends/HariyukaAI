@@ -23,9 +23,12 @@ export const metadata: Metadata = {
   title: "Hariyuka AI - Next-Gen AI SEO Article Writer",
   description: "Generate human-grade, rank-ready long-form articles with multi-step agentic AI pipeline.",
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
@@ -37,7 +40,8 @@ export default function RootLayout({
   return (
     <html lang="id" className={`dark ${sansFont.variable} ${serifFont.variable}`}>
       <head>
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/logo.png" type="image/png" sizes="any" />
+        <link rel="apple-touch-icon" href="/logo.png" />
       </head>
       <body className="font-sans min-h-screen antialiased selection:bg-[#d97757] selection:text-white">
         <ThemeProvider>
