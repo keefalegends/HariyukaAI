@@ -540,5 +540,182 @@
     "product_name": null,
     "created_at": "2026-08-22T06:23:50.159907",
     "updated_at": "2026-08-22T06:25:26.490632"
+  },
+  "2aaaa13a-1627-4ea1-ba3a-44a59182ddf2": {
+    "id": "2aaaa13a-1627-4ea1-ba3a-44a59182ddf2",
+    "user_id": "default-user",
+    "project_id": null,
+    "title": "Cara Mencuci Piring yang Benar agar Bersih dan Higienis",
+    "target_keyword": "Cara Mencuci Piring yang Benar agar Bersih dan Higienis",
+    "article_type": "backlink_article",
+    "secondary_keywords": [],
+    "language": "id",
+    "tone": "authoritative",
+    "target_length": 550,
+    "outline_json": {
+      "title": "Cara Mencuci Piring yang Benar agar Bersih dan Higienis",
+      "estimated_total_words": 550,
+      "sections": [
+        {
+          "id": "section-1",
+          "heading": "Urgensi Sanitasi Peralatan Makan bagi Kesehatan Keluarga",
+          "level": "h2",
+          "target_word_count": 120,
+          "key_points": [
+            "Memperkenalkan Cara Mencuci Piring yang Benar agar Bersih dan Higienis pada kalimat pembuka",
+            "Membahas bahaya penumpukan bakteri dan residu lemak tak kasat mata",
+            "Pentingnya urutan mencuci piring yang benar untuk efisiensi dan kebersihan maksimal"
+          ],
+          "keywords_to_include": [
+            "Cara Mencuci Piring yang Benar agar Bersih dan Higienis",
+            "urutan mencuci piring yang benar"
+          ],
+          "subsections": []
+        },
+        {
+          "id": "section-2",
+          "heading": "5 Langkah Cara Mencuci Piring yang Benar agar Bersih dan Higienis",
+          "level": "h2",
+          "target_word_count": 270,
+          "key_points": [
+            "1. Membuang sisa makanan (scraping) dan menyortir peralatan berdasarkan tingkat kekotoran",
+            "2. Merendam dan menghilangkan noda minyak membandel di piring dengan air hangat",
+            "3. Membersihkan mulai dari gelas dan sendok menggunakan sabun cuci piring antibakteri berkualitas",
+            "4. Membilas seluruh permukaan dengan air bersih mengalir hingga tidak licin",
+            "5. Menerapkan tips mencuci piring bebas bau amis serta cara mengeringkan piring higienis di rak bersirkulasi udara baik"
+          ],
+          "keywords_to_include": [
+            "Cara Mencuci Piring yang Benar agar Bersih dan Higienis",
+            "menghilangkan noda minyak membandel di piring",
+            "sabun cuci piring antibakteri",
+            "tips mencuci piring bebas bau amis",
+            "cara mengeringkan piring higienis"
+          ],
+          "subsections": []
+        },
+        {
+          "id": "section-3",
+          "heading": "Perawatan Spons dan Area Wastafel demi Mencegah Kontaminasi Silang",
+          "level": "h2",
+          "target_word_count": 95,
+          "key_points": [
+            "Penerapan cara membersihkan spons cuci piring secara teratur agar bebas jamur dan kuman",
+            "Menjaga kebersihan bak cuci piring (sink) agar tidak menjadi sarang bakteri",
+            "Jadwal penggantian spons cuci secara berkala setiap 2 hingga 4 minggu"
+          ],
+          "keywords_to_include": [
+            "cara membersihkan spons cuci piring"
+          ],
+          "subsections": []
+        },
+        {
+          "id": "section-4",
+          "heading": "Kesimpulan Cara Mencuci Piring yang Benar agar Bersih dan Higienis",
+          "level": "h2",
+          "target_word_count": 65,
+          "key_points": [
+            "Ringkasan manfaat menerapkan teknik mencuci dan pengeringan yang higienis",
+            "Ajakan untuk membiasakan standar kebersihan dapur yang konsisten setiap hari"
+          ],
+          "keywords_to_include": [
+            "Cara Mencuci Piring yang Benar agar Bersih dan Higienis"
+          ],
+          "subsections": []
+        }
+      ]
+    },
+    "serp_data": {
+      "search_intent": "Informational",
+      "primary_audience": "Ibu rumah tangga, anak kos, pengelola usaha F&B/kuliner, serta individu yang ingin menjaga sanitasi dapur dan mencegah kontaminasi bakteri dari peralatan makan.",
+      "core_angle": "Panduan langkah-demi-langkah berbasis standar higienitas dapur profesional, mulai dari urutan pemilahan perabot, disinfeksi spons berkala, hingga teknik pengeringan higienis tanpa lap kotor.",
+      "lsi_keywords": [
+        "urutan mencuci piring yang benar",
+        "sabun cuci piring antibakteri",
+        "cara membersihkan spons cuci piring",
+        "tips mencuci piring bebas bau amis",
+        "cara mengeringkan piring higienis",
+        "menghilangkan noda minyak membandel di piring"
+      ],
+      "semantic_entities": [
+        "Bakteri Salmonella dan E. coli",
+        "Spons cuci piring",
+        "Sanitasi termal (Air panas)",
+        "Surfaktan sabun pencuci piring"
+      ],
+      "paa_questions": [
+        "Bagaimana urutan mencuci piring yang benar?",
+        "Berapa lama sekali spons cuci piring harus diganti?",
+        "Apakah mencuci piring dengan air panas lebih higienis?",
+        "Bagaimana cara menghilangkan bau amis dan sisa minyak pada piring?"
+      ],
+      "content_gaps": [
+        "Minimnya pembahasan sanitasi spons pencuci piring yang faktanya merupakan sarang utama bakteri di area dapur.",
+        "Kurangnya edukasi tentang bahaya kontaminasi silang (cross-contamination) akibat merendam piring kotor terlalu lama di bak cuci.",
+        "Jarang ada tips teknis pengeringan (air-drying vs lap kain) yang berdampak besar pada kehigienisan akhir perabot."
+      ],
+      "suggested_title": "Cara Mencuci Piring yang Benar agar Bersih dan Higienis Bebas Kuman"
+    },
+    "content_markdown": "# Cara Mencuci Piring yang Benar agar Bersih dan Higienis\n\n## Urgensi Sanitasi Peralatan Makan bagi Kesehatan Keluarga\n\nCara mencuci piring yang benar agar bersih dan higienis bukan sekadar rutinitas dapur biasa — ini adalah garis pertahanan pertama kesehatan keluarga. Banyak orang tidak menyadari bahwa piring yang terlihat bersih secara kasat mata belum tentu bebas dari bakteri berbahaya seperti *E. coli* atau *Salmonella*. Residu lemak yang menempel tipis di permukaan peralatan makan menjadi media ideal bagi mikroorganisme untuk berkembang biak dengan cepat.\n\nUrutan mencuci yang tepat juga menentukan hasil akhir kebersihan. Memulai dari peralatan yang paling ringan kotorannya — seperti gelas dan sendok — sebelum beralih ke panci berminyak, membantu menjaga air cucian tetap efektif lebih lama. Kebiasaan sederhana ini berdampak besar pada higienitas makanan yang disajikan setiap hari.\n\n## 5 Langkah Cara Mencuci Piring yang Benar agar Bersih dan Higienis\n\nProses mencuci piring yang efektif dimulai jauh sebelum tangan menyentuh sabun. Langkah pertama adalah *scraping* — membuang sisa makanan ke tempat sampah menggunakan spatula atau tisu dapur. Sortir juga peralatan berdasarkan tingkat kekotorannya: pisahkan gelas, sendok, dan garpu dari piring berminyak atau panci bekas masak. Ini mencegah kontaminasi silang sejak awal.\n\nLangkah kedua, rendam peralatan yang memiliki noda minyak membandel dalam air hangat selama 10–15 menit. Suhu hangat membantu melonggarkan lemak yang menempel, sehingga proses menggosok menjadi jauh lebih mudah dan tidak perlu tenaga ekstra. Tambahkan sedikit sabun ke dalam rendaman untuk hasil yang lebih optimal.\n\nKetiga, mulai proses pencucian dari peralatan paling ringan — gelas terlebih dahulu, lalu sendok dan garpu — menggunakan sabun cuci piring antibakteri berkualitas. Pilih sabun yang mampu mengangkat lemak sekaligus membunuh kuman tanpa meninggalkan residu berbau tajam. Gunakan spons lembut untuk gelas agar tidak tergores, dan sikat kecil untuk sela-sela garpu.\n\nLangkah keempat adalah membilas. Pastikan seluruh permukaan dibilas di bawah air bersih mengalir hingga tidak terasa licin sama sekali. Rasa licin menandakan sabun belum sepenuhnya terbilas — dan residu sabun yang tertinggal justru bisa menjadi media pertumbuhan bakteri.\n\nTerakhir, keringkan peralatan secara higienis. Hindari mengelap dengan kain yang sudah lembap karena bisa memindahkan bakteri. Gunakan rak bersirkulasi udara baik dan biarkan piring mengering secara alami. Untuk menghilangkan bau amis, rendam sebentar dalam larutan air perasan jeruk nipis sebelum dibilas akhir — cara sederhana namun terbukti efektif menjaga kesegaran peralatan makan.\n\n## Perawatan Spons dan Wastafel demi Mencegah Kontaminasi Silang\n\nSpons cuci piring adalah sarang bakteri yang sering diabaikan. Bilas spons hingga bersih setiap selesai digunakan, lalu peras kuat-kuat dan simpan di tempat berventilasi agar cepat kering. Rendam spons dalam larutan air panas atau campuran cuka putih seminggu sekali untuk membunuh kuman yang bersembunyi di dalamnya. Ganti spons setiap dua hingga empat minggu sekali, atau lebih cepat jika sudah berbau tidak sedap. Jangan lupa bersihkan area wastafel secara rutin karena sisa sabun dan kotoran yang menumpuk di sana justru menjadi tempat berkembang biaknya bakteri berbahaya.\n\n## Kesimpulan: Cara Mencuci Piring yang Benar agar Bersih dan Higienis\n\nMenerapkan cara mencuci piring yang benar agar bersih dan higienis bukan sekadar rutinitas, melainkan investasi nyata bagi kesehatan keluarga. Dengan teknik yang tepat — mulai dari pemilihan sabun, metode pembilasan, pengeringan, hingga perawatan spons — dapur Anda menjadi lingkungan yang jauh lebih aman. Jadikan standar kebersihan ini kebiasaan harian agar manfaatnya terasa konsisten dan perlindungan dari bakteri berbahaya tetap terjaga setiap saat.",
+    "content_html": "",
+    "status": "completed",
+    "word_count": 543,
+    "seo_score": 100,
+    "seo_audit": {
+      "score": 100,
+      "word_count": 543,
+      "reading_time_minutes": 3,
+      "keyword_density": 0.92,
+      "keyword_count": 5,
+      "checklist": [
+        {
+          "rule": "Text Length",
+          "passed": true,
+          "message": "543 kata (Sesuai SOP Backlink: 500–599 kata)"
+        },
+        {
+          "rule": "Keyphrase in Introduction",
+          "passed": true,
+          "message": "Keyphrase ditemukan di 150 kata pertama"
+        },
+        {
+          "rule": "Keyphrase Density",
+          "passed": true,
+          "message": "Keyphrase ditemukan 5 kali (0.92% - Sangat Ideal & Natural)"
+        },
+        {
+          "rule": "Keyphrase in Subheadings",
+          "passed": true,
+          "message": "2 sub-heading mengandung keyphrase (Sangat Baik)"
+        },
+        {
+          "rule": "Image Status",
+          "passed": true,
+          "message": "Mode Teks Murni (Gambar ditambahkan saat posting ke WordPress)"
+        },
+        {
+          "rule": "Single Title (H1)",
+          "passed": true,
+          "message": "Hanya ada 1 tag judul utama, struktur H2/H3 rapi"
+        },
+        {
+          "rule": "Links in Content",
+          "passed": true,
+          "message": "Siap untuk penambahan link internal/outbound"
+        },
+        {
+          "rule": "Keyphrase in Conclusion",
+          "passed": true,
+          "message": "Keyphrase ditegaskan kembali di bagian kesimpulan"
+        }
+      ]
+    },
+    "include_image_placeholder": false,
+    "target_link_1_url": null,
+    "target_link_1_anchor": null,
+    "target_link_2_url": null,
+    "target_link_2_anchor": null,
+    "product_name": null,
+    "created_at": "2026-08-22T06:50:40.489171",
+    "updated_at": "2026-08-22T06:52:42.927534"
   }
 }

@@ -23,6 +23,7 @@ import {
 import { useTheme, type Theme } from "@/contexts/theme-context";
 import { useTokens } from "@/lib/use-tokens";
 import { HariyukaLogo } from "@/components/ui/hariyuka-logo";
+import { SidebarTerminal } from "@/components/layout/sidebar-terminal";
 
 const navigation = [
   { name: "Dashboard",   href: "/dashboard", icon: LayoutDashboard },
@@ -332,6 +333,9 @@ export function Sidebar() {
             );
           })}
         </nav>
+
+        {/* ─── LIVE BACKGROUND PROCESS TERMINAL (COLLAPSIBLE) ─── */}
+        <SidebarTerminal collapsed={collapsed} />
 
         {/* ─── BOTTOM USER & CONTROLS FOOTER ─── */}
         <div className="border-t t-border shrink-0">
