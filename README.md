@@ -6,7 +6,7 @@
 [![Yoast SEO](https://img.shields.io/badge/Yoast%20WordPress-Green%20Light%20SOP-success?style=for-the-badge)](https://yoast.com/)
 [![Tiptap](https://img.shields.io/badge/Editor-Tiptap%20Suite-000000?style=for-the-badge)](https://tiptap.dev/)
 
-> **Hariyuka AI** adalah platform **100% Free & Open-Source Self-Hosted** AI SEO Article Writer & Content Authenticity Suite berbasis **Multi-Step Agentic Pipeline**. Dirancang khusus untuk menghasilkan artikel berbobot jurnalis, lolos sensor detektor AI (*0% AI on ZeroGPT*), mematuhi Standar Operasional Prosedur (SOP) Yoast WordPress, dan siap mendominasi peringkat 1 Google tanpa batasan kredit kata.
+> **Hariyuka AI** adalah platform **100% Free & Open-Source Self-Hosted** AI SEO Article Writer & Content Authenticity Suite berbasis **Multi-Step Agentic Pipeline**. Dirancang khusus untuk menghasilkan artikel berbobot jurnalis, lolos sensor detektor AI (*0% AI on ZeroGPT*), mematuhi Standar Operasional Prosedur (SOP) Yoast WordPress.
 
 ---
 
