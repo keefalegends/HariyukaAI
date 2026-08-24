@@ -26,6 +26,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+      - PORT=3000
       - NEXT_PUBLIC_API_URL=https://hariyuka.my.id/api/v1
     networks:
       - web_proxy
