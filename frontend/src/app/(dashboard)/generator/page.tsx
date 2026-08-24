@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { StepInput } from "./_components/step-input";
 import { StepOutline, type ArticleOutline } from "./_components/step-outline";
 import { StepGeneration } from "./_components/step-generation";
 import { logTerminal, setTerminalStatus } from "@/lib/terminal-bus";
 import { getApiUrl } from "@/lib/api-config";
 
-export default function GeneratorPage() {
+function GeneratorContent() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [isLoading, setIsLoading] = useState(false);
   const [articleId, setArticleId] = useState<string>("");
@@ -128,5 +128,13 @@ export default function GeneratorPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function GeneratorPage() {
+  return (
+    <Suspense fallback={<div className="py-8 text-center text-xs text-[#78716c]">Memuat Generator...</div>}>
+      <GeneratorContent />
+    </Suspense>
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Globe, Eye, EyeOff, Terminal, Info, X, ShieldAlert, ArrowRight, Loader2 } from "lucide-react";
+import { Globe, Eye, EyeOff, Terminal, X, ShieldAlert, Loader2 } from "lucide-react";
 import { HariyukaLogo } from "@/components/ui/hariyuka-logo";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/dashboard";
@@ -93,7 +93,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* ─── MAIN GATEWAY TERMINAL CARD (Exact 1:1 Match with Screenshot) ─── */}
+      {/* ─── MAIN GATEWAY TERMINAL CARD ─── */}
       <div className="w-full max-w-[440px] rounded-xl border border-[#2c2926] bg-[#141210] p-6 sm:p-8 shadow-2xl space-y-6 relative">
         {/* Top bar */}
         <div className="flex items-center justify-between text-[11px] text-[#78716c] pb-3 border-b border-[#24211e]">
@@ -231,5 +231,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0d0c0b]" />}>
+      <LoginForm />
+    </Suspense>
   );
 }
