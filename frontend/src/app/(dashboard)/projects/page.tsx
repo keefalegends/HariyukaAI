@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { FolderKanban, Plus, Globe, Trash2, X, Loader2, AlertCircle } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
+import { getApiUrl } from "@/lib/api-config";
 
 interface ProjectItem {
   id: string;
@@ -28,7 +29,7 @@ export default function ProjectsPage() {
   // Fetch projects from backend
   const fetchProjects = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/projects");
+      const res = await fetch(getApiUrl("/api/v1/projects"));
       if (res.ok) {
         const data = await res.json();
         setProjects(Array.isArray(data) ? data : []);
@@ -51,7 +52,7 @@ export default function ProjectsPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/projects", {
+      const res = await fetch(getApiUrl("/api/v1/projects"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -77,7 +78,7 @@ export default function ProjectsPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/projects/${id}`, {
+      const res = await fetch(getApiUrl(`/api/v1/projects/${id}`), {
         method: "DELETE",
       });
       if (res.ok) {

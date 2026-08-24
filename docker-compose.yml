@@ -1,45 +1,41 @@
 version: '3.8'
 
 services:
-  # Redis for Background Job Queue & SSE Pub/Sub
-  redis:
-    image: redis:7-alpine
-    container_name: hariyuka-redis
-    restart: always
-    ports:
-      - "6379:6379"
+  # ─── FASTAPI BACKEND (Python 3.11 - Single Worker) ───
+  hariyuka_backend:
+    image: ghcr.io/keefalegends/hariyuka-backend:latest
+    container_name: hariyuka_backend
+    restart: unless-stopped
+    env_file:
+      - .env
     volumes:
-      - redis_data:/data
+      - ./backend/data:/app/data
+    networks:
+      - web_proxy
+    deploy:
+      resources:
+        limits:
+          memory: 180M
 
-  # FastAPI Engine Backend
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: hariyuka-backend
-    restart: always
-    ports:
-      - "8000:8000"
+  # ─── NEXT.JS 14 FRONTEND (Standalone Multi-stage) ───
+  hariyuka_frontend:
+    image: ghcr.io/keefalegends/hariyuka-frontend:latest
+    container_name: hariyuka_frontend
+    restart: unless-stopped
     env_file:
       - .env
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://hariyuka.my.id/api/v1
+    networks:
+      - web_proxy
     depends_on:
-      - redis
+      - hariyuka_backend
+    deploy:
+      resources:
+        limits:
+          memory: 180M
 
-  # Next.js 14 Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: hariyuka-frontend
-    restart: always
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    depends_on:
-      - backend
-
-volumes:
-  redis_data:
+networks:
+  web_proxy:
+    external: true

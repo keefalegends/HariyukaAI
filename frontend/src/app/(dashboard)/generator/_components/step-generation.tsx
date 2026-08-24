@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 import { logTerminal, setTerminalStatus } from "@/lib/terminal-bus";
+import { getApiUrl } from "@/lib/api-config";
 
 interface StepGenerationProps {
   articleId: string;
@@ -43,7 +44,7 @@ export function StepGeneration({ articleId, onFinished }: StepGenerationProps) {
   useEffect(() => {
     if (!articleId) return;
 
-    const eventSource = new EventSource(`http://localhost:8000/api/v1/stream/${articleId}`);
+    const eventSource = new EventSource(getApiUrl(`/api/v1/stream/${articleId}`));
 
     eventSource.onmessage = (event) => {
       try {

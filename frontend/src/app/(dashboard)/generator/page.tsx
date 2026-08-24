@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { StepInput } from "./_components/step-input";
-import { StepOutline, ArticleOutline } from "./_components/step-outline";
+import { StepOutline, type ArticleOutline } from "./_components/step-outline";
 import { StepGeneration } from "./_components/step-generation";
 import { logTerminal, setTerminalStatus } from "@/lib/terminal-bus";
+import { getApiUrl } from "@/lib/api-config";
 
 export default function GeneratorPage() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -24,7 +25,7 @@ export default function GeneratorPage() {
     logTerminal("JOB", `Target Keyphrase: "${formData.target_keyword}"`);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/articles/generate-outline", {
+      const res = await fetch(getApiUrl("/api/v1/articles/generate-outline"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -36,7 +37,7 @@ export default function GeneratorPage() {
         logTerminal("SYS", `Task ID terdaftar: ${data.article_id.slice(0, 8)}...`);
 
         // Listen for outline_ready event via SSE
-        const eventSource = new EventSource(`http://localhost:8000/api/v1/stream/${data.article_id}`);
+        const eventSource = new EventSource(getApiUrl(`/api/v1/stream/${data.article_id}`));
 
         eventSource.onmessage = (event) => {
           try {
@@ -83,7 +84,7 @@ export default function GeneratorPage() {
     setTerminalStatus("running", "Menulis konten...");
 
     try {
-      await fetch(`http://localhost:8000/api/v1/articles/${articleId}/continue-writing`, {
+      await fetch(getApiUrl(`/api/v1/articles/${articleId}/continue-writing`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

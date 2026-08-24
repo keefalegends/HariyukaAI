@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 import { logTerminal } from "@/lib/terminal-bus";
+import { getApiUrl } from "@/lib/api-config";
 
 interface AuditResult {
   total_words: number;
@@ -84,7 +85,7 @@ export default function CheckerPage() {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/checker/history");
+      const res = await fetch(getApiUrl("/api/v1/checker/history"));
       if (res.ok) {
         const data = await res.json();
         setHistory(data);
@@ -133,7 +134,7 @@ Jangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless
     logTerminal("JOB", `Memulai scan orisinalitas (${wordCount} kata)...`);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/checker/audit", {
+      const res = await fetch(getApiUrl("/api/v1/checker/audit"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -171,7 +172,7 @@ Jangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless
     e.stopPropagation();
     setDeletingId(id);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/checker/history/${id}`, {
+      const res = await fetch(getApiUrl(`/api/v1/checker/history/${id}`), {
         method: "DELETE",
       });
       if (res.ok) {
@@ -187,7 +188,7 @@ Jangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless
   const handleClearAllHistory = async () => {
     if (!confirm("Apakah Anda yakin ingin menghapus semua riwayat audit?")) return;
     try {
-      const res = await fetch("http://localhost:8000/api/v1/checker/history", {
+      const res = await fetch(getApiUrl("/api/v1/checker/history"), {
         method: "DELETE",
       });
       if (res.ok) {

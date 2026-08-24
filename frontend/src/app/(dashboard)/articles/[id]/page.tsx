@@ -21,6 +21,7 @@ import { TiptapEditor } from "@/components/editor/tiptap-editor";
 import { SeoSidebar } from "@/components/editor/seo-sidebar";
 import { useTokens } from "@/lib/use-tokens";
 import { logTerminal } from "@/lib/terminal-bus";
+import { getApiUrl } from "@/lib/api-config";
 
 export default function ArticleEditorPage() {
   const params = useParams();
@@ -49,7 +50,7 @@ export default function ArticleEditorPage() {
 
     const fetchArticle = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/articles/${articleId}`);
+        const res = await fetch(getApiUrl(`/api/v1/articles/${articleId}`));
         if (res.ok) {
           const data = await res.json();
           setArticle(data);
@@ -75,7 +76,7 @@ export default function ArticleEditorPage() {
     setIsSaving(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/articles/${articleId}`, {
+      const res = await fetch(getApiUrl(`/api/v1/articles/${articleId}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -101,7 +102,7 @@ export default function ArticleEditorPage() {
     if (!articleId) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/articles/${articleId}`, {
+      const res = await fetch(getApiUrl(`/api/v1/articles/${articleId}`), {
         method: "DELETE",
       });
       if (res.ok) {
@@ -121,7 +122,7 @@ export default function ArticleEditorPage() {
     logTerminal("JOB", `Memindai keaslian konten: "${article?.title || articleId.slice(0, 8)}"...`);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/checker/audit", {
+      const res = await fetch(getApiUrl("/api/v1/checker/audit"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

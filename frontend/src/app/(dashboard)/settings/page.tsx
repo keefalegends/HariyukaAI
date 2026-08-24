@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
+import { getApiUrl } from "@/lib/api-config";
 
 export default function SettingsPage() {
   const tk = useTokens();
@@ -40,7 +41,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/settings/current");
+        const res = await fetch(getApiUrl("/api/v1/settings/current"));
         if (res.ok) {
           const data = await res.json();
           if (data.base_url) setBaseUrl(data.base_url);
@@ -50,7 +51,7 @@ export default function SettingsPage() {
       } catch (e) {
         // Fallback to health endpoint if current not available
         try {
-          const res = await fetch("http://localhost:8000/health");
+          const res = await fetch(getApiUrl("/health"));
           if (res.ok) {
             const data = await res.json();
             if (data.models) {
@@ -70,7 +71,7 @@ export default function SettingsPage() {
     setTestResult(null);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/settings/test-9router", {
+      const res = await fetch(getApiUrl("/api/v1/settings/test-9router"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -84,8 +85,8 @@ export default function SettingsPage() {
       if (res.ok && data.success) {
         setTestResult({
           success: true,
-          statusText: "Connected (9Router Proxy Terverifikasi)",
-          details: `Koneksi gateway 9Router BERHASIL! Ditemukan ${data.total_models} model AI siap digunakan.`,
+          statusText: "Koneksi Berhasil!",
+          details: `9Router Gateway Aktif. Ditemukan ${data.total_models || data.models?.length || 0} model AI siap pakai.`,
         });
         if (data.models && data.models.length > 0) {
           setAvailableModels(data.models);
@@ -93,15 +94,15 @@ export default function SettingsPage() {
       } else {
         setTestResult({
           success: false,
-          statusText: "Autentikasi Gagal",
-          details: data.error || "API Key 9Router tidak valid atau server proxy tidak dapat dijangkau.",
+          statusText: "Koneksi Gagal (401 / 500)",
+          details: data.error || "Gagal menghubungi 9Router. Periksa Base URL dan API Key.",
         });
       }
-    } catch (e: any) {
+    } catch (e) {
       setTestResult({
         success: false,
-        statusText: "Koneksi Backend / 9Router Gagal",
-        details: "Pastikan backend FastAPI aktif dan 9Router Base URL dapat dijangkau.",
+        statusText: "Error Jaringan",
+        details: "Tidak dapat terhubung ke backend server.",
       });
     }
     setIsTesting(false);
@@ -111,7 +112,7 @@ export default function SettingsPage() {
   const handleFetchModels = async () => {
     setIsFetchingModels(true);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/settings/test-9router", {
+      const res = await fetch(getApiUrl("/api/v1/settings/test-9router"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,7 +149,7 @@ export default function SettingsPage() {
   // 3. Save Settings
   const handleSave = async () => {
     try {
-      await fetch("http://localhost:8000/api/v1/settings/save", {
+      await fetch(getApiUrl("/api/v1/settings/save"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

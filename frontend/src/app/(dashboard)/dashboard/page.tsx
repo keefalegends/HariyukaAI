@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
+import { getApiUrl } from "@/lib/api-config";
 
 interface DashboardStats {
   total_articles: number;
@@ -71,7 +72,7 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/settings/dashboard-stats")
+    fetch(getApiUrl("/api/v1/settings/dashboard-stats"))
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d) setStats(d);

@@ -25,6 +25,7 @@ import { useTheme, type Theme } from "@/contexts/theme-context";
 import { useTokens } from "@/lib/use-tokens";
 import { HariyukaLogo } from "@/components/ui/hariyuka-logo";
 import { SidebarTerminal } from "@/components/layout/sidebar-terminal";
+import { getApiUrl } from "@/lib/api-config";
 
 const navigation = [
   { name: "Dashboard",        href: "/dashboard", icon: LayoutDashboard },
@@ -55,7 +56,7 @@ export function Sidebar() {
 
   useEffect(() => {
     // Fetch dashboard stats
-    fetch("http://localhost:8000/api/v1/settings/dashboard-stats")
+    fetch(getApiUrl("/api/v1/settings/dashboard-stats"))
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d?.total_articles !== undefined) setArticleCount(d.total_articles);

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
+import { getApiUrl } from "@/lib/api-config";
 
 interface ArticleItem {
   id: string;
@@ -44,7 +45,7 @@ export default function ArticlesPage() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/articles");
+        const res = await fetch(getApiUrl("/api/v1/articles"));
         if (res.ok) {
           const data = await res.json();
           setArticles(Array.isArray(data) ? data : []);
@@ -64,7 +65,7 @@ export default function ArticlesPage() {
     if (!articleToDelete) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/articles/${articleToDelete.id}`, {
+      const res = await fetch(getApiUrl(`/api/v1/articles/${articleToDelete.id}`), {
         method: "DELETE",
       });
       if (res.ok) {

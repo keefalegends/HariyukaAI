@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, Zap, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
+import { getApiUrl } from "@/lib/api-config";
 
 export function Header() {
   const tk = useTokens();
@@ -14,7 +15,7 @@ export function Header() {
     setTesting(true);
     setStatusMsg(null);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/settings/test-9router", {
+      const res = await fetch(getApiUrl("/api/v1/settings/test-9router"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),

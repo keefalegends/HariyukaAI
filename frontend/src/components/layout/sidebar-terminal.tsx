@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 import { TerminalLog, getStoredTerminalLogs, TerminalStatus } from "@/lib/terminal-bus";
+import { getApiUrl } from "@/lib/api-config";
 
 interface SidebarTerminalProps {
   collapsed?: boolean;
@@ -82,7 +83,7 @@ export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const res = await fetch("http://localhost:8000/health");
+        const res = await fetch(getApiUrl("/health"));
         if (res.ok) {
           setGatewayStatus("online");
         } else {
