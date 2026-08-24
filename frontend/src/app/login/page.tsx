@@ -99,7 +99,7 @@ function LoginForm() {
         <div className="flex items-center justify-between text-[11px] text-[#78716c] pb-3 border-b border-[#24211e]">
           <div className="flex items-center gap-1.5 text-[#d97757] hover:underline cursor-pointer">
             <Globe className="w-3.5 h-3.5" />
-            <span className="font-semibold tracking-wide">hariyuka.ai</span>
+            <span className="font-semibold tracking-wide">hariyuka.my.id</span>
             <span className="text-[10px]">↗</span>
           </div>
 
