@@ -22,8 +22,8 @@ class Settings(BaseSettings):
     # Default Models (ag/ alias prefix)
     MODEL_SERP_EXTRACTOR: str = "ag/gemini-3.7-flash-high"
     MODEL_OUTLINE_GENERATOR: str = "ag/gemini-3.7-flash-high"
-    MODEL_SECTION_WRITER: str = "ag/claude-sonnet-4-6"
-    MODEL_SEO_POLISHER: str = "ag/claude-sonnet-4-6"
+    MODEL_SECTION_WRITER: str = "ag/claude-opus-4-6"
+    MODEL_SEO_POLISHER: str = "ag/claude-opus-4-6"
 
     # Supabase Settings
     NEXT_PUBLIC_SUPABASE_URL: Optional[str] = None

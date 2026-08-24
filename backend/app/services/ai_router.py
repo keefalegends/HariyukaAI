@@ -339,13 +339,18 @@ Output valid JSON matching this schema:
         else:
             humanizer_directives = ""
 
-        system_prompt = f"""You are an Authentic Indonesian SEO Writer crafting high-ranking, human-written editorial content.
+        system_prompt = f"""You are an Authentic Indonesian SEO Writer crafting high-ranking, human-written editorial content using Claude 4.6 Opus.
 {humanizer_directives}
-RULES:
-1. ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
-2. Word count target for this section: EXACTLY ~{target_word_count} words. Write substantive, engaging paragraphs.
-3. KEYPHRASE DENSITY: Mention the exact focus keyphrase AT MOST 1 or 2 times in this section. Use natural pronouns ('alat ini', 'langkah tersebut') elsewhere.
-4. If this is Section 1, mention keyphrase in the very first sentence.
+🚨 STRICT PARAGRAPH & SENTENCE STRUCTURE SOP (SALNA EDITORIAL RULES):
+1. MINIMUM 2 PARAGRAPHS PER SUBHEADING: Under EVERY H2 and H3 heading, you MUST write at least 2 distinct paragraphs separated by a double newline (`\\n\\n`). Single-paragraph sections are STRICTLY FORBIDDEN.
+2. MINIMUM 3 SENTENCES PER PARAGRAPH: Every single paragraph MUST contain at least 3 well-crafted, substantive sentences (each ending with a period, question mark, or exclamation mark). Never write a paragraph with only 1 or 2 sentences.
+3. PARAGRAPH FLOW FORMULA:
+   - Paragraph 1: Topic sentence, underlying issue/context, and technical explanation.
+   - Paragraph 2+: Concrete actionable advice, practical application, and reader benefit.
+4. HEADINGS: ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
+5. WORD COUNT: Target ~{target_word_count} words for this section.
+6. KEYPHRASE DENSITY: Mention the exact focus keyphrase '{target_keyword}' AT MOST 1 or 2 times in this section. Use natural pronouns ('alat ini', 'langkah tersebut') elsewhere.
+7. If this is Section 1, mention keyphrase in the very first sentence.
 """
 
         user_prompt = f"""
@@ -355,7 +360,7 @@ Article Type: {article_type.upper()}
 Section Index: {section_index} of {total_sections}
 Currently Writing Section:
 - Heading: {section_heading} ({section_level.upper()})
-- Target Word Count: EXACTLY ~{target_word_count} words
+- Target Word Count: EXACTLY ~{target_word_count} words (Consisting of MINIMUM 2 paragraphs, each with MINIMUM 3 sentences)
 - Key Points to Cover:
 {chr(10).join(f"  * {pt}" for pt in key_points)}
 
@@ -384,7 +389,7 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         return raw_output
 
     # --------------------------------------------------------------------------
-    # STEP 4: Final SEO Polish & Anti-AI Sanitizer (Claude 4.6)
+    # STEP 4: Final SEO Polish & Anti-AI Sanitizer (Claude 4.6 Opus)
     # --------------------------------------------------------------------------
     async def polish_and_optimize_seo(
         self,
@@ -404,7 +409,7 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
 
         if humanize_writing:
             humanizer_polish = """
-6. ANTI-AI DETECTOR SANITIZATION PASS:
+7. ANTI-AI DETECTOR SANITIZATION PASS:
    - Eliminate ALL em-dashes (`—` and `--`). Replace with commas or clean periods.
    - Break any remaining formulaic AI transitions ('Ini bukan sekadar...', 'Hal yang perlu dipahami...', 'Berikut lima tips...', 'Merupakan langkah krusial...').
    - Infuse native Indonesian conversational ease ('kan', 'sih', 'lho', 'nih', 'Gimana solusinya?') so AI detector gives < 15% score.
@@ -413,16 +418,18 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         else:
             humanizer_polish = ""
 
-        system_prompt = f"""You are a Master Indonesian Editor and Anti-AI SEO Specialist.
-CALIBRATION REQUIREMENTS:
-1. STRICT WORD COUNT: Final text length MUST be between {target_range}.
+        system_prompt = f"""You are a Master Indonesian Editor and Anti-AI SEO Specialist using Claude 4.6 Opus.
+CALIBRATION REQUIREMENTS (SALNA EDITORIAL & YOAST SOP):
+1. SUBHEADING PARAGRAPH DEPTH: Every single H2 (##) and H3 (###) MUST have AT LEAST 2 distinct paragraphs under it. If any section has only 1 paragraph, split and elaborate it into 2 substantive paragraphs.
+2. PARAGRAPH SENTENCE DEPTH: Every single paragraph MUST contain AT LEAST 3 complete sentences. Never leave thin 1-sentence or 2-sentence paragraphs.
+3. STRICT WORD COUNT: Final text length MUST be between {target_range}.
    If under 500 words, expand paragraphs with helpful details and actionable real-world tips.
-2. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
+4. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
    Count occurrences of '{target_keyword}'. It MUST appear between 5 and 7 times total across the entire article!
    If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
-3. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
-4. IMAGE RULE: {image_rule}
-5. Preserve all markdown links `[anchor](url)`.
+5. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
+6. IMAGE RULE: {image_rule}
+7. Preserve all markdown links `[anchor](url)`.
 {humanizer_polish}
 Output only the final polished article in Markdown.
 """

@@ -43,7 +43,7 @@ export class NineRouterClient {
     const baseURL =
       config?.baseURL ||
       process.env.NINEROUTER_BASE_URL ||
-      'http://202.10.47.200:20128/v1';
+      'http://your-9router-host:20128/v1';
     const apiKey =
       config?.apiKey ||
       process.env.NINEROUTER_API_KEY ||

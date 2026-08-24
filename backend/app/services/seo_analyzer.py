@@ -166,6 +166,53 @@ class SeoAnalyzerService:
             score += 8
             checklist.append({"rule": "Keyphrase in Conclusion", "passed": False, "message": "Sebutkan keyphrase di paragraf penutup"})
 
+        # Rule 9: Subheading Paragraph Depth (Minimal 2 Paragraf per Subheading) (10 pts)
+        sections_raw = re.split(r"\n#{2,3}\s+[^\n]+", content_markdown)
+        actual_sections = [s.strip() for s in sections_raw if s.strip()]
+        sections_with_multi_paras = 0
+        for sec in actual_sections:
+            paras = [p.strip() for p in sec.split("\n\n") if p.strip() and not p.strip().startswith("[caption")]
+            if len(paras) >= 2:
+                sections_with_multi_paras += 1
+        
+        if len(actual_sections) == 0 or sections_with_multi_paras >= max(1, int(len(actual_sections) * 0.7)):
+            score += 10
+            checklist.append({
+                "rule": "Subheading Paragraph Depth",
+                "passed": True,
+                "message": f"Setiap subheading memiliki minimal 2 paragraf padat ({sections_with_multi_paras}/{len(actual_sections) or 1} bagian sesuai SOP)"
+            })
+        else:
+            score += 5
+            checklist.append({
+                "rule": "Subheading Paragraph Depth",
+                "passed": False,
+                "message": f"Ada subheading yang kurang dari 2 paragraf ({sections_with_multi_paras}/{len(actual_sections)} bagian memenuhi syarat)"
+            })
+
+        # Rule 10: Paragraph Sentence Density (Minimal 3 Kalimat per Paragraf) (10 pts)
+        all_paragraphs = [p.strip() for p in content_markdown.split("\n\n") if p.strip() and not p.strip().startswith("#") and not p.strip().startswith("[caption")]
+        valid_paras = 0
+        for p in all_paragraphs:
+            sentences = [s for s in re.split(r"[.!?]+", p) if len(s.strip().split()) >= 3]
+            if len(sentences) >= 3:
+                valid_paras += 1
+                
+        if len(all_paragraphs) == 0 or valid_paras >= max(1, int(len(all_paragraphs) * 0.6)):
+            score += 10
+            checklist.append({
+                "rule": "Paragraph Sentence Density",
+                "passed": True,
+                "message": f"Kedalaman paragraf memadai (minimal 3 kalimat per paragraf, {valid_paras}/{len(all_paragraphs) or 1} paragraf)"
+            })
+        else:
+            score += 5
+            checklist.append({
+                "rule": "Paragraph Sentence Density",
+                "passed": False,
+                "message": f"Ditemukan paragraf tipis (<3 kalimat, {valid_paras}/{len(all_paragraphs)} paragraf memenuhi syarat)"
+            })
+
         # Final normalization to max 100
         final_score = min(100, max(0, score))
 

@@ -22,7 +22,7 @@ export default function SettingsPage() {
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [serpModel, setSerpModel] = useState("ag/gemini-3.7-flash-high");
-  const [writerModel, setWriterModel] = useState("ag/claude-sonnet-4-6");
+  const [writerModel, setWriterModel] = useState("ag/claude-opus-4-6");
 
   const [isTesting, setIsTesting] = useState(false);
   const [isFetchingModels, setIsFetchingModels] = useState(false);
