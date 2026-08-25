@@ -176,4 +176,4 @@ Buka browser di: **`http://localhost:3000`**
 ---
 
 ## 📄 Lisensi
-Didistribusikan di bawah lisensi **MIT**. 100% Free & Open-Source.
+Didistribusikan di bawah lisensi **MIT**. Open-Source.
