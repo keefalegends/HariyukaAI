@@ -406,65 +406,69 @@ export default function ArticleEditorPage() {
       )}
 
       {/* Top Header Navigation */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b t-border">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b t-border">
+        {/* Left: Back button & Title */}
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
           <Link
             href="/articles"
-            className={`p-2 rounded-lg text-xs font-medium transition-colors ${tk.outlineBtn}`}
+            className={`h-9 w-9 inline-flex items-center justify-center rounded-xl text-xs font-medium transition-colors shrink-0 ${tk.outlineBtn}`}
+            title="Kembali ke Daftar Artikel"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${tk.monoBadge}`}>
                 Editor Suite
               </span>
               <span className={`text-[11px] ${tk.textFaint}`}>• ID: {articleId.slice(0, 8)}...</span>
             </div>
-            <h1 className={`text-base font-semibold ${tk.textPrimary} truncate max-w-xl mt-0.5`}>
+            <h1 className={`text-base font-semibold ${tk.textPrimary} truncate max-w-xl mt-0.5`} title={article?.title}>
               {article?.title || "Memuat Artikel..."}
             </h1>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Right: Unified Action Buttons Toolbar */}
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           {/* Copy Artikel WordPress Button */}
           <button
             type="button"
             onClick={handleCopyWordPress}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all active:scale-95 cursor-pointer border-[#d97757]/40 bg-[#d97757]/10 text-[#d97757] hover:bg-[#d97757] hover:text-white`}
+            className={`h-9 inline-flex items-center gap-1.5 px-3.5 rounded-xl text-xs font-semibold border transition-all active:scale-95 cursor-pointer whitespace-nowrap border-[#d97757]/40 bg-[#d97757]/10 text-[#d97757] hover:bg-[#d97757] hover:text-white shadow-sm`}
             title="Copy isi artikel untuk ditempel ke WordPress editor"
           >
             {copiedWordPress ? <Check className="w-3.5 h-3.5" /> : <FileCheck2 className="w-3.5 h-3.5" />}
-            <span>{copiedWordPress ? "Artikel Tersalin!" : "Copy WordPress"}</span>
+            <span>{copiedWordPress ? "Tersalin!" : "Copy WordPress"}</span>
           </button>
 
           {/* Cek AI & Plagiat Button */}
           <button
             type="button"
             onClick={handleRunChecker}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all active:scale-95 cursor-pointer ${tk.outlineBtn} hover:border-[#d97757] hover:text-[#d97757]`}
+            className={`h-9 inline-flex items-center gap-1.5 px-3.5 rounded-xl text-xs font-semibold border transition-all active:scale-95 cursor-pointer whitespace-nowrap ${tk.outlineBtn} hover:border-[#d97757] hover:text-[#d97757] shadow-sm`}
             title="Pindai Keaslian & Deteksi AI"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-[#d97757]" />
             <span>Cek AI & Plagiat</span>
           </button>
 
+          {/* Delete Button */}
           <button
             type="button"
             onClick={() => setShowDeleteModal(true)}
-            className="p-2 rounded-lg border border-red-500/20 text-stone-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+            className="h-9 w-9 inline-flex items-center justify-center rounded-xl border border-red-500/20 text-stone-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer shrink-0 shadow-sm"
             title="Hapus Artikel"
           >
             <Trash2 className="w-4 h-4" />
           </button>
 
+          {/* Save Button */}
           <button
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className={`t-accent-bg flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all active:scale-95 cursor-pointer disabled:opacity-50`}
+            className={`h-9 inline-flex items-center gap-2 px-4 rounded-xl text-xs font-semibold transition-all active:scale-95 cursor-pointer disabled:opacity-50 whitespace-nowrap shadow-sm bg-[#d97757] hover:bg-[#c26445] text-white`}
           >
             {isSaving ? (
               <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

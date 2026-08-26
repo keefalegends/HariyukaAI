@@ -67,9 +67,9 @@ export function SeoSidebar({
 
   // Score color logic
   const getScoreColor = (s: number) => {
-    if (s >= 80) return "text-emerald-400 border-emerald-500/40 bg-emerald-500/10";
-    if (s >= 60) return "text-amber-400 border-amber-500/40 bg-amber-500/10";
-    return "text-red-400 border-red-500/40 bg-red-500/10";
+    if (s >= 80) return "text-emerald-500 dark:text-emerald-400 border-emerald-500/40 bg-emerald-500/10";
+    if (s >= 60) return "text-amber-500 dark:text-amber-400 border-amber-500/40 bg-amber-500/10";
+    return "text-red-500 dark:text-red-400 border-red-500/40 bg-red-500/10";
   };
 
   const defaultChecklist =
@@ -120,13 +120,15 @@ export function SeoSidebar({
         </div>
       </div>
 
-      {/* Tab Switcher: Yoast Snippet vs Audit Checklist */}
-      <div className="flex rounded-xl p-1 bg-stone-900/60 border t-border text-xs">
+      {/* Tab Switcher: Yoast Snippet vs Audit Checklist (Fully Light/Dark Adaptive) */}
+      <div className="flex rounded-xl p-1 bg-stone-200/80 dark:bg-stone-900/80 border border-stone-300/80 dark:border-stone-800 text-xs">
         <button
           type="button"
           onClick={() => setActiveTab("snippet")}
-          className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-1.5 ${
-            activeTab === "snippet" ? "bg-[#d97757] text-white shadow-sm" : `${tk.textMuted} hover:${tk.textPrimary}`
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            activeTab === "snippet"
+              ? "bg-[#d97757] text-white shadow-sm"
+              : "text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white"
           }`}
         >
           <Globe className="w-3.5 h-3.5" />
@@ -135,30 +137,32 @@ export function SeoSidebar({
         <button
           type="button"
           onClick={() => setActiveTab("checklist")}
-          className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-1.5 ${
-            activeTab === "checklist" ? "bg-[#d97757] text-white shadow-sm" : `${tk.textMuted} hover:${tk.textPrimary}`
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            activeTab === "checklist"
+              ? "bg-[#d97757] text-white shadow-sm"
+              : "text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white"
           }`}
         >
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Audit Checklist ({defaultChecklist.filter((c) => c.passed).length}/{defaultChecklist.length})</span>
+          <span>Audit ({defaultChecklist.filter((c) => c.passed).length}/{defaultChecklist.length})</span>
         </button>
       </div>
 
       {/* ─── TAB 1: YOAST WORDPRESS SNIPPET ─── */}
       {activeTab === "snippet" && (
-        <div className="space-y-4 animate-in fade-in">
+        <div className="space-y-4 animate-in fade-in duration-150">
           {/* Google Search Result Mockup */}
-          <div className="rounded-xl border t-border bg-[#141210] p-3.5 space-y-1.5 font-sans">
-            <div className="flex items-center gap-2 text-[10px] text-stone-400">
-              <span className="w-4 h-4 rounded-full bg-stone-800 flex items-center justify-center text-[8px] text-[#d97757]">
+          <div className="rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-100/90 dark:bg-[#141210] p-3.5 space-y-1.5 font-sans">
+            <div className="flex items-center gap-2 text-[10px] text-stone-500 dark:text-stone-400">
+              <span className="w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-800 flex items-center justify-center text-[8px] text-[#d97757]">
                 🌐
               </span>
               <span className="truncate">hariyuka.my.id › {activeSlug}</span>
             </div>
-            <h4 className="text-xs font-semibold text-[#8ab4f8] hover:underline cursor-pointer leading-snug line-clamp-1">
+            <h4 className="text-xs font-semibold text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer leading-snug line-clamp-1">
               {activeSeoTitle}
             </h4>
-            <p className="text-[11px] text-stone-400 leading-tight line-clamp-2">
+            <p className="text-[11px] text-stone-600 dark:text-stone-400 leading-tight line-clamp-2">
               {activeMetaDesc}
             </p>
           </div>
@@ -172,13 +176,13 @@ export function SeoSidebar({
                 <button
                   type="button"
                   onClick={() => copyToClipboard(targetKeyword, "kw")}
-                  className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-medium cursor-pointer`}
+                  className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-semibold cursor-pointer`}
                 >
-                  {copiedKey === "kw" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copiedKey === "kw" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                   {copiedKey === "kw" ? "Tersalin!" : "Copy"}
                 </button>
               </div>
-              <div className={`p-2 rounded-lg border t-border t-bg-tag font-mono text-[11px] ${tk.textPrimary}`}>
+              <div className="p-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1c1917] font-mono text-[11px] text-stone-900 dark:text-stone-100">
                 {targetKeyword}
               </div>
             </div>
@@ -188,15 +192,15 @@ export function SeoSidebar({
               <div className="flex items-center justify-between text-[11px]">
                 <span className={`font-semibold ${tk.textMuted}`}>SEO Title</span>
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-mono ${activeSeoTitle.length <= 60 ? "text-emerald-400" : "text-amber-400"}`}>
+                  <span className={`text-[10px] font-mono ${activeSeoTitle.length <= 60 ? "text-emerald-500 dark:text-emerald-400 font-bold" : "text-amber-500 font-bold"}`}>
                     {activeSeoTitle.length}/60
                   </span>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(activeSeoTitle, "title")}
-                    className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-medium cursor-pointer`}
+                    className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-semibold cursor-pointer`}
                   >
-                    {copiedKey === "title" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copiedKey === "title" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                     {copiedKey === "title" ? "Tersalin!" : "Copy"}
                   </button>
                 </div>
@@ -205,7 +209,7 @@ export function SeoSidebar({
                 type="text"
                 value={activeSeoTitle}
                 onChange={(e) => onUpdateMetadata?.({ seoTitle: e.target.value })}
-                className={`w-full p-2 rounded-lg border t-border t-bg-tag text-[11px] ${tk.textPrimary} focus:outline-none focus:border-[#d97757]`}
+                className="w-full p-2 rounded-lg border border-stone-300 dark:border-stone-800 bg-white dark:bg-[#1c1917] text-[11px] text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#d97757] focus:ring-1 focus:ring-[#d97757]"
               />
             </div>
 
@@ -216,9 +220,9 @@ export function SeoSidebar({
                 <button
                   type="button"
                   onClick={() => copyToClipboard(activeSlug, "slug")}
-                  className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-medium cursor-pointer`}
+                  className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-semibold cursor-pointer`}
                 >
-                  {copiedKey === "slug" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copiedKey === "slug" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                   {copiedKey === "slug" ? "Tersalin!" : "Copy"}
                 </button>
               </div>
@@ -226,7 +230,7 @@ export function SeoSidebar({
                 type="text"
                 value={activeSlug}
                 onChange={(e) => onUpdateMetadata?.({ slug: e.target.value })}
-                className={`w-full p-2 rounded-lg border t-border t-bg-tag font-mono text-[11px] ${tk.textPrimary} focus:outline-none focus:border-[#d97757]`}
+                className="w-full p-2 rounded-lg border border-stone-300 dark:border-stone-800 bg-white dark:bg-[#1c1917] font-mono text-[11px] text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#d97757] focus:ring-1 focus:ring-[#d97757]"
               />
             </div>
 
@@ -235,15 +239,15 @@ export function SeoSidebar({
               <div className="flex items-center justify-between text-[11px]">
                 <span className={`font-semibold ${tk.textMuted}`}>Meta Description</span>
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-mono ${activeMetaDesc.length >= 120 && activeMetaDesc.length <= 155 ? "text-emerald-400" : "text-amber-400"}`}>
+                  <span className={`text-[10px] font-mono ${activeMetaDesc.length >= 120 && activeMetaDesc.length <= 155 ? "text-emerald-500 dark:text-emerald-400 font-bold" : "text-amber-500 font-bold"}`}>
                     {activeMetaDesc.length}/155
                   </span>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(activeMetaDesc, "desc")}
-                    className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-medium cursor-pointer`}
+                    className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-semibold cursor-pointer`}
                   >
-                    {copiedKey === "desc" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    {copiedKey === "desc" ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                     {copiedKey === "desc" ? "Tersalin!" : "Copy"}
                   </button>
                 </div>
@@ -252,7 +256,7 @@ export function SeoSidebar({
                 rows={3}
                 value={activeMetaDesc}
                 onChange={(e) => onUpdateMetadata?.({ metaDescription: e.target.value })}
-                className={`w-full p-2 rounded-lg border t-border t-bg-tag text-[11px] ${tk.textPrimary} focus:outline-none focus:border-[#d97757] resize-none leading-relaxed`}
+                className="w-full p-2 rounded-lg border border-stone-300 dark:border-stone-800 bg-white dark:bg-[#1c1917] text-[11px] text-stone-900 dark:text-stone-100 focus:outline-none focus:border-[#d97757] focus:ring-1 focus:ring-[#d97757] resize-none leading-relaxed"
               />
             </div>
 
@@ -263,7 +267,7 @@ export function SeoSidebar({
                 const fullSnippet = `Focus Keyphrase: ${targetKeyword}\nSEO Title: ${activeSeoTitle}\nSlug: ${activeSlug}\nMeta Description: ${activeMetaDesc}`;
                 copyToClipboard(fullSnippet, "all");
               }}
-              className={`w-full py-2.5 px-3 rounded-xl border border-[#d97757]/40 bg-[#d97757]/10 hover:bg-[#d97757] text-[#d97757] hover:text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm`}
+              className="w-full py-2.5 px-3 rounded-xl border border-[#d97757]/40 bg-[#d97757]/10 hover:bg-[#d97757] text-[#d97757] hover:text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98"
             >
               {copiedKey === "all" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedKey === "all" ? "Semua Snippet Tersalin!" : "Copy Paket Lengkap Yoast"}</span>
@@ -274,7 +278,7 @@ export function SeoSidebar({
 
       {/* ─── TAB 2: AUDIT CHECKLIST & METRICS ─── */}
       {activeTab === "checklist" && (
-        <div className="space-y-4 animate-in fade-in">
+        <div className="space-y-4 animate-in fade-in duration-150">
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className={`t-bg-tag border t-border rounded-xl p-3 space-y-1`}>
@@ -295,11 +299,11 @@ export function SeoSidebar({
 
             <div className={`t-bg-tag border t-border rounded-xl p-3 space-y-1`}>
               <div className={`flex items-center gap-1.5 text-[10px] font-medium ${tk.textFaint}`}>
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                 Density Keyphrase
               </div>
-              <div className="text-sm font-bold text-emerald-400">
-                {keywordDensity}% <span className="text-[10px] font-normal text-stone-400">({keywordCount || Math.round(wordCount * (keywordDensity / 100))}x)</span>
+              <div className="text-sm font-bold text-emerald-500 dark:text-emerald-400">
+                {keywordDensity}% <span className="text-[10px] font-normal text-stone-500 dark:text-stone-400">({keywordCount || Math.round(wordCount * (keywordDensity / 100))}x)</span>
               </div>
             </div>
 
@@ -318,7 +322,7 @@ export function SeoSidebar({
               <span className={`text-xs font-semibold uppercase tracking-wider ${tk.textPrimary}`}>
                 Yoast SEO Analysis Checklist
               </span>
-              <span className="text-[10px] font-mono text-emerald-400">
+              <span className="text-[10px] font-mono text-emerald-500 dark:text-emerald-400 font-bold">
                 {defaultChecklist.filter((c) => c.passed).length}/{defaultChecklist.length} Lolos
               </span>
             </div>
@@ -328,16 +332,18 @@ export function SeoSidebar({
                 <div
                   key={idx}
                   className={`flex items-start gap-2.5 text-xs rounded-xl p-2.5 border transition-colors ${
-                    item.passed ? "border-emerald-500/20 bg-emerald-950/10" : "border-red-500/20 bg-red-950/10"
+                    item.passed
+                      ? "border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/10"
+                      : "border-red-500/30 bg-red-500/5 dark:bg-red-950/10"
                   }`}
                 >
                   {item.passed ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
                   ) : (
-                    <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <XCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
                   )}
                   <div className="min-w-0">
-                    <div className={`font-semibold text-xs ${item.passed ? tk.textPrimary : "text-red-300"}`}>
+                    <div className={`font-semibold text-xs ${item.passed ? tk.textPrimary : "text-red-500 dark:text-red-300"}`}>
                       {item.rule}
                     </div>
                     <div className={`text-[11px] ${tk.textMuted} leading-tight mt-0.5`}>
@@ -361,11 +367,11 @@ export function SeoSidebar({
                     key={i}
                     className={`text-[11px] px-2 py-1 rounded-md border flex items-center gap-1 ${
                       sk.found
-                        ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-400"
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-medium"
                         : `${tk.tagBg} ${tk.textFaint}`
                     }`}
                   >
-                    {sk.found ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : "•"}
+                    {sk.found ? <CheckCircle2 className="w-3 h-3 text-emerald-500 dark:text-emerald-400" /> : "•"}
                     {sk.keyword}
                   </span>
                 ))}
