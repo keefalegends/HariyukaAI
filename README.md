@@ -84,7 +84,7 @@ graph TD
 | **Rich Text Editor** | Tiptap Rich Editor (Markdown & HTML Live Synchronization) |
 | **Backend Engine** | Python 3.11 FastAPI, Pydantic v2, AsyncIO, SSE Streaming |
 | **AI Gateway** | 9Router Proxy (OpenAI Compatible) via Async OpenAI SDK |
-| **AI Model Routing** | `ag/gemini-3.7-flash-high` (SERP/Outline) & `ag/claude-opus-4-6` (Writer/SEO) |
+| **AI Model Routing** | `ag/gemini-3.7-flash-high` (SERP/Outline) & `ag/claude-opus-4-6-thinking` (Writer/SEO) |
 | **Database & Persistence** | Persistent Local JSON Database (`backend/data/`) |
 | **Deployment & Proxy** | Docker Compose Standalone (~50MB RAM), Caddy Server Reverse Proxy |
 
@@ -159,8 +159,8 @@ NINEROUTER_API_KEY=your_9router_api_key_here
 # Model Routing Aliases
 MODEL_SERP_EXTRACTOR=ag/gemini-3.7-flash-high
 MODEL_OUTLINE_GENERATOR=ag/gemini-3.7-flash-high
-MODEL_SECTION_WRITER=ag/claude-opus-4-6
-MODEL_SEO_POLISHER=ag/claude-opus-4-6
+MODEL_SECTION_WRITER=ag/claude-opus-4-6-thinking
+MODEL_SEO_POLISHER=ag/claude-opus-4-6-thinking
 
 # Operator Static Authentication
 AUTH_USERS=keefa9:password123,salna9:password123
