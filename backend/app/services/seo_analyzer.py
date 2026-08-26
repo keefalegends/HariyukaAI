@@ -102,18 +102,62 @@ class SeoAnalyzerService:
         else:
             checklist.append({"rule": "Keyphrase Density", "passed": False, "message": "Keyphrase utama tidak ditemukan dalam konten!"})
 
-        # Rule 4: Keyphrase in Subheadings (H2 / H3) (15 pts)
+        # Rule 4: Keyphrase in Subheadings (H2 / H3) (15 pts - Adaptive)
         subheadings = re.findall(r"^#{2,3}\s+(.+)", content_markdown, re.MULTILINE)
         kw_in_subheadings = [sh for sh in subheadings if kw_clean in sh.lower()]
-        if 2 <= len(kw_in_subheadings) <= 4:
-            score += 15
-            checklist.append({"rule": "Keyphrase in Subheadings", "passed": True, "message": f"{len(kw_in_subheadings)} sub-heading mengandung keyphrase (Sangat Baik)"})
-        elif len(kw_in_subheadings) == 1 or len(kw_in_subheadings) > 4:
-            score += 12
-            checklist.append({"rule": "Keyphrase in Subheadings", "passed": True, "message": f"{len(kw_in_subheadings)} sub-heading mengandung keyphrase"})
-        else:
-            score += 5
-            checklist.append({"rule": "Keyphrase in Subheadings", "passed": False, "message": "Sertakan keyphrase di minimal 2 sub-heading H2/H3"})
+        count_kw_sub = len(kw_in_subheadings)
+
+        if article_type == "pillar":
+            if 2 <= count_kw_sub <= 5:
+                score += 15
+                checklist.append({
+                    "rule": "Keyphrase in Subheadings",
+                    "passed": True,
+                    "message": f"{count_kw_sub} sub-heading mengandung keyphrase (Sangat Baik untuk Artikel Pilar)"
+                })
+            elif count_kw_sub == 1:
+                score += 10
+                checklist.append({
+                    "rule": "Keyphrase in Subheadings",
+                    "passed": False,
+                    "message": "1 sub-heading mengandung keyphrase (Untuk Artikel Pilar 1.500+ kata, disarankan minimal 2 sub-heading)"
+                })
+            elif count_kw_sub > 5:
+                score += 12
+                checklist.append({
+                    "rule": "Keyphrase in Subheadings",
+                    "passed": True,
+                    "message": f"{count_kw_sub} sub-heading mengandung keyphrase (Cukup tinggi, jaga agar tetap natural)"
+                })
+            else:
+                score += 5
+                checklist.append({
+                    "rule": "Keyphrase in Subheadings",
+                    "passed": False,
+                    "message": "Sertakan keyphrase di minimal 2 sub-heading H2/H3"
+                })
+        else:  # backlink_article & backlink_product (500–599 kata)
+            if count_kw_sub >= 2:
+                score += 15
+                checklist.append({
+                    "rule": "Keyphrase in Subheadings",
+                    "passed": True,
+                    "message": f"{count_kw_sub} sub-heading mengandung keyphrase (Sangat Optimal & Kuat)"
+                })
+            elif count_kw_sub == 1:
+                score += 15
+                checklist.append({
+                    "rule": "Keyphrase in Subheadings",
+                    "passed": True,
+                    "message": "1 sub-heading mengandung keyphrase (Lolos SOP Backlink. Catatan: Tambahkan ke 2 sub-heading jika SOP agensi mewajibkan)"
+                })
+            else:
+                score += 5
+                checklist.append({
+                    "rule": "Keyphrase in Subheadings",
+                    "passed": False,
+                    "message": "Sertakan focus keyphrase di minimal 1 sub-heading H2/H3"
+                })
 
         # Rule 5: Keyphrase in Image Alt / Pure Text Mode (10 pts)
         has_image = bool(
