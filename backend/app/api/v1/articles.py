@@ -18,6 +18,7 @@ from app.schemas.article import (
 from app.pipeline.orchestrator import orchestrator
 from app.services.seo_analyzer import seo_analyzer
 from app.db.storage import storage
+from app.config import settings
 
 router = APIRouter(prefix="/articles", tags=["Articles"])
 
@@ -35,6 +36,14 @@ async def generate_outline_endpoint(
     Step 1 & 2: Analyzes SERP, search intent, and creates an interactive H2/H3 outline based on article_type.
     Pauses at Step 2 to allow user review.
     """
+    # Pre-flight validation: Check 9Router API Key configuration
+    api_key = (settings.NINEROUTER_API_KEY or "").strip()
+    if not api_key or api_key in ["your_9router_api_key_here", "placeholder_key"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Kunci API 9Router belum dikonfigurasi! Buka menu 'API & Model' di sidebar kiri untuk memasukkan Base URL dan API Key 9Router Anda."
+        )
+
     article_id = str(uuid.uuid4())
     job_id = str(uuid.uuid4())
 
@@ -151,6 +160,14 @@ async def continue_writing_endpoint(
     if article_id not in storage.articles:
         raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
 
+    # Pre-flight validation: Check 9Router API Key configuration
+    api_key = (settings.NINEROUTER_API_KEY or "").strip()
+    if not api_key or api_key in ["your_9router_api_key_here", "placeholder_key"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Kunci API 9Router belum dikonfigurasi! Buka menu 'API & Model' di sidebar kiri untuk memasukkan Base URL dan API Key 9Router Anda."
+        )
+
     article = storage.articles[article_id]
     
     # Update article with latest outline and optional title changes
@@ -199,6 +216,7 @@ async def continue_writing_endpoint(
             article["slug"] = result.get("slug")
             article["meta_description"] = result.get("meta_description")
             article["seo_title"] = result.get("seo_title", article.get("title"))
+            article["tags"] = result.get("tags")
             article["status"] = "completed"
             article["updated_at"] = datetime.utcnow()
             storage.save_articles()
@@ -279,6 +297,8 @@ async def update_article_content(article_id: str, req: UpdateArticleContentReque
         article["meta_description"] = req.meta_description
     if req.seo_title is not None:
         article["seo_title"] = req.seo_title
+    if req.tags is not None:
+        article["tags"] = req.tags
 
     article["updated_at"] = datetime.utcnow()
     storage.save_articles()

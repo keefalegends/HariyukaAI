@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import Link from "next/link";
+import { AlertTriangle, Settings } from "lucide-react";
 import { StepInput } from "./_components/step-input";
 import { StepOutline, type ArticleOutline } from "./_components/step-outline";
 import { StepGeneration } from "./_components/step-generation";
@@ -10,6 +12,7 @@ import { getApiUrl } from "@/lib/api-config";
 function GeneratorContent() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [articleId, setArticleId] = useState<string>("");
   const [targetKeyword, setTargetKeyword] = useState("");
   const [outline, setOutline] = useState<ArticleOutline | null>(null);
@@ -18,6 +21,7 @@ function GeneratorContent() {
   // STEP 1 -> STEP 2: Trigger Outline Generation
   const handleInputSubmit = async (formData: any) => {
     setIsLoading(true);
+    setErrorBanner(null);
     setTargetKeyword(formData.target_keyword);
 
     setTerminalStatus("running", `Analisis SERP: "${formData.target_keyword}"`);
@@ -31,6 +35,16 @@ function GeneratorContent() {
         body: JSON.stringify(formData),
       });
 
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const errMsg = errData.detail || "Gagal menghubungi backend gateway.";
+        setIsLoading(false);
+        setErrorBanner(errMsg);
+        logTerminal("ERR", errMsg);
+        setTerminalStatus("error", "Koneksi 9Router Belum Siap");
+        return;
+      }
+
       const data = await res.json();
       if (data.article_id) {
         setArticleId(data.article_id);
@@ -42,6 +56,14 @@ function GeneratorContent() {
         eventSource.onmessage = (event) => {
           try {
             const payload = JSON.parse(event.data);
+            if (payload.event === "error") {
+              setIsLoading(false);
+              const errMsg = payload.data?.message || "Terjadi kesalahan pada AI Gateway";
+              logTerminal("ERR", `Gagal: ${errMsg}`);
+              setTerminalStatus("error", errMsg);
+              setErrorBanner(errMsg);
+              eventSource.close();
+            }
             if (payload.event === "step_start") {
               logTerminal("API", `[Step ${payload.data?.step}] ${payload.data?.name}`);
               setTerminalStatus("running", payload.data?.name);
@@ -69,8 +91,10 @@ function GeneratorContent() {
       }
     } catch (err) {
       console.error("Failed to generate outline:", err);
-      logTerminal("ERR", `Koneksi backend gagal: ${String(err)}`);
+      const errMsg = `Koneksi backend gagal: ${String(err)}`;
+      logTerminal("ERR", errMsg);
       setTerminalStatus("error", "Koneksi backend gagal");
+      setErrorBanner(errMsg);
       setIsLoading(false);
     }
   };
@@ -78,13 +102,14 @@ function GeneratorContent() {
   // STEP 2 -> STEP 3: Continue to Writing Phase
   const handleOutlineContinue = async (updatedOutline: ArticleOutline, customTitle?: string) => {
     setIsLoading(true);
+    setErrorBanner(null);
     setOutline(updatedOutline);
 
     logTerminal("JOB", `Menyetujui outline (${updatedOutline.sections?.length} bagian). Memulai penulisan...`);
     setTerminalStatus("running", "Menulis konten...");
 
     try {
-      await fetch(getApiUrl(`/api/v1/articles/${articleId}/continue-writing`), {
+      const res = await fetch(getApiUrl(`/api/v1/articles/${articleId}/continue-writing`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -92,6 +117,16 @@ function GeneratorContent() {
           title: customTitle,
         }),
       });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const errMsg = errData.detail || "Gagal memulai penulisan artikel.";
+        setIsLoading(false);
+        setErrorBanner(errMsg);
+        logTerminal("ERR", errMsg);
+        setTerminalStatus("error", "Koneksi 9Router Belum Siap");
+        return;
+      }
     } catch (err) {
       console.warn("Backend continue writing notice:", err);
       logTerminal("ERR", `Notice continue writing: ${String(err)}`);
@@ -103,6 +138,37 @@ function GeneratorContent() {
 
   return (
     <div className="py-2">
+      {/* Error / Missing API Key Warning Banner */}
+      {errorBanner && (
+        <div className="mb-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-xs space-y-2.5 animate-in fade-in">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-red-500/20 text-red-500 shrink-0">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-bold text-red-500 text-xs">Peringatan: Tidak Bisa Memulai Generator</h4>
+              <p className="text-stone-300 text-[11px] mt-0.5 leading-relaxed">{errorBanner}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 pt-1 pl-11">
+            <Link
+              href="/settings"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#d97757] hover:bg-[#c26445] text-white font-semibold text-xs transition-all shadow-sm active:scale-95"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span>Buka Menu API & Model</span>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setErrorBanner(null)}
+              className="px-3.5 py-1.5 rounded-xl border border-stone-700 text-stone-400 hover:text-white text-xs transition-all cursor-pointer"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
       {currentStep === 1 && (
         <StepInput onSubmit={handleInputSubmit} isLoading={isLoading} />
       )}

@@ -461,7 +461,7 @@ Return the final polished markdown:
         return polished
 
     # --------------------------------------------------------------------------
-    # STEP 5: Yoast SEO Snippet & Metadata Generator (Slug & Meta Description)
+    # STEP 5: Yoast SEO Snippet & Metadata Generator (Slug, Meta Desc, Tags)
     # --------------------------------------------------------------------------
     async def generate_seo_metadata(
         self,
@@ -474,16 +474,23 @@ Return the final polished markdown:
         - Slug: strictly clean permalink containing the primary keyphrase
         - Meta Description: 130-155 characters, includes primary keyphrase at the start, engaging call to action
         - SEO Title: High CTR Title under 60 characters
+        - Tags: 8-10 high-relevance WordPress tags / keyphrase synonyms separated strictly by commas (no numbering)
         """
         clean_slug = re.sub(r"[^a-zA-Z0-9\s-]", "", target_keyword).strip().lower()
         default_slug = re.sub(r"[\s-]+", "-", clean_slug)
+        
+        # Smart fallback for tags (concise 1-3 word phrases)
+        kw_words = [w for w in re.sub(r"[^a-zA-Z0-9\s]", "", target_keyword).split() if len(w) > 2]
+        core_kw = " ".join(kw_words[:2]) if kw_words else "seo"
+        default_tags = f"{core_kw}, tips {core_kw}, rekomendasi {core_kw}, panduan {core_kw}, cara memilih {core_kw}"
 
         system_prompt = """You are a Yoast SEO WordPress Metadata Specialist.
-Generate clean, click-worthy metadata in JSON format:
+Generate clean, concise, click-worthy metadata in JSON format:
 {
   "seo_title": "Max 60 chars, includes focus keyphrase naturally",
   "slug": "url-friendly-slug-containing-only-keyphrase",
-  "meta_description": "130-155 characters, MUST contain primary keyphrase near the beginning, high CTR appeal without em-dashes"
+  "meta_description": "130-155 characters, MUST contain primary keyphrase near the beginning, high CTR appeal without em-dashes",
+  "tags": "8 to 10 SHORT keyword tags (each tag MUST be only 1 to 3 words max, Indonesian), strictly separated by commas. NEVER include long sentences or repeat the full article title! (e.g. 'steamer rice cooker, inner pot keramik, wadah kukusan, hemat listrik, tips memilih, rice cooker awet, panci anti lengket, peralatan dapur')"
 }"""
         user_prompt = f"""
 Focus Keyphrase: "{target_keyword}"
@@ -504,16 +511,28 @@ Generate the JSON metadata:
                 response_format={"type": "json_object"}
             )
             data = self.extract_json(raw)
+            raw_tags = data.get("tags")
+            if isinstance(raw_tags, list):
+                clean_list = [re.sub(r"^\d+[\.\-\)]\s*", "", str(t)).strip().strip('"\'') for t in raw_tags if t]
+                tags_str = ", ".join(clean_list)
+            elif isinstance(raw_tags, str):
+                parts = [re.sub(r"^\d+[\.\-\)]\s*", "", p).strip().strip('"\'') for p in raw_tags.split(",") if p.strip()]
+                tags_str = ", ".join(parts)
+            else:
+                tags_str = default_tags
+
             return {
                 "seo_title": data.get("seo_title", title)[:65],
                 "slug": data.get("slug", default_slug),
-                "meta_description": data.get("meta_description", f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini.")[:160]
+                "meta_description": data.get("meta_description", f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini.")[:160],
+                "tags": tags_str
             }
         except Exception:
             return {
                 "seo_title": title[:65],
                 "slug": default_slug,
-                "meta_description": f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini."
+                "meta_description": f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini.",
+                "tags": default_tags
             }
 
 

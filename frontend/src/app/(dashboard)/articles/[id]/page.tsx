@@ -34,6 +34,7 @@ export default function ArticleEditorPage() {
   const [slug, setSlug] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [seoTitle, setSeoTitle] = useState("");
+  const [tags, setTags] = useState("");
   const [seoAudit, setSeoAudit] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -62,6 +63,7 @@ export default function ArticleEditorPage() {
           setSlug(data.slug || "");
           setMetaDescription(data.meta_description || "");
           setSeoTitle(data.seo_title || data.title || "");
+          setTags(data.tags || "");
           setSeoAudit(data.seo_audit || null);
         }
       } catch (err) {
@@ -78,10 +80,11 @@ export default function ArticleEditorPage() {
     setContentMarkdown(markdown);
   };
 
-  const handleUpdateMetadata = (meta: { slug?: string; metaDescription?: string; seoTitle?: string }) => {
+  const handleUpdateMetadata = (meta: { slug?: string; metaDescription?: string; seoTitle?: string; tags?: string }) => {
     if (meta.slug !== undefined) setSlug(meta.slug);
     if (meta.metaDescription !== undefined) setMetaDescription(meta.metaDescription);
     if (meta.seoTitle !== undefined) setSeoTitle(meta.seoTitle);
+    if (meta.tags !== undefined) setTags(meta.tags);
   };
 
   const handleCopyWordPress = () => {
@@ -104,6 +107,7 @@ export default function ArticleEditorPage() {
           slug: slug,
           meta_description: metaDescription,
           seo_title: seoTitle,
+          tags: tags,
         }),
       });
 
@@ -114,6 +118,7 @@ export default function ArticleEditorPage() {
         setSlug(updated.slug || slug);
         setMetaDescription(updated.meta_description || metaDescription);
         setSeoTitle(updated.seo_title || seoTitle);
+        setTags(updated.tags || tags);
         setSavedSuccess(true);
         setTimeout(() => setSavedSuccess(false), 2000);
       }
@@ -506,6 +511,7 @@ export default function ArticleEditorPage() {
             slug={slug}
             metaDescription={metaDescription}
             seoTitle={seoTitle}
+            tags={tags}
             onUpdateMetadata={handleUpdateMetadata}
           />
         </div>

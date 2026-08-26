@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Layers,
   Sparkles,
+  Hash,
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
@@ -31,7 +32,8 @@ interface SeoSidebarProps {
   slug?: string;
   metaDescription?: string;
   seoTitle?: string;
-  onUpdateMetadata?: (meta: { slug?: string; metaDescription?: string; seoTitle?: string }) => void;
+  tags?: string;
+  onUpdateMetadata?: (meta: { slug?: string; metaDescription?: string; seoTitle?: string; tags?: string }) => void;
 }
 
 export function SeoSidebar({
@@ -46,6 +48,7 @@ export function SeoSidebar({
   slug = "",
   metaDescription = "",
   seoTitle = "",
+  tags = "",
   onUpdateMetadata,
 }: SeoSidebarProps) {
   const tk = useTokens();
@@ -58,6 +61,14 @@ export function SeoSidebar({
   const activeMetaDesc =
     metaDescription ||
     `Panduan lengkap seputar ${targetKeyword}. Temukan tips penting, cara memilih yang tepat, dan rekomendasi terbaik di sini.`;
+  const activeTags =
+    tags ||
+    `${targetKeyword}, tips ${targetKeyword}, cara ${targetKeyword}, panduan ${targetKeyword}, rekomendasi ${targetKeyword}, review ${targetKeyword}, trik ${targetKeyword}, fitur ${targetKeyword}, keunggulan ${targetKeyword}, spesifikasi ${targetKeyword}`;
+
+  const tagsList = activeTags
+    .split(",")
+    .map((t) => t.trim().replace(/^["']|["']$/g, "").replace(/^\d+[\.\-\)]\s*/, ""))
+    .filter(Boolean);
 
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -78,11 +89,11 @@ export function SeoSidebar({
       : [
           { rule: "Keyphrase in Introduction", passed: true, message: "Keyphrase muncul di 150 kata pertama (Paragraf pembuka)" },
           { rule: "Keyphrase Density", passed: true, message: `Keyphrase muncul ${keywordCount || 6} kali (~${keywordDensity}% - Optimal 5–7x)` },
-          { rule: "Keyphrase in Subheadings", passed: true, message: "Minimal 2 sub-heading H2/H3 mengandung keyphrase" },
+          { rule: "Keyphrase in Subheadings", passed: true, message: "Sub-heading H2/H3 mengandung keyphrase sesuai SOP" },
           { rule: "Subheading Paragraph Depth", passed: true, message: "Setiap subheading memiliki minimal 2 paragraf padat" },
           { rule: "Paragraph Sentence Density", passed: true, message: "Kedalaman paragraf memadai (minimal 3 kalimat per paragraf)" },
           { rule: "Single Title (H1)", passed: true, message: "Hanya ada 1 tag H1, body konten terstruktur H2/H3" },
-          { rule: "Text Length", passed: true, message: `${wordCount} kata (Sesuai SOP Target Panjang Kata 500-599)` },
+          { rule: "Text Length", passed: true, message: `${wordCount} kata (Sesuai SOP Target Panjang Kata)` },
           { rule: "Links in Content", passed: true, message: "Tautan kontekstual & brand terpasang natural" },
           { rule: "Keyphrase in Conclusion", passed: true, message: "Keyphrase ditegaskan kembali di bagian kesimpulan" },
         ];
@@ -260,14 +271,59 @@ export function SeoSidebar({
               />
             </div>
 
+            {/* 5. WordPress Tags & Sinonim (10 Comma-Separated Tags) */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-1.5">
+                  <Hash className="w-3.5 h-3.5 text-[#d97757]" />
+                  <span className={`font-semibold ${tk.textMuted}`}>WordPress Tags & Sinonim</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                    {tagsList.length} tags
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(activeTags, "tags")}
+                    className={`flex items-center gap-1 text-[10px] ${tk.accentText} hover:underline font-semibold cursor-pointer`}
+                    title="Salin semua tag dipisahkan koma untuk ditempel ke WordPress"
+                  >
+                    {copiedKey === "tags" ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    {copiedKey === "tags" ? "Tersalin!" : "Copy Tags"}
+                  </button>
+                </div>
+              </div>
+              <textarea
+                rows={2}
+                value={activeTags}
+                onChange={(e) => onUpdateMetadata?.({ tags: e.target.value })}
+                placeholder="tag 1, tag 2, tag 3..."
+                className={`w-full p-2 rounded-lg border t-border t-bg-tag font-mono text-[11px] ${tk.textPrimary} focus:outline-none focus:border-[#d97757] resize-none leading-relaxed`}
+              />
+              {/* Interactive Tag Chips Preview */}
+              {tagsList.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1.5">
+                  {tagsList.map((t, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center text-[10px] px-2 py-0.5 rounded-md border border-[#d97757]/30 bg-[#d97757]/10 text-[#d97757] font-medium max-w-[200px] truncate"
+                      title={`#${t}`}
+                    >
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Copy All Button */}
             <button
               type="button"
               onClick={() => {
-                const fullSnippet = `Focus Keyphrase: ${targetKeyword}\nSEO Title: ${activeSeoTitle}\nSlug: ${activeSlug}\nMeta Description: ${activeMetaDesc}`;
+                const fullSnippet = `Focus Keyphrase: ${targetKeyword}\nSEO Title: ${activeSeoTitle}\nSlug: ${activeSlug}\nMeta Description: ${activeMetaDesc}\nWordPress Tags: ${activeTags}`;
                 copyToClipboard(fullSnippet, "all");
               }}
-              className="w-full py-2.5 px-3 rounded-xl border border-[#d97757]/40 bg-[#d97757]/10 hover:bg-[#d97757] text-[#d97757] hover:text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98"
+              className="w-full py-2.5 px-3 rounded-xl border border-[#d97757]/40 bg-[#d97757]/10 hover:bg-[#d97757] text-[#d97757] hover:text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 mt-2"
             >
               {copiedKey === "all" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedKey === "all" ? "Semua Snippet Tersalin!" : "Copy Paket Lengkap Yoast"}</span>

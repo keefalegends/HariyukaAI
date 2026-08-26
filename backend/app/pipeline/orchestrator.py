@@ -283,6 +283,7 @@ class ArticlePipelineOrchestrator:
             "slug": seo_meta.get("slug"),
             "meta_description": seo_meta.get("meta_description"),
             "seo_title": seo_meta.get("seo_title", title),
+            "tags": seo_meta.get("tags"),
             "article_type": article_type,
             "content_markdown": polished_markdown,
             "word_count": seo_audit["word_count"],

@@ -168,5 +168,22 @@
     ],
     "error_message": null,
     "updated_at": "2026-08-22T11:21:13.482321"
+  },
+  "921a31d7-6099-41dd-8c5a-2305eb99096a": {
+    "id": "921a31d7-6099-41dd-8c5a-2305eb99096a",
+    "article_id": "97778a79-c781-4cbd-bf00-28c3aad8e493",
+    "current_step": 1,
+    "total_steps": 5,
+    "step_name": "serp_analysis",
+    "progress_percentage": 10,
+    "status": "failed",
+    "logs": [
+      {
+        "time": "2026-08-26T06:55:33.494678",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": "Connection error.",
+    "updated_at": "2026-08-26T06:55:43.061256"
   }
 }

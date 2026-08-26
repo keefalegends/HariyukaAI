@@ -719,183 +719,33 @@
     "created_at": "2026-08-22T10:47:47.320852",
     "updated_at": "2026-08-22T10:49:23.426099"
   },
-  "5e97d921-428a-4d95-b321-9ea90b5b4938": {
-    "id": "5e97d921-428a-4d95-b321-9ea90b5b4938",
+  "97778a79-c781-4cbd-bf00-28c3aad8e493": {
+    "id": "97778a79-c781-4cbd-bf00-28c3aad8e493",
     "user_id": "default-user",
     "project_id": null,
-    "title": "7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama",
+    "title": "Artikel: 7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama",
     "target_keyword": "7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama",
-    "article_type": "backlink_article",
+    "article_type": "backlink_product",
     "secondary_keywords": [],
     "language": "id",
     "tone": "authoritative",
     "target_length": 550,
-    "outline_json": {
-      "title": "7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama",
-      "estimated_total_words": 570,
-      "sections": [
-        {
-          "id": "section-1",
-          "heading": "Pentingnya Menemukan Rice Cooker Multifungsi Berkualitas untuk Dapur Modern",
-          "level": "h2",
-          "target_word_count": 120,
-          "key_points": [
-            "Membuka artikel dengan tantangan memilih alat masak serbaguna yang tahan lama untuk kebutuhan keluarga",
-            "Menghadirkan 7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama pada paragraf pembuka sebagai solusi praktis",
-            "Menyoroti efisiensi memasak nasi sekaligus mengukus lauk untuk menghemat waktu dan energi"
-          ],
-          "keywords_to_include": [
-            "7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama",
-            "rice cooker digital multifungsi"
-          ],
-          "subsections": []
-        },
-        {
-          "id": "section-2",
-          "heading": "Panduan Praktis dan 7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama",
-          "level": "h2",
-          "target_word_count": 280,
-          "key_points": [
-            "Prioritaskan material wadah kukusan rice cooker stainless steel atau baki kukusan food grade bpa free agar makanan tetap higienis",
-            "Pilih inner pot anti lengket bebas pfoa berlapis keramik tebal untuk distribusi panas optimal dan ketahanan gores",
-            "Cek efisiensi daya dengan memilih rice cooker low watt hemat listrik guna menghemat pengeluaran bulanan",
-            "Sesuaikan kapasitas wadah kukusan dan panci utama dengan porsi harian keluarga",
-            "Pastikan sistem ventilasi uap dan tutup atas mudah dibongkar pasang untuk memudahkan pembersihan rutin"
-          ],
-          "keywords_to_include": [
-            "7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama",
-            "wadah kukusan rice cooker stainless steel",
-            "baki kukusan food grade bpa free",
-            "inner pot anti lengket bebas pfoa",
-            "rice cooker low watt hemat listrik"
-          ],
-          "subsections": []
-        },
-        {
-          "id": "section-3",
-          "heading": "Pertimbangan Tambahan dan Perawatan agar Unit Tetap Awet",
-          "level": "h2",
-          "target_word_count": 100,
-          "key_points": [
-            "Pentingnya memilih unit dengan garansi resmi dan ketersediaan suku cadang",
-            "Menerapkan cara merawat steamer rice cooker yang tepat, seperti menghindari spons kawat saat mencuci baki kukus dan panci",
-            "Menjaga bagian elemen pemanas selalu kering sebelum proses memasak dimulai"
-          ],
-          "keywords_to_include": [
-            "cara merawat steamer rice cooker"
-          ],
-          "subsections": []
-        },
-        {
-          "id": "section-4",
-          "heading": "Kesimpulan 7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama",
-          "level": "h2",
-          "target_word_count": 70,
-          "key_points": [
-            "Rangkuman pentingnya meneliti material, konsumsi daya, serta fitur keamanan produk sebelum membeli",
-            "Rekomendasi tindakan cerdas bagi pembeli untuk memilih produk yang memberikan nilai investasi jangka panjang bagi dapur rumah tangga"
-          ],
-          "keywords_to_include": [
-            "7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama"
-          ],
-          "subsections": []
-        }
-      ]
-    },
-    "serp_data": {
-      "search_intent": "Commercial",
-      "primary_audience": "Ibu rumah tangga, keluarga muda, dan anak kost yang mencari rice cooker multifungsi dengan fitur kukusan (steamer) berkualitas tinggi, aman untuk kesehatan (food grade), hemat listrik, dan awet jangka panjang.",
-      "core_angle": "Panduan seleksi mendalam berstandar keamanan pangan (Stainless Steel 304 vs Plastik Food-Grade BPA-Free) dan efisiensi daya listrik, dilengkapi checklist teknis agar tidak salah pilih produk yang cepat rusak atau berbau.",
-      "lsi_keywords": [
-        "wadah kukusan rice cooker stainless steel",
-        "rice cooker low watt hemat listrik",
-        "baki kukusan food grade bpa free",
-        "inner pot anti lengket bebas pfoa",
-        "rice cooker digital multifungsi",
-        "cara merawat steamer rice cooker"
-      ],
-      "semantic_entities": [
-        "Stainless Steel Grade 304",
-        "Polypropylene Food Grade (PP 5)",
-        "Konsumsi Daya (Wattage)",
-        "Sertifikasi SNI & Food Safety",
-        "Inner Pot Ceramic Coating"
-      ],
-      "paa_questions": [
-        "Apa bahan steamer rice cooker yang paling aman untuk kesehatan?",
-        "Lebih bagus kukusan rice cooker berbahan stainless steel atau plastik?",
-        "Berapa watt rice cooker steamer yang hemat listrik untuk pemakaian harian?",
-        "Bagaimana cara membersihkan baki kukusan rice cooker agar tidak cepat menguning dan awet?"
-      ],
-      "content_gaps": [
-        "Kurangnya perbandingan komparatif ketahanan suhu tinggi antara material Stainless 304 vs Plastik PP 5.",
-        "Jarang membahas tinggi/kedalaman baki steamer terhadap sirkulasi uap air agar nasi di bawahnya tidak menjadi lembek.",
-        "Tidak adanya panduan membersihkan kerak uap air tanpa merusak lapisan pelindung wadah kukusan."
-      ],
-      "suggested_title": "7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama"
-    },
-    "content_markdown": "## Pentingnya Menemukan Rice Cooker Multifungsi Berkualitas untuk Dapur Modern\n\nMilih alat masak yang beneran tahan lama itu susah-susah gampang, lho. Apalagi kalau butuh yang bisa masak nasi sekaligus ngukus lauk dalam satu waktu. Nah, 7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama hadir sebagai panduan praktis buat kamu yang nggak mau salah beli.\n\nBayangin aja, tiap pagi bisa masak nasi sambil kukus ikan atau sayuran sekaligus. Hemat waktu, hemat gas, hemat listrik. Efisiensinya kerasa banget di keseharian keluarga, kan?\n\nTapi banyak orang keburu beli tanpa riset dulu. Akhirnya? Alat cepat rusak, lapisan dalam mengelupas, atau fitur steamer-nya nggak berfungsi maksimal. Repot banget kalau sudah begitu.\n\n## Panduan Praktis 7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama\n\nOke, langsung masuk ke intinya aja ya. Biar nggak nyesel setelah beli, ada beberapa hal yang wajib dicek sebelum memutuskan.\n\n### 1. Material Wadah Kukusan Itu Penting Banget\n\nJangan anggap remeh bagian ini. Pilih baki atau wadah kukusan berbahan stainless steel atau setidaknya plastik food grade BPA free. Kenapa? Karena uap panas langsung kontak sama makanan. Kalau materialnya asal-asalan, zat berbahaya bisa ikut masuk ke sayuran atau ikan yang sedang dikukus. Nggak mau kan?\n\n### 2. Perhatikan Lapisan Inner Pot-nya\n\nInner pot berlapis keramik tebal itu beda lho hasilnya dibanding yang biasa. Distribusi panasnya lebih merata, nasi matang sempurna, dan goresan akibat sendok nggak gampang bikin lapisan mengelupas. Pastikan juga sudah bebas PFOA ya, bukan cuma anti lengket biasa.\n\n### 3. Cek Konsumsi Daya Listriknya\n\nRice cooker low watt bukan berarti kualitasnya jelek. Justru sekarang banyak merek yang efisien di daya tapi performa masaknya tetap oke. Coba cek dulu spesifikasi watt-nya sebelum beli. Bakal kerasa banget penghematannya di tagihan listrik tiap bulan, percaya deh.\n\n### 4. Sesuaikan Kapasitas dengan Kebutuhan Keluarga\n\nKeluarga 4 orang beda kebutuhannya sama yang 2 orang. Jangan beli kapasitas terlalu besar atau terlalu kecil. Wadah kukusan juga harus cukup lega buat porsi lauk harian supaya hasil kukusannya merata sempurna.\n\n### 5. Sistem Ventilasi dan Kemudahan Bersih\n\nTutup atas yang mudah dilepas itu penyelamat. Sisa uap dan kotoran sering numpuk di bagian ventilasi. Kalau susah dibongkar, lama-lama jadi sarang kuman. Pilih yang komponen tutupnya bisa dilepas dan dicuci terpisah. Simpel tapi sering diabaikan, nih.\n\n### 6. Fitur Keamanan Auto-Shutoff\n\nFitur ini bukan sekadar bonus, tapi kebutuhan nyata. Auto-shutoff mencegah nasi gosong dan melindungi komponen pemanas dari kerusakan akibat panas berlebih. Cek apakah fitur ini tersedia sebelum checkout.\n\n### 7. Garansi Resmi dan Ketersediaan Suku Cadang\n\nGaransi resmi itu keharusan, bukan pelengkap. Pastikan suku cadang seperti baki kukus dan tutup uap mudah didapat di pasaran. Repot kalau rusak satu bagian kecil tapi unitnya langsung jadi rongsokan.\n\n## Perawatan agar Unit Tetap Awet Jangka Panjang\n\nSoal perawatan, jangan pernah pakai spons kawat buat mencuci panci atau baki kukus. Lapisan antilengketnya bisa tergores dan rusak permanen.\n\nSatu lagi yang sering dilupain: elemen pemanas harus benar-benar kering sebelum mulai memasak. Kalau masih lembap, performa memanasnya turun dan komponen cepat korosi. Kebiasaan kecil ini bakal kerasa banget dampaknya jangka panjang.\n\n## Kesimpulan\n\nMenerapkan 7 Tips Memilih Steamer Rice Cooker yang Bagus dan Awet Tahan Lama secara menyeluruh itu kunci utamanya. Cek material, konsumsi daya, fitur keamanan, sampai ketersediaan suku cadang sebelum memutuskan beli. Kalau semua poin tadi sudah dipertimbangkan matang, peluang dapat alat yang awet bertahun-tahun jauh lebih besar. Investasi dapur yang cerdas dimulai dari riset kecil sebelum checkout, bukan setelah nyesel.",
+    "outline_json": null,
+    "serp_data": null,
+    "content_markdown": "",
     "content_html": "",
-    "status": "completed",
-    "word_count": 564,
-    "seo_score": 95,
-    "seo_audit": {
-      "score": 95,
-      "word_count": 564,
-      "reading_time_minutes": 3,
-      "keyword_density": 0.53,
-      "keyword_count": 3,
-      "checklist": [
-        {
-          "rule": "Text Length",
-          "passed": true,
-          "message": "564 kata (Sesuai SOP Backlink: 500–599 kata)"
-        },
-        {
-          "rule": "Keyphrase in Introduction",
-          "passed": true,
-          "message": "Keyphrase ditemukan di 150 kata pertama"
-        },
-        {
-          "rule": "Keyphrase Density",
-          "passed": true,
-          "message": "Keyphrase ditemukan 3 kali (Disarankan 5-7 kali)"
-        },
-        {
-          "rule": "Keyphrase in Subheadings",
-          "passed": true,
-          "message": "1 sub-heading mengandung keyphrase"
-        },
-        {
-          "rule": "Image Status",
-          "passed": true,
-          "message": "Mode Teks Murni (Gambar ditambahkan saat posting ke WordPress)"
-        },
-        {
-          "rule": "Single Title (H1)",
-          "passed": true,
-          "message": "Hanya ada 1 tag judul utama, struktur H2/H3 rapi"
-        },
-        {
-          "rule": "Links in Content",
-          "passed": true,
-          "message": "Siap untuk penambahan link internal/outbound"
-        },
-        {
-          "rule": "Keyphrase in Conclusion",
-          "passed": true,
-          "message": "Keyphrase ditegaskan kembali di bagian kesimpulan"
-        }
-      ]
-    },
+    "status": "failed",
+    "word_count": 0,
+    "seo_score": 0,
+    "seo_audit": {},
     "humanize_writing": true,
-    "include_image_placeholder": false,
+    "include_image_placeholder": true,
     "target_link_1_url": null,
     "target_link_1_anchor": null,
     "target_link_2_url": null,
     "target_link_2_anchor": null,
     "product_name": null,
-    "created_at": "2026-08-22T11:09:12.792742",
-    "updated_at": "2026-08-22T11:15:57.114781"
+    "created_at": "2026-08-26T06:55:33.489262",
+    "updated_at": "2026-08-26T06:55:43.058387"
   }
 }

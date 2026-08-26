@@ -111,6 +111,7 @@ class ArticleResponse(BaseModel):
     slug: Optional[str] = None
     meta_description: Optional[str] = None
     seo_title: Optional[str] = None
+    tags: Optional[str] = None
     status: str
     word_count: int = 0
     seo_score: int = 0
@@ -133,6 +134,7 @@ class UpdateArticleContentRequest(BaseModel):
     slug: Optional[str] = None
     meta_description: Optional[str] = None
     seo_title: Optional[str] = None
+    tags: Optional[str] = None
 
 
 class JobStatusResponse(BaseModel):
