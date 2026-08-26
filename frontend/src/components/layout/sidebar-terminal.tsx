@@ -24,7 +24,7 @@ interface SidebarTerminalProps {
 export function SidebarTerminal({ collapsed = false }: SidebarTerminalProps) {
   const tk = useTokens();
   const [mounted, setMounted] = useState(false);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [gatewayStatus, setGatewayStatus] = useState<"online" | "offline">("online");
   const [jobStatus, setJobStatus] = useState<TerminalStatus>("idle");
   const [activeTask, setActiveTask] = useState<string>("daemon idle");
