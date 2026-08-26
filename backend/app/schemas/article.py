@@ -108,6 +108,9 @@ class ArticleResponse(BaseModel):
     serp_data: Optional[Dict[str, Any]] = None
     content_markdown: Optional[str] = None
     content_html: Optional[str] = None
+    slug: Optional[str] = None
+    meta_description: Optional[str] = None
+    seo_title: Optional[str] = None
     status: str
     word_count: int = 0
     seo_score: int = 0
@@ -127,6 +130,9 @@ class UpdateArticleContentRequest(BaseModel):
     content_markdown: Optional[str] = None
     content_html: Optional[str] = None
     title: Optional[str] = None
+    slug: Optional[str] = None
+    meta_description: Optional[str] = None
+    seo_title: Optional[str] = None
 
 
 class JobStatusResponse(BaseModel):

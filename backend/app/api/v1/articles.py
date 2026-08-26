@@ -196,6 +196,9 @@ async def continue_writing_endpoint(
             article["word_count"] = result["word_count"]
             article["seo_score"] = result["seo_score"]
             article["seo_audit"] = result["seo_audit"]
+            article["slug"] = result.get("slug")
+            article["meta_description"] = result.get("meta_description")
+            article["seo_title"] = result.get("seo_title", article.get("title"))
             article["status"] = "completed"
             article["updated_at"] = datetime.utcnow()
             storage.save_articles()
@@ -270,6 +273,12 @@ async def update_article_content(article_id: str, req: UpdateArticleContentReque
         article["content_html"] = req.content_html
     if req.title is not None:
         article["title"] = req.title
+    if req.slug is not None:
+        article["slug"] = req.slug
+    if req.meta_description is not None:
+        article["meta_description"] = req.meta_description
+    if req.seo_title is not None:
+        article["seo_title"] = req.seo_title
 
     article["updated_at"] = datetime.utcnow()
     storage.save_articles()

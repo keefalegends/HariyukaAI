@@ -255,11 +255,11 @@ class ArticlePipelineOrchestrator:
         )
 
         # ----------------------------------------------------------------------
-        # Step 5: SEO Analysis Audit & Final Stream
+        # Step 5: SEO Analysis Audit & Yoast Snippet Generation
         # ----------------------------------------------------------------------
         await self.emit_event(article_id, "step_start", {
             "step": 5,
-            "name": "Kalkulasi Skor Yoast SEO 100 Poin",
+            "name": "Kalkulasi Skor Yoast SEO 100 Poin & Pembuatan Snippet WordPress",
             "progress": 95
         })
 
@@ -271,9 +271,18 @@ class ArticlePipelineOrchestrator:
             include_image_placeholder=include_image_placeholder
         )
 
+        seo_meta = await ai_router.generate_seo_metadata(
+            title=title,
+            target_keyword=target_keyword,
+            content_markdown=polished_markdown
+        )
+
         final_result = {
             "article_id": article_id,
             "title": title,
+            "slug": seo_meta.get("slug"),
+            "meta_description": seo_meta.get("meta_description"),
+            "seo_title": seo_meta.get("seo_title", title),
             "article_type": article_type,
             "content_markdown": polished_markdown,
             "word_count": seo_audit["word_count"],

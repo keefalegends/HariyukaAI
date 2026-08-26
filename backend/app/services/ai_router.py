@@ -460,5 +460,61 @@ Return the final polished markdown:
 
         return polished
 
+    # --------------------------------------------------------------------------
+    # STEP 5: Yoast SEO Snippet & Metadata Generator (Slug & Meta Description)
+    # --------------------------------------------------------------------------
+    async def generate_seo_metadata(
+        self,
+        title: str,
+        target_keyword: str,
+        content_markdown: str
+    ) -> Dict[str, str]:
+        """
+        Generates Yoast WordPress SEO Snippet Metadata:
+        - Slug: strictly clean permalink containing the primary keyphrase
+        - Meta Description: 130-155 characters, includes primary keyphrase at the start, engaging call to action
+        - SEO Title: High CTR Title under 60 characters
+        """
+        clean_slug = re.sub(r"[^a-zA-Z0-9\s-]", "", target_keyword).strip().lower()
+        default_slug = re.sub(r"[\s-]+", "-", clean_slug)
+
+        system_prompt = """You are a Yoast SEO WordPress Metadata Specialist.
+Generate clean, click-worthy metadata in JSON format:
+{
+  "seo_title": "Max 60 chars, includes focus keyphrase naturally",
+  "slug": "url-friendly-slug-containing-only-keyphrase",
+  "meta_description": "130-155 characters, MUST contain primary keyphrase near the beginning, high CTR appeal without em-dashes"
+}"""
+        user_prompt = f"""
+Focus Keyphrase: "{target_keyword}"
+Article Title: "{title}"
+Content Sample:
+{content_markdown[:600]}
+
+Generate the JSON metadata:
+"""
+        try:
+            raw = await self.complete(
+                model=self.model_outline,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.3,
+                response_format={"type": "json_object"}
+            )
+            data = self.extract_json(raw)
+            return {
+                "seo_title": data.get("seo_title", title)[:65],
+                "slug": data.get("slug", default_slug),
+                "meta_description": data.get("meta_description", f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini.")[:160]
+            }
+        except Exception:
+            return {
+                "seo_title": title[:65],
+                "slug": default_slug,
+                "meta_description": f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini."
+            }
+
 
 ai_router = AIRouterService()

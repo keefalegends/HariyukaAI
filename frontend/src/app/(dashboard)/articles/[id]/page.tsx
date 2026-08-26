@@ -31,9 +31,13 @@ export default function ArticleEditorPage() {
 
   const [article, setArticle] = useState<any>(null);
   const [contentMarkdown, setContentMarkdown] = useState("");
+  const [slug, setSlug] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [seoTitle, setSeoTitle] = useState("");
   const [seoAudit, setSeoAudit] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [copiedWordPress, setCopiedWordPress] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Delete modal state
@@ -55,6 +59,9 @@ export default function ArticleEditorPage() {
           const data = await res.json();
           setArticle(data);
           setContentMarkdown(data.content_markdown || "");
+          setSlug(data.slug || "");
+          setMetaDescription(data.meta_description || "");
+          setSeoTitle(data.seo_title || data.title || "");
           setSeoAudit(data.seo_audit || null);
         }
       } catch (err) {
@@ -71,6 +78,19 @@ export default function ArticleEditorPage() {
     setContentMarkdown(markdown);
   };
 
+  const handleUpdateMetadata = (meta: { slug?: string; metaDescription?: string; seoTitle?: string }) => {
+    if (meta.slug !== undefined) setSlug(meta.slug);
+    if (meta.metaDescription !== undefined) setMetaDescription(meta.metaDescription);
+    if (meta.seoTitle !== undefined) setSeoTitle(meta.seoTitle);
+  };
+
+  const handleCopyWordPress = () => {
+    if (!contentMarkdown) return;
+    navigator.clipboard.writeText(contentMarkdown);
+    setCopiedWordPress(true);
+    setTimeout(() => setCopiedWordPress(false), 2500);
+  };
+
   const handleSave = async () => {
     if (!articleId) return;
     setIsSaving(true);
@@ -81,6 +101,9 @@ export default function ArticleEditorPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content_markdown: contentMarkdown,
+          slug: slug,
+          meta_description: metaDescription,
+          seo_title: seoTitle,
         }),
       });
 
@@ -88,6 +111,9 @@ export default function ArticleEditorPage() {
         const updated = await res.json();
         setArticle(updated);
         setSeoAudit(updated.seo_audit);
+        setSlug(updated.slug || slug);
+        setMetaDescription(updated.meta_description || metaDescription);
+        setSeoTitle(updated.seo_title || seoTitle);
         setSavedSuccess(true);
         setTimeout(() => setSavedSuccess(false), 2000);
       }
@@ -403,6 +429,17 @@ export default function ArticleEditorPage() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
+          {/* Copy Artikel WordPress Button */}
+          <button
+            type="button"
+            onClick={handleCopyWordPress}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all active:scale-95 cursor-pointer border-[#d97757]/40 bg-[#d97757]/10 text-[#d97757] hover:bg-[#d97757] hover:text-white`}
+            title="Copy isi artikel untuk ditempel ke WordPress editor"
+          >
+            {copiedWordPress ? <Check className="w-3.5 h-3.5" /> : <FileCheck2 className="w-3.5 h-3.5" />}
+            <span>{copiedWordPress ? "Artikel Tersalin!" : "Copy WordPress"}</span>
+          </button>
+
           {/* Cek AI & Plagiat Button */}
           <button
             type="button"
@@ -462,6 +499,10 @@ export default function ArticleEditorPage() {
             targetKeyword={article?.target_keyword || "SEO"}
             checklist={seoAudit?.checklist}
             secondaryKeywords={seoAudit?.secondary_keywords}
+            slug={slug}
+            metaDescription={metaDescription}
+            seoTitle={seoTitle}
+            onUpdateMetadata={handleUpdateMetadata}
           />
         </div>
       </div>
