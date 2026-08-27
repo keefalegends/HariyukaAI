@@ -304,16 +304,6 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={copyToClipboard}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${tk.outlineBtn}`}
-            title="Salin semua teks"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? "Tersalin!" : "Salin"}</span>
-          </button>
-
-          <button
-            type="button"
             onClick={downloadMarkdown}
             className="t-accent-bg flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-semibold shadow-sm transition-all"
             title="Download .md"

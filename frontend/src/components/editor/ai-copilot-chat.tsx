@@ -10,11 +10,8 @@ import {
   Check,
   Bot,
   User,
-  Sliders,
   ChevronDown,
   Wand2,
-  FileEdit,
-  ArrowRight,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 import { getApiUrl } from "@/lib/api-config";
@@ -168,21 +165,21 @@ export function AiCopilotChat({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#181614] border border-stone-800/80 rounded-2xl overflow-hidden font-sans">
+    <div className={`flex flex-col h-full t-card border t-border rounded-2xl overflow-hidden font-sans shadow-sm`}>
       {/* Header bar (Claude style) */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-stone-800/80 bg-[#1f1c19]">
+      <div className="flex items-center justify-between px-4 py-3 border-b t-border t-bg-tag">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#d97757]/20 border border-[#d97757]/40 flex items-center justify-center text-[#d97757]">
+          <div className="w-7 h-7 rounded-lg bg-[#d97757]/20 border border-[#d97757]/40 flex items-center justify-center text-[#d97757] shrink-0">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-stone-100">AI Copilot</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-stone-800 text-stone-300 font-mono">
+              <span className={`text-xs font-bold ${tk.textPrimary}`}>AI Copilot</span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded border t-border t-bg-card ${tk.textFaint} font-mono`}>
                 Split-View
               </span>
             </div>
-            <p className="text-[10px] text-stone-400">Claude Artifacts Editor Assistant</p>
+            <p className={`text-[10px] ${tk.textMuted}`}>Claude Artifacts Editor Assistant</p>
           </div>
         </div>
 
@@ -192,17 +189,17 @@ export function AiCopilotChat({
             <button
               type="button"
               onClick={() => setShowModelPicker(!showModelPicker)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-stone-700 bg-stone-900/90 text-stone-300 hover:text-white text-[11px] font-mono transition-colors cursor-pointer"
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border t-border t-bg-card ${tk.textPrimary} text-[11px] font-mono transition-colors cursor-pointer hover:border-[#d97757]/50`}
             >
               <span className="max-w-[130px] truncate">
                 {DEFAULT_MODELS.find((m) => m.id === selectedModel)?.label.split(" ")[0] || selectedModel}
               </span>
-              <ChevronDown className="w-3 h-3 text-stone-400" />
+              <ChevronDown className={`w-3 h-3 ${tk.textFaint}`} />
             </button>
 
             {showModelPicker && (
-              <div className="absolute right-0 top-full mt-1.5 w-64 p-1.5 rounded-xl border border-stone-700 bg-[#1f1c19] shadow-2xl z-50 text-xs space-y-1">
-                <div className="text-[10px] uppercase font-bold text-stone-400 px-2 py-1">Pilih Model 9Router</div>
+              <div className={`absolute right-0 top-full mt-1.5 w-64 p-1.5 rounded-xl border t-border t-card shadow-2xl z-50 text-xs space-y-1`}>
+                <div className={`text-[10px] uppercase font-bold ${tk.textFaint} px-2 py-1`}>Pilih Model 9Router</div>
                 {DEFAULT_MODELS.map((m) => (
                   <button
                     key={m.id}
@@ -214,7 +211,7 @@ export function AiCopilotChat({
                     className={`w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] transition-colors flex items-center justify-between cursor-pointer ${
                       selectedModel === m.id
                         ? "bg-[#d97757] text-white font-semibold"
-                        : "text-stone-300 hover:bg-stone-800"
+                        : `${tk.textPrimary} hover:t-bg-tag`
                     }`}
                   >
                     <span className="truncate">{m.label}</span>
@@ -230,7 +227,7 @@ export function AiCopilotChat({
             type="button"
             onClick={onClose}
             title="Tutup Mode Copilot"
-            className="w-7 h-7 rounded-lg border border-stone-700 hover:bg-stone-800 flex items-center justify-center text-stone-400 hover:text-white transition-colors cursor-pointer"
+            className={`w-7 h-7 rounded-lg border t-border hover:bg-stone-500/10 flex items-center justify-center ${tk.textMuted} hover:${tk.textPrimary} transition-colors cursor-pointer`}
           >
             <X className="w-4 h-4" />
           </button>
@@ -245,7 +242,7 @@ export function AiCopilotChat({
             className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}
           >
             {/* Sender Label */}
-            <div className="flex items-center gap-1.5 text-[10px] text-stone-500 mb-1 px-1">
+            <div className={`flex items-center gap-1.5 text-[10px] ${tk.textFaint} mb-1 px-1`}>
               {msg.role === "user" ? (
                 <>
                   <span>Anda</span>
@@ -254,7 +251,7 @@ export function AiCopilotChat({
               ) : (
                 <>
                   <Bot className="w-3 h-3 text-[#d97757]" />
-                  <span className="text-stone-400 font-medium">Claude Copilot</span>
+                  <span className={`${tk.textMuted} font-medium`}>Claude Copilot</span>
                 </>
               )}
               <span>• {msg.timestamp}</span>
@@ -264,27 +261,27 @@ export function AiCopilotChat({
             <div
               className={`max-w-[88%] rounded-2xl p-3.5 leading-relaxed ${
                 msg.role === "user"
-                  ? "bg-[#d97757]/20 border border-[#d97757]/40 text-stone-100 rounded-tr-sm"
-                  : "bg-stone-900/90 border border-stone-800 text-stone-200 rounded-tl-sm space-y-2.5 shadow-sm"
+                  ? "bg-[#d97757]/15 border border-[#d97757]/40 text-stone-900 dark:text-stone-100 rounded-tr-sm"
+                  : "t-bg-tag border t-border text-stone-900 dark:text-stone-200 rounded-tl-sm space-y-2.5 shadow-sm"
               }`}
             >
               <div className="text-xs whitespace-pre-wrap">{msg.content}</div>
 
               {/* Action and Metric Badges for Assistant revisions */}
               {msg.modifiedContent && (
-                <div className="pt-2 border-t border-stone-800/80 flex items-center justify-between gap-2 flex-wrap text-[11px]">
+                <div className="pt-2 border-t t-border flex items-center justify-between gap-2 flex-wrap text-[11px]">
                   <div className="flex items-center gap-2 font-mono text-[10px]">
-                    <span className="px-2 py-0.5 rounded bg-stone-800 border border-stone-700 text-stone-300">
+                    <span className={`px-2 py-0.5 rounded t-bg-card border t-border ${tk.textMuted}`}>
                       {msg.wordCount} kata
                     </span>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 dark:text-emerald-400 font-bold">
                       SEO: {msg.seoScore}/100
                     </span>
                   </div>
 
                   <div className="flex items-center gap-1.5">
                     {appliedMessageId === msg.id ? (
-                      <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold">
+                      <span className="text-[10px] text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-semibold">
                         <Check className="w-3 h-3" /> Aktif di Editor
                       </span>
                     ) : (
@@ -312,11 +309,11 @@ export function AiCopilotChat({
         {/* Loading Spinner Indicator */}
         {isLoading && (
           <div className="flex flex-col items-start">
-            <div className="flex items-center gap-1.5 text-[10px] text-stone-500 mb-1 px-1">
+            <div className={`flex items-center gap-1.5 text-[10px] ${tk.textFaint} mb-1 px-1`}>
               <Bot className="w-3 h-3 text-[#d97757]" />
-              <span className="text-stone-400">Claude Copilot sedang merevisi...</span>
+              <span className={tk.textMuted}>Claude Copilot sedang merevisi...</span>
             </div>
-            <div className="rounded-2xl rounded-tl-sm p-3.5 bg-stone-900 border border-stone-800 flex items-center gap-2.5 text-xs text-stone-300">
+            <div className={`rounded-2xl rounded-tl-sm p-3.5 t-bg-tag border t-border flex items-center gap-2.5 text-xs ${tk.textPrimary}`}>
               <Loader2 className="w-4 h-4 text-[#d97757] animate-spin" />
               <span>Memproses instruksi & merevisi draf artikel...</span>
             </div>
@@ -327,14 +324,14 @@ export function AiCopilotChat({
       </div>
 
       {/* Quick Prompt Suggestions */}
-      <div className="px-4 py-2 border-t border-stone-800/80 bg-[#1b1816]/70">
-        <div className="text-[10px] uppercase font-bold text-stone-500 mb-1.5 flex items-center justify-between">
+      <div className="px-4 py-2 border-t t-border t-bg-tag">
+        <div className={`text-[10px] uppercase font-bold ${tk.textFaint} mb-1.5 flex items-center justify-between`}>
           <span>Inspirasi Instruksi Cepat</span>
           {canUndo && (
             <button
               type="button"
               onClick={onUndoContent}
-              className="text-[10px] text-amber-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+              className="text-[10px] text-amber-500 dark:text-amber-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" /> Batalkan Perubahan Terakhir (Undo)
             </button>
@@ -347,7 +344,7 @@ export function AiCopilotChat({
               type="button"
               onClick={() => handleSendMessage(qp)}
               disabled={isLoading}
-              className="shrink-0 px-2.5 py-1 rounded-lg border border-stone-800 bg-stone-900/90 hover:border-[#d97757]/50 text-stone-300 hover:text-white text-[10px] transition-all cursor-pointer truncate max-w-[240px]"
+              className={`shrink-0 px-2.5 py-1 rounded-lg border t-border t-bg-card hover:border-[#d97757]/60 ${tk.textPrimary} text-[10px] transition-all cursor-pointer truncate max-w-[240px]`}
               title={qp}
             >
               {qp}
@@ -357,8 +354,8 @@ export function AiCopilotChat({
       </div>
 
       {/* Bottom Input Area */}
-      <div className="p-3 border-t border-stone-800/80 bg-[#1f1c19]">
-        <div className="relative rounded-xl border border-stone-700 bg-stone-950 focus-within:border-[#d97757] transition-all">
+      <div className="p-3 border-t t-border t-bg-tag">
+        <div className="relative rounded-xl border t-border t-bg-card focus-within:border-[#d97757] transition-all shadow-inner">
           <textarea
             ref={textareaRef}
             rows={2}
@@ -367,10 +364,10 @@ export function AiCopilotChat({
             onKeyDown={handleKeyDown}
             disabled={isLoading}
             placeholder="Tulis instruksi revisi ke Claude... (Tekan Enter untuk kirim)"
-            className="w-full bg-transparent px-3.5 py-2.5 text-xs text-stone-100 placeholder-stone-500 focus:outline-none resize-none leading-relaxed"
+            className={`w-full bg-transparent px-3.5 py-2.5 text-xs ${tk.textPrimary} placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none resize-none leading-relaxed`}
           />
 
-          <div className="flex items-center justify-between px-3 py-1.5 border-t border-stone-800/60 bg-stone-900/50 rounded-b-xl text-[10px] text-stone-400">
+          <div className={`flex items-center justify-between px-3 py-1.5 border-t t-border t-bg-tag/50 rounded-b-xl text-[10px] ${tk.textFaint}`}>
             <span>Shift + Enter untuk baris baru</span>
             <button
               type="button"

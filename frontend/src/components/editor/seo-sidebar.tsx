@@ -108,23 +108,23 @@ export function SeoSidebar({
         <button
           type="button"
           onClick={onOpenCopilot}
-          className="w-full py-3 px-4 rounded-xl border border-[#d97757]/40 bg-gradient-to-r from-[#d97757]/20 via-[#d97757]/10 to-transparent hover:from-[#d97757] hover:to-[#c26445] text-stone-100 font-semibold text-xs transition-all flex items-center justify-between group shadow-sm active:scale-98 cursor-pointer"
+          className={`w-full py-3 px-4 rounded-xl border border-[#d97757]/50 bg-gradient-to-r from-[#d97757]/15 via-[#d97757]/5 to-transparent hover:bg-[#d97757] ${tk.textPrimary} hover:text-white font-semibold text-xs transition-all flex items-center justify-between group shadow-sm active:scale-98 cursor-pointer`}
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-lg bg-[#d97757] text-white flex items-center justify-center shadow-sm">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="w-7 h-7 rounded-lg bg-[#d97757] text-white flex items-center justify-center shadow-sm shrink-0">
+              <Sparkles className="w-4 h-4" />
             </div>
-            <div className="text-left">
-              <div className="font-bold text-xs group-hover:text-white flex items-center gap-1.5">
-                <span>AI Copilot Editor</span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#d97757]/30 group-hover:bg-white/20 text-[#d97757] group-hover:text-white font-mono">
+            <div className="text-left min-w-0">
+              <div className="font-bold text-xs flex items-center gap-1.5">
+                <span className={`${tk.textPrimary} group-hover:text-white`}>AI Copilot Editor</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#d97757]/20 group-hover:bg-white/20 text-[#d97757] group-hover:text-white font-mono font-semibold">
                   Claude Split
                 </span>
               </div>
-              <p className="text-[10px] text-stone-400 group-hover:text-white/80">Revisi & modifikasi via prompt</p>
+              <p className={`text-[10px] ${tk.textMuted} group-hover:text-white/90`}>Revisi & modifikasi via prompt</p>
             </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
+          <ArrowRight className={`w-4 h-4 ${tk.textMuted} group-hover:text-white group-hover:translate-x-0.5 transition-transform shrink-0`} />
         </button>
       )}
 
