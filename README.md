@@ -11,7 +11,7 @@
 
 ---
 
-## 🌟 Fitur Utama
+##  Fitur Utama
 
 ### 1.  5-Step Multi-Agent Pipeline
 * **Analisis SERP & Search Intent (`Gemini 3.7 Flash`):** Analisis kompetitor peringkat 1–3 Google, entitas LSI, dan *People Also Ask*.
@@ -42,7 +42,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 * **Frontend:** Next.js 14 (App Router), React, TypeScript, Tailwind CSS, Tiptap Editor.
 * **Backend:** FastAPI (Python 3.11), Pydantic v2, AsyncIO, SSE (Server-Sent Events).
@@ -52,7 +52,7 @@
 
 ---
 
-## 🚀 Panduan Instalasi Cepat
+##  Panduan Instalasi Cepat
 
 ### 1. Clone & Konfigurasi Lingkungan
 ```bash
