@@ -307,17 +307,17 @@ export default function ArticleEditorPage() {
                 {/* Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Plagiarism Box */}
-                  <div className="p-4 rounded-xl border t-border bg-black/20 space-y-2">
+                  <div className="p-4 rounded-xl border t-border t-bg-tag space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-stone-400">Keunikan Plagiasi</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold">
+                      <span className={`font-semibold ${tk.textPrimary}`}>Keunikan Plagiasi</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">
                         {checkerReport.plagiarism?.uniqueness_score}% Unik
                       </span>
                     </div>
-                    <div className="text-2xl font-extrabold font-mono text-emerald-400">
+                    <div className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">
                       {checkerReport.plagiarism?.uniqueness_score}%
                     </div>
-                    <p className="text-[10px] text-stone-400">
+                    <p className={`text-[10px] ${tk.textMuted}`}>
                       {checkerReport.plagiarism?.matched_sources?.length === 0
                         ? "✓ 100% Bebas plagiasi dari web index."
                         : `Ditemukan ${checkerReport.plagiarism?.matched_sources?.length} sumber yang cocok.`}
@@ -325,14 +325,14 @@ export default function ArticleEditorPage() {
                   </div>
 
                   {/* AI Detector Box */}
-                  <div className="p-4 rounded-xl border t-border bg-black/20 space-y-2">
+                  <div className="p-4 rounded-xl border t-border t-bg-tag space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-stone-400">Detektor Konten AI</span>
+                      <span className={`font-semibold ${tk.textPrimary}`}>Detektor Konten AI</span>
                       <span
                         className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
                           checkerReport.ai_detection?.ai_percentage <= 30
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-amber-500/15 text-amber-400"
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                            : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
                         }`}
                       >
                         {checkerReport.ai_detection?.verdict}
@@ -340,12 +340,14 @@ export default function ArticleEditorPage() {
                     </div>
                     <div
                       className={`text-2xl font-extrabold font-mono ${
-                        checkerReport.ai_detection?.ai_percentage <= 30 ? "text-emerald-400" : "text-amber-400"
+                        checkerReport.ai_detection?.ai_percentage <= 30
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-amber-600 dark:text-amber-400"
                       }`}
                     >
                       {checkerReport.ai_detection?.human_percentage}% Human
                     </div>
-                    <p className="text-[10px] text-stone-400">
+                    <p className={`text-[10px] ${tk.textMuted}`}>
                       Skor AI: {checkerReport.ai_detection?.ai_percentage}% • Burstiness: {checkerReport.ai_detection?.burstiness_score}
                     </p>
                   </div>
@@ -356,17 +358,17 @@ export default function ArticleEditorPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className={`font-semibold ${tk.textPrimary}`}>Pratinjau Ritme Kalimat:</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-emerald-400 text-[10px]">● Human</span>
-                        <span className="text-amber-400 text-[10px]">● Warning</span>
-                        <span className="text-red-400 text-[10px]">● Terindikasi AI</span>
+                      <div className="flex items-center gap-2 font-medium text-[10px]">
+                        <span className="text-emerald-600 dark:text-emerald-400">● Human</span>
+                        <span className="text-amber-600 dark:text-amber-400">● Warning</span>
+                        <span className="text-red-600 dark:text-red-400">● Terindikasi AI</span>
                       </div>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-black/30 border t-border text-xs leading-relaxed max-h-48 overflow-y-auto">
+                    <div className="p-3.5 rounded-xl t-bg-tag border t-border text-xs leading-relaxed max-h-48 overflow-y-auto">
                       {checkerReport.ai_detection.sentences.map((s: any, idx: number) => {
                         let bg = "";
-                        if (s.tag === "ai") bg = "bg-red-500/20 text-red-200";
-                        else if (s.tag === "warning") bg = "bg-amber-500/20 text-amber-200";
+                        if (s.tag === "ai") bg = "bg-red-500/20 text-red-700 dark:text-red-200";
+                        else if (s.tag === "warning") bg = "bg-amber-500/20 text-amber-800 dark:text-amber-200";
                         return (
                           <span key={idx} className={`px-1 py-0.5 rounded mr-1 ${bg}`} title={s.reason}>
                             {s.text}{" "}

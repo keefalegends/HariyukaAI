@@ -243,14 +243,6 @@ export default function CopilotHubPage() {
 
                 {/* Right: Action Buttons */}
                 <div className="flex items-center gap-2.5 shrink-0">
-                  <Link
-                    href={`/articles/${article.id}`}
-                    className={`h-10 inline-flex items-center gap-1.5 px-3.5 rounded-xl text-xs font-semibold border transition-all ${tk.outlineBtn}`}
-                    title="Buka Halaman Editor Biasa"
-                  >
-                    <span>Editor Standar</span>
-                  </Link>
-
                   {/* Primary CTA: Enter AI Copilot Split-View */}
                   <Link
                     href={`/articles/${article.id}?copilot=true`}

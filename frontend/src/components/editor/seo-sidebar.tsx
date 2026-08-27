@@ -143,7 +143,7 @@ export function SeoSidebar({
                 <div className="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-sm shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 group-hover:bg-white/20 text-emerald-400 group-hover:text-white font-mono font-bold">
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 group-hover:bg-white/20 text-emerald-600 dark:text-emerald-400 group-hover:text-white font-mono font-bold">
                   Scan
                 </span>
               </div>
