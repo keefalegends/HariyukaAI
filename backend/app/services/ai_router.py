@@ -168,30 +168,31 @@ Return a valid JSON object matching this schema exactly:
         if article_type == "pillar":
             exact_target = target_word_count if (target_word_count and 1450 <= target_word_count <= 1650) else 1550
             section_breakdown = f"""
-1. Section 1 (H2 Intro): ~250 words
-2. Section 2 (H2 Core Method): ~450 words
-3. Section 3 (H2 Best Practices): ~400 words
-4. Section 4 (H2 Troubleshooting/Tips): ~300 words
-5. Section 5 (H2 Kesimpulan {target_keyword}): ~150 words
+1. Section 1 (H2 Pembuka & Urgensi Topik): ~250 words - Pengenalan mendalam {target_keyword} & masalah nyata pembaca
+2. Section 2 (H2 Metode Utama & Langkah Teknis {target_keyword}): ~450 words - Panduan inti bertahap yang presisi
+3. Section 3 (H2 Best Practices & Trik Efisiensi {target_keyword}): ~400 words - Optimasi hasil & tips ahli lapangan
+4. Section 4 (H2 Kesalahan Fatal yang Harus Dihindari Terkait {target_keyword}): ~300 words - Troubleshooting & solusi antisipasi
+5. Section 5 (H2 Kesimpulan {target_keyword}): ~150 words - Rangkuman konseptual & aksi praktis pembaca
 Total: ~1550 words
 """
         else:
             exact_target = 550
             section_breakdown = f"""
-1. Section 1 (H2 Pembuka & Konteks Lapangan): ~120 words
-2. Section 2 (H2 5 Alasan / Tips Praktis {target_keyword}): ~280 words
-3. Section 3 (H2 Pertimbangan Penting Sebelum Beli): ~100 words
-4. Section 4 (H2 Kesimpulan {target_keyword}): ~70 words
+1. Section 1 (H2 Pembuka & Relevansi Topik): ~120 words - Mengapa {target_keyword} penting dan apa masalah yang ingin diselesaikan
+2. Section 2 (H2 Panduan Inti / Solusi Utama {target_keyword}): ~280 words - 4-5 poin konkret, langkah teknis, atau tips praktis utama
+3. Section 3 (H2 Trik Efisiensi & Hal yang Perlu Diperhatikan Terkait {target_keyword}): ~100 words - Optimasi hasil dan kesalahan yang sering terjadi
+4. Section 4 (H2 Kesimpulan {target_keyword}): ~70 words - Rekomendasi ringkas & langkah tindak lanjut langsung
 Total: ~550 words (strictly 500-599 words)
 """
 
         system_prompt = (
             "You are a Senior SEO Content Architect trained on WordPress Yoast & RankMath SOP standards.\n"
-            "CRITICAL RULES:\n"
-            "1. ONLY use H2 and H3 levels. NEVER output H1.\n"
-            f"2. Total word count must strictly target {exact_target} words ({'1500-1599 words' if article_type == 'pillar' else '500-599 words'}).\n"
-            "3. Include the keyphrase in at most 2 or 3 subheadings (NOT in all subheadings to prevent keyword stuffing).\n"
-            f"4. End with a conclusion section: 'Kesimpulan {target_keyword}'."
+            "CRITICAL TOPICAL FOCUS & STRUCTURE RULES:\n"
+            f"1. 🎯 LASER TOPICAL FOCUS: Every heading, sub-heading, and key point MUST strictly revolve around '{target_keyword}'. ZERO OFF-TOPIC DRIFT. Do NOT introduce unrelated buying/generic advice unless the keyword specifically asks for it.\n"
+            "2. ONLY use H2 and H3 levels. NEVER output H1.\n"
+            f"3. Total word count must strictly target {exact_target} words ({'1500-1599 words' if article_type == 'pillar' else '500-599 words'}).\n"
+            f"4. Include '{target_keyword}' in at least 1 or 2 subheadings naturally to satisfy Yoast SEO.\n"
+            f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'."
         )
 
         user_prompt = f"""
@@ -341,12 +342,17 @@ Output valid JSON matching this schema:
 
         system_prompt = f"""You are an Authentic Indonesian SEO Writer crafting high-ranking, human-written editorial content using Claude 4.6 Opus.
 {humanizer_directives}
+🎯 CRITICAL LASER TOPICAL FOCUS & ANTI-DRIFT GUARDRAIL (STRICT):
+1. ZERO TOPICAL DRIFT: Every single sentence in this section MUST strictly explain, solve, or elaborate on '{target_keyword}'.
+2. NEVER wander into unrelated philosophical musings, generic kitchen/life analogies, or tangential subtopics that do not directly answer '{target_keyword}'. The reader searched specifically for '{target_keyword}' — give them dense, direct, practical, and highly useful insights immediately!
+3. DENSE ACTIONABLE WRITING: Avoid generic filler or repetitive restatements. Deliver real-world techniques, tangible steps, cause-and-effect reasoning, and practical criteria.
+
 🚨 STRICT PARAGRAPH & SENTENCE STRUCTURE SOP (SALNA EDITORIAL RULES):
 1. MINIMUM 2 PARAGRAPHS PER SUBHEADING: Under EVERY H2 and H3 heading, you MUST write at least 2 distinct paragraphs separated by a double newline (`\\n\\n`). Single-paragraph sections are STRICTLY FORBIDDEN.
 2. MINIMUM 3 SENTENCES PER PARAGRAPH: Every single paragraph MUST contain at least 3 well-crafted, substantive sentences (each ending with a period, question mark, or exclamation mark). Never write a paragraph with only 1 or 2 sentences.
 3. PARAGRAPH FLOW FORMULA:
-   - Paragraph 1: Topic sentence, underlying issue/context, and technical explanation.
-   - Paragraph 2+: Concrete actionable advice, practical application, and reader benefit.
+   - Paragraph 1: Specific core challenge, technical context, and why this matters for '{target_keyword}'.
+   - Paragraph 2+: Concrete actionable steps, practical field application, and direct tangible benefit for the reader.
 4. HEADINGS: ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
 5. WORD COUNT: Target ~{target_word_count} words for this section.
 6. KEYPHRASE DENSITY: Mention the exact focus keyphrase '{target_keyword}' AT MOST 1 or 2 times in this section. Use natural pronouns ('alat ini', 'langkah tersebut') elsewhere.
@@ -379,7 +385,7 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         raw_output = await self.complete(
             model=self.model_writer,
             messages=messages,
-            temperature=0.85 if humanize_writing else 0.65,
+            temperature=0.42 if humanize_writing else 0.35,
         )
 
         # Post-clean any remaining em-dashes
@@ -420,16 +426,20 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
 
         system_prompt = f"""You are a Master Indonesian Editor and Anti-AI SEO Specialist using Claude 4.6 Opus.
 CALIBRATION REQUIREMENTS (SALNA EDITORIAL & YOAST SOP):
-1. SUBHEADING PARAGRAPH DEPTH: Every single H2 (##) and H3 (###) MUST have AT LEAST 2 distinct paragraphs under it. If any section has only 1 paragraph, split and elaborate it into 2 substantive paragraphs.
-2. PARAGRAPH SENTENCE DEPTH: Every single paragraph MUST contain AT LEAST 3 complete sentences. Never leave thin 1-sentence or 2-sentence paragraphs.
-3. STRICT WORD COUNT: Final text length MUST be between {target_range}.
-   If under 500 words, expand paragraphs with helpful details and actionable real-world tips.
-4. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
+1. 🎯 LASER TOPICAL PRUNING (ELIMINATE OFF-TOPIC RAMBLING):
+   - Scan the entire article for any sentences that drift away from '{target_keyword}'.
+   - If any paragraph drifts into unrelated philosophy, generic filler, or tangential topics, CUT IT OUT or REWRITE it so it strictly delivers dense, actionable, high-value insights about '{target_keyword}'.
+   - Every single section must directly answer and explain '{target_keyword}'.
+2. SUBHEADING PARAGRAPH DEPTH: Every single H2 (##) and H3 (###) MUST have AT LEAST 2 distinct paragraphs under it. If any section has only 1 paragraph, split and elaborate it into 2 substantive paragraphs.
+3. PARAGRAPH SENTENCE DEPTH: Every single paragraph MUST contain AT LEAST 3 complete sentences. Never leave thin 1-sentence or 2-sentence paragraphs.
+4. STRICT WORD COUNT: Final text length MUST be between {target_range}.
+   If under 500 words, expand paragraphs with helpful details and actionable real-world tips directly related to '{target_keyword}'.
+5. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
    Count occurrences of '{target_keyword}'. It MUST appear between 5 and 7 times total across the entire article!
    If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
-5. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
-6. IMAGE RULE: {image_rule}
-7. Preserve all markdown links `[anchor](url)`.
+6. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
+7. IMAGE RULE: {image_rule}
+8. Preserve all markdown links `[anchor](url)`.
 {humanizer_polish}
 Output only the final polished article in Markdown.
 """
@@ -451,7 +461,7 @@ Return the final polished markdown:
         polished = await self.complete(
             model=self.model_seo,
             messages=messages,
-            temperature=0.4 if humanize_writing else 0.25,
+            temperature=0.30 if humanize_writing else 0.20,
         )
 
         # Final pass: Strip any lingering em-dashes
