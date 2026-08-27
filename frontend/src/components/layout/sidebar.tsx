@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { useTheme, type Theme } from "@/contexts/theme-context";
 import { useTokens } from "@/lib/use-tokens";
@@ -31,6 +32,7 @@ const navigation = [
   { name: "Dashboard",        href: "/dashboard", icon: LayoutDashboard },
   { name: "Generator",        href: "/generator",  icon: PenLine },
   { name: "Artikel",          href: "/articles",   icon: FileText },
+  { name: "AI Copilot",       href: "/copilot",    icon: Sparkles },
   { name: "Cek AI & Plagiat", href: "/checker",    icon: ShieldCheck, badge: "BETA" },
   { name: "Proyek",           href: "/projects",   icon: FolderOpen },
   { name: "API & Model",      href: "/settings",   icon: Settings },

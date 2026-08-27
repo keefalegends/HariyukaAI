@@ -137,21 +137,21 @@ export function SeoSidebar({
             <button
               type="button"
               onClick={onRunChecker}
-              className="p-3 rounded-xl border t-border t-bg-tag hover:border-[#d97757]/60 hover:t-bg-card t-text-primary font-semibold text-xs transition-all flex flex-col justify-between gap-2.5 group shadow-sm active:scale-98 cursor-pointer"
+              className="p-3 rounded-xl border border-emerald-500/40 bg-gradient-to-br from-emerald-500/20 via-emerald-500/5 to-transparent hover:bg-emerald-600 t-text-primary hover:text-white font-semibold text-xs transition-all flex flex-col justify-between gap-2.5 group shadow-sm active:scale-98 cursor-pointer"
             >
               <div className="flex items-center justify-between w-full">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-sm shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
-                <span className="text-[9px] px-1.5 py-0.5 rounded t-bg-card border t-border t-text-faint font-mono font-bold">
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 group-hover:bg-white/20 text-emerald-400 group-hover:text-white font-mono font-bold">
                   Scan
                 </span>
               </div>
               <div className="text-left w-full">
-                <div className="font-bold text-xs t-text-primary group-hover:t-accent-text truncate">
+                <div className="font-bold text-xs t-text-primary group-hover:text-white truncate">
                   Cek AI/Plagiat
                 </div>
-                <p className="text-[10px] t-text-secondary truncate mt-0.5">Pindai Keaslian</p>
+                <p className="text-[10px] t-text-secondary group-hover:text-white/90 truncate mt-0.5">Pindai Keaslian</p>
               </div>
             </button>
           )}

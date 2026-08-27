@@ -345,7 +345,74 @@ async def ai_edit_article_endpoint(article_id: str, req: AIEditArticleRequest):
             model=req.model or settings.MODEL_SECTION_WRITER,
             article_type=article.get("article_type", "backlink_article"),
         )
+
+        # Persist conversation to article's chat history
+        if "copilot_chat_history" not in article or not isinstance(article["copilot_chat_history"], list):
+            article["copilot_chat_history"] = []
+
+        now_str = datetime.utcnow().strftime("%H:%M")
+        user_msg = {
+            "id": f"user-{int(datetime.utcnow().timestamp() * 1000)}",
+            "role": "user",
+            "content": req.instruction,
+            "timestamp": now_str,
+        }
+        asst_msg = {
+            "id": f"asst-{int(datetime.utcnow().timestamp() * 1000)}",
+            "role": "assistant",
+            "content": res.get("explanation") or "Perubahan telah diterapkan pada artikel.",
+            "explanation": res.get("explanation"),
+            "modifiedContent": res.get("modified_content_markdown"),
+            "wordCount": res.get("word_count"),
+            "seoScore": res.get("seo_score"),
+            "timestamp": now_str,
+        }
+        article["copilot_chat_history"].append(user_msg)
+        article["copilot_chat_history"].append(asst_msg)
+
+        # Update article content and metrics in persistent storage
+        if res.get("modified_content_markdown"):
+            article["content_markdown"] = res["modified_content_markdown"]
+        if res.get("word_count"):
+            article["word_count"] = res["word_count"]
+        if res.get("seo_score"):
+            article["seo_score"] = res["seo_score"]
+        if res.get("seo_audit"):
+            article["seo_audit"] = res["seo_audit"]
+        article["updated_at"] = datetime.utcnow()
+        storage.save_articles()
+
         return res
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal melakukan revisi AI: {str(e)}")
+
+
+@router.get("/{article_id}/copilot-chat")
+async def get_copilot_chat_history(article_id: str):
+    """
+    Fetch persisted AI Copilot chat messages for an article.
+    """
+    if article_id not in storage.articles:
+        raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
+    article = storage.articles[article_id]
+    messages = article.get("copilot_chat_history", [])
+    return {
+        "article_id": article_id,
+        "total_messages": len(messages),
+        "messages": messages,
+    }
+
+
+@router.delete("/{article_id}/copilot-chat")
+async def clear_copilot_chat_history(article_id: str):
+    """
+    Reset / clear AI Copilot chat history for an article.
+    """
+    if article_id not in storage.articles:
+        raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
+    article = storage.articles[article_id]
+    article["copilot_chat_history"] = []
+    storage.save_articles()
+    return {"success": True, "message": "Riwayat percakapan AI Copilot berhasil direset"}
+
 

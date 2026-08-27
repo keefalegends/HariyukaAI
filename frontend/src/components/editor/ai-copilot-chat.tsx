@@ -12,6 +12,7 @@ import {
   User,
   ChevronDown,
   Wand2,
+  Trash2,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 import { getApiUrl } from "@/lib/api-config";
@@ -77,6 +78,45 @@ export function AiCopilotChat({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 1. Auto-load persisted chat history from backend
+  useEffect(() => {
+    if (!articleId) return;
+    const loadChatHistory = async () => {
+      try {
+        const res = await fetch(getApiUrl(`/api/v1/articles/${articleId}/copilot-chat`));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && data.messages.length > 0) {
+            setMessages(data.messages);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load chat history:", err);
+      }
+    };
+    loadChatHistory();
+  }, [articleId]);
+
+  const handleClearChat = async () => {
+    if (!window.confirm("Hapus semua riwayat percakapan untuk artikel ini?")) return;
+    try {
+      await fetch(getApiUrl(`/api/v1/articles/${articleId}/copilot-chat`), {
+        method: "DELETE",
+      });
+      setMessages([
+        {
+          id: "welcome-1",
+          role: "assistant",
+          content:
+            "Riwayat percakapan telah direset. Tulis instruksi revisi baru Anda di bawah.",
+          timestamp: "Baru saja",
+        },
+      ]);
+    } catch (err) {
+      console.error("Failed to clear chat history:", err);
+    }
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -221,6 +261,18 @@ export function AiCopilotChat({
               </div>
             )}
           </div>
+
+          {/* Reset / Clear Chat Button */}
+          {messages.length > 1 && (
+            <button
+              type="button"
+              onClick={handleClearChat}
+              title="Reset / Bersihkan Riwayat Chat"
+              className={`w-7 h-7 rounded-lg border t-border hover:bg-red-500/10 hover:border-red-500/30 flex items-center justify-center ${tk.textMuted} hover:text-red-400 transition-colors cursor-pointer`}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
 
           {/* Close Split View */}
           <button
