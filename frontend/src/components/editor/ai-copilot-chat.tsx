@@ -261,11 +261,11 @@ export function AiCopilotChat({
             <div
               className={`max-w-[88%] rounded-2xl p-3.5 leading-relaxed ${
                 msg.role === "user"
-                  ? "bg-[#d97757]/15 border border-[#d97757]/40 text-stone-900 dark:text-stone-100 rounded-tr-sm"
-                  : "t-bg-tag border t-border text-stone-900 dark:text-stone-200 rounded-tl-sm space-y-2.5 shadow-sm"
+                  ? "bg-[#d97757]/20 border border-[#d97757]/40 t-text-primary rounded-tr-sm"
+                  : "t-bg-tag border t-border t-text-primary rounded-tl-sm space-y-2.5 shadow-sm"
               }`}
             >
-              <div className="text-xs whitespace-pre-wrap">{msg.content}</div>
+              <div className="text-xs whitespace-pre-wrap t-text-primary">{msg.content}</div>
 
               {/* Action and Metric Badges for Assistant revisions */}
               {msg.modifiedContent && (
@@ -274,14 +274,14 @@ export function AiCopilotChat({
                     <span className={`px-2 py-0.5 rounded t-bg-card border t-border ${tk.textMuted}`}>
                       {msg.wordCount} kata
                     </span>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 dark:text-emerald-400 font-bold">
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
                       SEO: {msg.seoScore}/100
                     </span>
                   </div>
 
                   <div className="flex items-center gap-1.5">
                     {appliedMessageId === msg.id ? (
-                      <span className="text-[10px] text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-semibold">
+                      <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold">
                         <Check className="w-3 h-3" /> Aktif di Editor
                       </span>
                     ) : (
@@ -331,7 +331,7 @@ export function AiCopilotChat({
             <button
               type="button"
               onClick={onUndoContent}
-              className="text-[10px] text-amber-500 dark:text-amber-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+              className="text-[10px] text-amber-400 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" /> Batalkan Perubahan Terakhir (Undo)
             </button>
@@ -364,7 +364,7 @@ export function AiCopilotChat({
             onKeyDown={handleKeyDown}
             disabled={isLoading}
             placeholder="Tulis instruksi revisi ke Claude... (Tekan Enter untuk kirim)"
-            className={`w-full bg-transparent px-3.5 py-2.5 text-xs ${tk.textPrimary} placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none resize-none leading-relaxed`}
+            className={`w-full bg-transparent px-3.5 py-2.5 text-xs ${tk.textPrimary} placeholder:opacity-50 placeholder:t-text-muted focus:outline-none resize-none leading-relaxed`}
           />
 
           <div className={`flex items-center justify-between px-3 py-1.5 border-t t-border t-bg-tag/50 rounded-b-xl text-[10px] ${tk.textFaint}`}>

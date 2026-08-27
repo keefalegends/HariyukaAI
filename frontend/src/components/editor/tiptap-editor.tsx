@@ -98,7 +98,15 @@ function markdownToHtml(md: string): string {
 
 export function TiptapEditor({ initialContent = "", onChange, readOnly = false }: TiptapEditorProps) {
   const tk = useTokens();
-  const [copied, setCopied] = useState(false);
+  const [copiedWordPress, setCopiedWordPress] = useState(false);
+
+  const handleCopyWordPress = () => {
+    const textToCopy = initialContent || editor?.getText() || "";
+    if (!textToCopy) return;
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedWordPress(true);
+    setTimeout(() => setCopiedWordPress(false), 2500);
+  };
 
   const editor = useEditor({
     editable: !readOnly,
@@ -152,12 +160,6 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(editor.getText());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const downloadMarkdown = () => {
@@ -304,8 +306,18 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={handleCopyWordPress}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-semibold border transition-all active:scale-95 cursor-pointer whitespace-nowrap border-[#d97757]/40 bg-[#d97757]/10 text-[#d97757] hover:bg-[#d97757] hover:text-white shadow-sm"
+            title="Copy isi artikel untuk ditempel ke WordPress editor"
+          >
+            {copiedWordPress ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copiedWordPress ? "Tersalin!" : "Copy WordPress"}</span>
+          </button>
+
+          <button
+            type="button"
             onClick={downloadMarkdown}
-            className="t-accent-bg flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-semibold shadow-sm transition-all"
+            className="t-accent-bg flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-semibold shadow-sm transition-all cursor-pointer"
             title="Download .md"
           >
             <Download className="w-3.5 h-3.5" />

@@ -36,6 +36,7 @@ interface SeoSidebarProps {
   tags?: string;
   onUpdateMetadata?: (meta: { slug?: string; metaDescription?: string; seoTitle?: string; tags?: string }) => void;
   onOpenCopilot?: () => void;
+  onRunChecker?: () => void;
 }
 
 export function SeoSidebar({
@@ -53,6 +54,7 @@ export function SeoSidebar({
   tags = "",
   onUpdateMetadata,
   onOpenCopilot,
+  onRunChecker,
 }: SeoSidebarProps) {
   const tk = useTokens();
   const [activeTab, setActiveTab] = useState<"snippet" | "checklist">("snippet");
@@ -103,29 +105,57 @@ export function SeoSidebar({
 
   return (
     <div className={`t-card rounded-2xl p-5 space-y-5 shadow-sm sticky top-20 border t-border`}>
-      {/* AI Copilot Split-View Launch Button (Claude Artifacts Style) */}
-      {onOpenCopilot && (
-        <button
-          type="button"
-          onClick={onOpenCopilot}
-          className={`w-full py-3 px-4 rounded-xl border border-[#d97757]/50 bg-gradient-to-r from-[#d97757]/15 via-[#d97757]/5 to-transparent hover:bg-[#d97757] ${tk.textPrimary} hover:text-white font-semibold text-xs transition-all flex items-center justify-between group shadow-sm active:scale-98 cursor-pointer`}
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[#d97757] text-white flex items-center justify-center shadow-sm shrink-0">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div className="text-left min-w-0">
-              <div className="font-bold text-xs flex items-center gap-1.5">
-                <span className={`${tk.textPrimary} group-hover:text-white`}>AI Copilot Editor</span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#d97757]/20 group-hover:bg-white/20 text-[#d97757] group-hover:text-white font-mono font-semibold">
-                  Claude Split
+      {/* Quick Action Suite: AI Copilot & Cek AI/Plagiat */}
+      {(onOpenCopilot || onRunChecker) && (
+        <div className="grid grid-cols-2 gap-2.5">
+          {/* Button 1: AI Copilot Editor */}
+          {onOpenCopilot && (
+            <button
+              type="button"
+              onClick={onOpenCopilot}
+              className="p-3 rounded-xl border border-[#d97757]/50 bg-gradient-to-br from-[#d97757]/20 via-[#d97757]/5 to-transparent hover:bg-[#d97757] t-text-primary hover:text-white font-semibold text-xs transition-all flex flex-col justify-between gap-2.5 group shadow-sm active:scale-98 cursor-pointer"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="w-7 h-7 rounded-lg bg-[#d97757] text-white flex items-center justify-center shadow-sm shrink-0">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#d97757]/20 group-hover:bg-white/20 t-accent-text group-hover:text-white font-mono font-bold">
+                  Split
                 </span>
               </div>
-              <p className={`text-[10px] ${tk.textMuted} group-hover:text-white/90`}>Revisi & modifikasi via prompt</p>
-            </div>
-          </div>
-          <ArrowRight className={`w-4 h-4 ${tk.textMuted} group-hover:text-white group-hover:translate-x-0.5 transition-transform shrink-0`} />
-        </button>
+              <div className="text-left w-full">
+                <div className="font-bold text-xs t-text-primary group-hover:text-white truncate">
+                  AI Copilot
+                </div>
+                <p className="text-[10px] t-text-secondary group-hover:text-white/90 truncate mt-0.5">Revisi via Prompt</p>
+              </div>
+            </button>
+          )}
+
+          {/* Button 2: Cek AI & Plagiat */}
+          {onRunChecker && (
+            <button
+              type="button"
+              onClick={onRunChecker}
+              className="p-3 rounded-xl border t-border t-bg-tag hover:border-[#d97757]/60 hover:t-bg-card t-text-primary font-semibold text-xs transition-all flex flex-col justify-between gap-2.5 group shadow-sm active:scale-98 cursor-pointer"
+            >
+              <div className="flex items-center justify-between w-full">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <span className="text-[9px] px-1.5 py-0.5 rounded t-bg-card border t-border t-text-faint font-mono font-bold">
+                  Scan
+                </span>
+              </div>
+              <div className="text-left w-full">
+                <div className="font-bold text-xs t-text-primary group-hover:t-accent-text truncate">
+                  Cek AI/Plagiat
+                </div>
+                <p className="text-[10px] t-text-secondary truncate mt-0.5">Pindai Keaslian</p>
+              </div>
+            </button>
+          )}
+        </div>
       )}
 
       {/* Header & Score Gauge */}

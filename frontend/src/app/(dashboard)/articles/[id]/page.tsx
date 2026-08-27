@@ -452,28 +452,6 @@ export default function ArticleEditorPage() {
 
         {/* Right: Unified Action Buttons Toolbar */}
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-          {/* Copy Artikel WordPress Button */}
-          <button
-            type="button"
-            onClick={handleCopyWordPress}
-            className={`h-9 inline-flex items-center gap-1.5 px-3.5 rounded-xl text-xs font-semibold border transition-all active:scale-95 cursor-pointer whitespace-nowrap border-[#d97757]/40 bg-[#d97757]/10 text-[#d97757] hover:bg-[#d97757] hover:text-white shadow-sm`}
-            title="Copy isi artikel untuk ditempel ke WordPress editor"
-          >
-            {copiedWordPress ? <Check className="w-3.5 h-3.5" /> : <FileCheck2 className="w-3.5 h-3.5" />}
-            <span>{copiedWordPress ? "Tersalin!" : "Copy WordPress"}</span>
-          </button>
-
-          {/* Cek AI & Plagiat Button */}
-          <button
-            type="button"
-            onClick={handleRunChecker}
-            className={`h-9 inline-flex items-center gap-1.5 px-3.5 rounded-xl text-xs font-semibold border transition-all active:scale-95 cursor-pointer whitespace-nowrap ${tk.outlineBtn} hover:border-[#d97757] hover:text-[#d97757] shadow-sm`}
-            title="Pindai Keaslian & Deteksi AI"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-[#d97757]" />
-            <span>Cek AI & Plagiat</span>
-          </button>
-
           {/* Delete Button */}
           <button
             type="button"
@@ -584,6 +562,7 @@ export default function ArticleEditorPage() {
               tags={tags}
               onUpdateMetadata={handleUpdateMetadata}
               onOpenCopilot={() => setIsCopilotOpen(true)}
+              onRunChecker={handleRunChecker}
             />
           </div>
         </div>
