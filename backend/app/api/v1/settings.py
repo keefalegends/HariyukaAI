@@ -138,12 +138,17 @@ async def save_settings(req: SaveSettingsRequest):
 
     # Re-initialize AI Router singleton client
     from app.services.ai_router import ai_router
+    if req.model_writer:
+        norm_writer = ai_router._normalize_model(req.model_writer)
+        settings.MODEL_SECTION_WRITER = norm_writer
+        settings.MODEL_SEO_POLISHER = norm_writer
+
     ai_router.base_url = settings.NINEROUTER_BASE_URL
     ai_router.api_key = settings.NINEROUTER_API_KEY
     ai_router.model_serp = settings.MODEL_SERP_EXTRACTOR
     ai_router.model_outline = settings.MODEL_OUTLINE_GENERATOR
-    ai_router.model_writer = settings.MODEL_SECTION_WRITER
-    ai_router.model_seo = settings.MODEL_SEO_POLISHER
+    ai_router.model_writer = ai_router._normalize_model(settings.MODEL_SECTION_WRITER)
+    ai_router.model_seo = ai_router._normalize_model(settings.MODEL_SEO_POLISHER)
     ai_router.client = AsyncOpenAI(
         base_url=settings.NINEROUTER_BASE_URL,
         api_key=settings.NINEROUTER_API_KEY
@@ -163,11 +168,12 @@ async def save_settings(req: SaveSettingsRequest):
 @router.get("/current")
 async def get_current_settings():
     """Get currently active settings from environment/memory."""
+    from app.services.ai_router import ai_router
     return {
         "base_url": settings.NINEROUTER_BASE_URL,
         "api_key_set": bool(settings.NINEROUTER_API_KEY and settings.NINEROUTER_API_KEY != "your_9router_api_key_here"),
         "model_serp": settings.MODEL_SERP_EXTRACTOR,
-        "model_writer": settings.MODEL_SECTION_WRITER,
+        "model_writer": ai_router._normalize_model(settings.MODEL_SECTION_WRITER),
     }
 
 

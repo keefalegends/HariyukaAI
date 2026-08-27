@@ -17,19 +17,41 @@ class AIRouterService:
     def __init__(self):
         self._init_client()
 
+    def _normalize_model(self, model: str) -> str:
+        """
+        Ensures Claude Opus 4.6 always uses the exact working 9Router thinking alias:
+        ag/claude-opus-4-6-thinking.
+        Prevents 404 'Requested entity was not found' errors.
+        """
+        m = (model or "").strip()
+        if not m:
+            return "ag/claude-opus-4-6-thinking"
+
+        # If it matches any variant of claude opus 4.6 without -thinking, automatically append -thinking
+        if m in [
+            "ag/claude-opus-4-6",
+            "claude-opus-4-6",
+            "antigravity/claude-opus-4-6",
+            "ag/claude-4.6-opus",
+            "claude-4.6-opus",
+        ] or (("claude-opus-4-6" in m or "claude-opus-4.6" in m) and not m.endswith("-thinking")):
+            return "ag/claude-opus-4-6-thinking"
+
+        return m
+
     def _init_client(self):
         self.base_url = settings.NINEROUTER_BASE_URL.rstrip("/")
         self.api_key = settings.NINEROUTER_API_KEY
         self.model_serp = settings.MODEL_SERP_EXTRACTOR
         self.model_outline = settings.MODEL_OUTLINE_GENERATOR
-        self.model_writer = settings.MODEL_SECTION_WRITER
-        self.model_seo = settings.MODEL_SEO_POLISHER
+        self.model_writer = self._normalize_model(settings.MODEL_SECTION_WRITER)
+        self.model_seo = self._normalize_model(settings.MODEL_SEO_POLISHER)
 
         self.client = AsyncOpenAI(
             base_url=self.base_url,
             api_key=self.api_key,
         )
-        logger.info(f"Initialized 9Router Client -> Base URL: {self.base_url}")
+        logger.info(f"Initialized 9Router Client -> Base URL: {self.base_url} | Writer: {self.model_writer}")
 
     async def complete(
         self,
@@ -39,6 +61,7 @@ class AIRouterService:
         max_tokens: Optional[int] = None,
         response_format: Optional[Dict[str, str]] = None,
     ) -> str:
+        model = self._normalize_model(model)
         try:
             kwargs: Dict[str, Any] = {
                 "model": model,
@@ -63,6 +86,7 @@ class AIRouterService:
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
     ) -> AsyncGenerator[str, None]:
+        model = self._normalize_model(model)
         try:
             kwargs: Dict[str, Any] = {
                 "model": model,

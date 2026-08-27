@@ -56,7 +56,7 @@ export default function SettingsPage() {
             const data = await res.json();
             if (data.models) {
               setSerpModel(data.models.serp_extractor || "ag/gemini-3.7-flash-high");
-              setWriterModel(data.models.section_writer || "ag/claude-sonnet-4-6");
+              setWriterModel(data.models.section_writer || "ag/claude-opus-4-6-thinking");
             }
           }
         } catch (err) {}
