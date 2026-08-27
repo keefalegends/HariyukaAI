@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Save,
@@ -27,6 +27,7 @@ import { getApiUrl } from "@/lib/api-config";
 export default function ArticleEditorPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const articleId = params?.id as string;
   const tk = useTokens();
 
@@ -43,8 +44,14 @@ export default function ArticleEditorPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // AI Copilot Split-View Mode & History Stack
-  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [isCopilotOpen, setIsCopilotOpen] = useState(searchParams?.get("copilot") === "true");
   const [previousContents, setPreviousContents] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (searchParams?.get("copilot") === "true") {
+      setIsCopilotOpen(true);
+    }
+  }, [searchParams]);
 
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
