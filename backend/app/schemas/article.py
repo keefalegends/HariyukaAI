@@ -147,3 +147,19 @@ class JobStatusResponse(BaseModel):
     status: str
     logs: List[Dict[str, Any]]
     error_message: Optional[str] = None
+
+
+class AIEditArticleRequest(BaseModel):
+    instruction: str
+    current_content_markdown: str
+    model: Optional[str] = None
+    chat_history: Optional[List[Dict[str, str]]] = None
+
+
+class AIEditArticleResponse(BaseModel):
+    success: bool
+    explanation: str
+    modified_content_markdown: str
+    word_count: int
+    seo_score: int
+    seo_audit: Optional[Dict[str, Any]] = None

@@ -16,6 +16,7 @@ import {
   Layers,
   Sparkles,
   Hash,
+  ArrowRight,
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
@@ -34,6 +35,7 @@ interface SeoSidebarProps {
   seoTitle?: string;
   tags?: string;
   onUpdateMetadata?: (meta: { slug?: string; metaDescription?: string; seoTitle?: string; tags?: string }) => void;
+  onOpenCopilot?: () => void;
 }
 
 export function SeoSidebar({
@@ -50,6 +52,7 @@ export function SeoSidebar({
   seoTitle = "",
   tags = "",
   onUpdateMetadata,
+  onOpenCopilot,
 }: SeoSidebarProps) {
   const tk = useTokens();
   const [activeTab, setActiveTab] = useState<"snippet" | "checklist">("snippet");
@@ -100,6 +103,31 @@ export function SeoSidebar({
 
   return (
     <div className={`t-card rounded-2xl p-5 space-y-5 shadow-sm sticky top-20 border t-border`}>
+      {/* AI Copilot Split-View Launch Button (Claude Artifacts Style) */}
+      {onOpenCopilot && (
+        <button
+          type="button"
+          onClick={onOpenCopilot}
+          className="w-full py-3 px-4 rounded-xl border border-[#d97757]/40 bg-gradient-to-r from-[#d97757]/20 via-[#d97757]/10 to-transparent hover:from-[#d97757] hover:to-[#c26445] text-stone-100 font-semibold text-xs transition-all flex items-center justify-between group shadow-sm active:scale-98 cursor-pointer"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg bg-[#d97757] text-white flex items-center justify-center shadow-sm">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
+            <div className="text-left">
+              <div className="font-bold text-xs group-hover:text-white flex items-center gap-1.5">
+                <span>AI Copilot Editor</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#d97757]/30 group-hover:bg-white/20 text-[#d97757] group-hover:text-white font-mono">
+                  Claude Split
+                </span>
+              </div>
+              <p className="text-[10px] text-stone-400 group-hover:text-white/80">Revisi & modifikasi via prompt</p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
+        </button>
+      )}
+
       {/* Header & Score Gauge */}
       <div>
         <div className="flex items-center justify-between mb-3">

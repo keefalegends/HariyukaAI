@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { TiptapEditor } from "@/components/editor/tiptap-editor";
 import { SeoSidebar } from "@/components/editor/seo-sidebar";
+import { AiCopilotChat } from "@/components/editor/ai-copilot-chat";
 import { useTokens } from "@/lib/use-tokens";
 import { logTerminal } from "@/lib/terminal-bus";
 import { getApiUrl } from "@/lib/api-config";
@@ -40,6 +41,10 @@ export default function ArticleEditorPage() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [copiedWordPress, setCopiedWordPress] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // AI Copilot Split-View Mode & History Stack
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [previousContents, setPreviousContents] = useState<string[]>([]);
 
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -436,6 +441,21 @@ export default function ArticleEditorPage() {
 
         {/* Right: Unified Action Buttons Toolbar */}
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          {/* AI Copilot Split-View Button */}
+          <button
+            type="button"
+            onClick={() => setIsCopilotOpen(!isCopilotOpen)}
+            className={`h-9 inline-flex items-center gap-1.5 px-3.5 rounded-xl text-xs font-semibold border transition-all active:scale-95 cursor-pointer whitespace-nowrap shadow-sm ${
+              isCopilotOpen
+                ? "bg-[#d97757] text-white border-transparent shadow-[#d97757]/20"
+                : "border-[#d97757]/40 bg-[#d97757]/10 text-[#d97757] hover:bg-[#d97757] hover:text-white"
+            }`}
+            title="Buka / Tutup AI Copilot Split-View"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{isCopilotOpen ? "Tutup Copilot" : "AI Copilot"}</span>
+          </button>
+
           {/* Copy Artikel WordPress Button */}
           <button
             type="button"
@@ -487,35 +507,100 @@ export default function ArticleEditorPage() {
         </div>
       </div>
 
-      {/* Main Grid: Tiptap Editor (Left) + Live SEO Sidebar (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Editor Area */}
-        <div className="lg:col-span-2 space-y-4">
-          <TiptapEditor
-            initialContent={contentMarkdown}
-            onChange={handleEditorChange}
-          />
-        </div>
+      {/* Main Content: Split-View Mode vs Standard View */}
+      {isCopilotOpen ? (
+        /* Claude Artifacts Split-View Layout (Left: AI Chat, Right: Live Article Document) */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-8.5rem)] animate-in fade-in duration-200">
+          {/* Left Column: AI Copilot Chat (5 cols ~ 42%) */}
+          <div className="lg:col-span-5 h-full">
+            <AiCopilotChat
+              articleId={articleId}
+              currentContent={contentMarkdown}
+              onApplyContent={(newMarkdown, newAudit) => {
+                setPreviousContents((prev) => [...prev, contentMarkdown]);
+                setContentMarkdown(newMarkdown);
+                if (newAudit) setSeoAudit(newAudit);
+              }}
+              onUndoContent={() => {
+                if (previousContents.length > 0) {
+                  const last = previousContents[previousContents.length - 1];
+                  setPreviousContents((prev) => prev.slice(0, -1));
+                  setContentMarkdown(last);
+                }
+              }}
+              canUndo={previousContents.length > 0}
+              onClose={() => setIsCopilotOpen(false)}
+            />
+          </div>
 
-        {/* SEO Sidebar */}
-        <div className="space-y-4">
-          <SeoSidebar
-            score={seoAudit?.score || article?.seo_score || 94}
-            wordCount={seoAudit?.word_count || article?.word_count || 550}
-            readingTime={seoAudit?.reading_time_minutes || 3}
-            keywordDensity={seoAudit?.keyword_density || 1.2}
-            keywordCount={seoAudit?.keyword_count}
-            targetKeyword={article?.target_keyword || "SEO"}
-            checklist={seoAudit?.checklist}
-            secondaryKeywords={seoAudit?.secondary_keywords}
-            slug={slug}
-            metaDescription={metaDescription}
-            seoTitle={seoTitle}
-            tags={tags}
-            onUpdateMetadata={handleUpdateMetadata}
-          />
+          {/* Right Column: Live Article Document Editor (7 cols ~ 58%) */}
+          <div className="lg:col-span-7 flex flex-col h-full overflow-hidden rounded-2xl border t-border t-card shadow-sm">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b t-border t-bg-tag text-xs shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span className={`font-semibold ${tk.textPrimary} text-xs truncate max-w-[280px]`}>
+                  {seoTitle || article?.title || "Dokumen Artikel"}
+                </span>
+                <span className={`text-[10px] font-mono ${tk.textFaint} shrink-0`}>
+                  ({seoAudit?.word_count || contentMarkdown.split(/\s+/).filter(Boolean).length} kata)
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold font-mono">
+                  SEO: {seoAudit?.score || article?.seo_score || 94}/100
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="px-2.5 py-1 rounded-lg bg-[#d97757] hover:bg-[#c26445] text-white font-semibold text-[11px] transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                  <span>Simpan</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              <TiptapEditor
+                initialContent={contentMarkdown}
+                onChange={handleEditorChange}
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        /* Standard Layout: Tiptap Editor (Left 2 cols) + Live SEO Sidebar (Right 1 col) */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-200">
+          {/* Editor Area */}
+          <div className="lg:col-span-2 space-y-4">
+            <TiptapEditor
+              initialContent={contentMarkdown}
+              onChange={handleEditorChange}
+            />
+          </div>
+
+          {/* SEO Sidebar */}
+          <div className="space-y-4">
+            <SeoSidebar
+              score={seoAudit?.score || article?.seo_score || 94}
+              wordCount={seoAudit?.word_count || article?.word_count || 550}
+              readingTime={seoAudit?.reading_time_minutes || 3}
+              keywordDensity={seoAudit?.keyword_density || 1.2}
+              keywordCount={seoAudit?.keyword_count}
+              targetKeyword={article?.target_keyword || "SEO"}
+              checklist={seoAudit?.checklist}
+              secondaryKeywords={seoAudit?.secondary_keywords}
+              slug={slug}
+              metaDescription={metaDescription}
+              seoTitle={seoTitle}
+              tags={tags}
+              onUpdateMetadata={handleUpdateMetadata}
+              onOpenCopilot={() => setIsCopilotOpen(true)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

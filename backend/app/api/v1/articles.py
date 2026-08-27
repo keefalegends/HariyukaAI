@@ -13,10 +13,13 @@ from app.schemas.article import (
     ContinueWritingRequest,
     ArticleResponse,
     UpdateArticleContentRequest,
-    JobStatusResponse
+    JobStatusResponse,
+    AIEditArticleRequest,
+    AIEditArticleResponse,
 )
 from app.pipeline.orchestrator import orchestrator
 from app.services.seo_analyzer import seo_analyzer
+from app.services.ai_editor import ai_editor
 from app.db.storage import storage
 from app.config import settings
 
@@ -313,3 +316,36 @@ async def delete_article(article_id: str):
         storage.save_articles()
         return {"success": True, "message": "Artikel berhasil dihapus"}
     raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
+
+
+@router.post("/{article_id}/ai-edit", response_model=AIEditArticleResponse)
+async def ai_edit_article_endpoint(article_id: str, req: AIEditArticleRequest):
+    """
+    AI Copilot Chat Endpoint: Modifies the article based on natural language instructions.
+    """
+    if article_id not in storage.articles:
+        raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
+
+    # Pre-flight check: ensure 9Router is configured
+    api_key = (settings.NINEROUTER_API_KEY or "").strip()
+    if not api_key or api_key in ["your_9router_api_key_here", "placeholder_key"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Kunci API 9Router belum dikonfigurasi! Buka menu 'API & Model' untuk mengaturnya."
+        )
+
+    article = storage.articles[article_id]
+    try:
+        res = await ai_editor.edit_article(
+            article_title=article.get("title", "Artikel"),
+            target_keyword=article.get("target_keyword", "SEO"),
+            current_content_markdown=req.current_content_markdown,
+            instruction=req.instruction,
+            chat_history=req.chat_history,
+            model=req.model or settings.MODEL_SECTION_WRITER,
+            article_type=article.get("article_type", "backlink_article"),
+        )
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal melakukan revisi AI: {str(e)}")
+
