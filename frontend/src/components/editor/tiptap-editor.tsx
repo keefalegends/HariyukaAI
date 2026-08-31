@@ -101,9 +101,21 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
   const [copiedWordPress, setCopiedWordPress] = useState(false);
 
   const handleCopyWordPress = () => {
-    const textToCopy = initialContent || editor?.getText() || "";
-    if (!textToCopy) return;
-    navigator.clipboard.writeText(textToCopy);
+    if (!editor) return;
+    const html = editor.getHTML();
+    if (!html) return;
+
+    // Use ClipboardItem to write both HTML (for WordPress rich paste) and plain text fallback
+    try {
+      const htmlBlob = new Blob([html], { type: "text/html" });
+      const textBlob = new Blob([editor.getText()], { type: "text/plain" });
+      const item = new ClipboardItem({ "text/html": htmlBlob, "text/plain": textBlob });
+      navigator.clipboard.write([item]);
+    } catch {
+      // Fallback for browsers that don't support ClipboardItem
+      navigator.clipboard.writeText(html);
+    }
+
     setCopiedWordPress(true);
     setTimeout(() => setCopiedWordPress(false), 2500);
   };
