@@ -58,11 +58,12 @@ function markdownToHtml(md: string): string {
       continue;
     }
 
-    // Inline formatting (bold, italic, code)
+    // Inline formatting (bold, italic, code, links)
     line = line
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.*?)\*/g, "<em>$1</em>")
-      .replace(/`([^`]+)`/g, "<code>$1</code>");
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
     // Headings
     if (line.startsWith("### ")) {
