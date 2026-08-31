@@ -274,7 +274,8 @@ class ArticlePipelineOrchestrator:
         seo_meta = await ai_router.generate_seo_metadata(
             title=title,
             target_keyword=target_keyword,
-            content_markdown=polished_markdown
+            content_markdown=polished_markdown,
+            article_type=article_type,
         )
 
         final_result = {

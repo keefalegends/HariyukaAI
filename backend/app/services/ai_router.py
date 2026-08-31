@@ -505,15 +505,17 @@ Return the final polished markdown:
         self,
         title: str,
         target_keyword: str,
-        content_markdown: str
+        content_markdown: str,
+        article_type: str = "backlink_article",
     ) -> Dict[str, str]:
         """
         Generates Yoast WordPress SEO Snippet Metadata:
         - Slug: strictly clean permalink containing the primary keyphrase
         - Meta Description: 130-155 characters, includes primary keyphrase at the start, engaging call to action
         - SEO Title: High CTR Title under 60 characters
-        - Tags: 8-10 high-relevance WordPress tags / keyphrase synonyms separated strictly by commas (no numbering)
+        - Tags: backlink_article = 10 tags, pillar/utama = 15 tags (short 1-3 word phrases)
         """
+        tag_count = 15 if article_type == "pillar" else 10
         clean_slug = re.sub(r"[^a-zA-Z0-9\s-]", "", target_keyword).strip().lower()
         default_slug = re.sub(r"[\s-]+", "-", clean_slug)
         
@@ -522,14 +524,14 @@ Return the final polished markdown:
         core_kw = " ".join(kw_words[:2]) if kw_words else "seo"
         default_tags = f"{core_kw}, tips {core_kw}, rekomendasi {core_kw}, panduan {core_kw}, cara memilih {core_kw}"
 
-        system_prompt = """You are a Yoast SEO WordPress Metadata Specialist.
+        system_prompt = f"""You are a Yoast SEO WordPress Metadata Specialist.
 Generate clean, concise, click-worthy metadata in JSON format:
-{
+{{
   "seo_title": "Max 60 chars, includes focus keyphrase naturally",
   "slug": "url-friendly-slug-containing-only-keyphrase",
   "meta_description": "130-155 characters, MUST contain primary keyphrase near the beginning, high CTR appeal without em-dashes",
-  "tags": "8 to 10 SHORT keyword tags (each tag MUST be only 1 to 3 words max, Indonesian), strictly separated by commas. NEVER include long sentences or repeat the full article title! (e.g. 'steamer rice cooker, inner pot keramik, wadah kukusan, hemat listrik, tips memilih, rice cooker awet, panci anti lengket, peralatan dapur')"
-}"""
+  "tags": "EXACTLY {tag_count} SHORT keyword tags (each tag MUST be only 1 to 3 words max, Indonesian), strictly separated by commas. NEVER include long sentences or repeat the full article title! (e.g. 'steamer rice cooker, inner pot keramik, wadah kukusan, hemat listrik, tips memilih, rice cooker awet, panci anti lengket, peralatan dapur')"
+}}"""
         user_prompt = f"""
 Focus Keyphrase: "{target_keyword}"
 Article Title: "{title}"
