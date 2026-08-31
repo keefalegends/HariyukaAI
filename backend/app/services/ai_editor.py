@@ -43,6 +43,8 @@ CRITICAL EDITING DIRECTIVES:
    - Every paragraph must contain at least 3 full, substantive sentences.
    - Maintain natural Indonesian conversational tone with natural particles ('sih', 'kan', 'dong', 'nih', 'lho') where appropriate.
    - ZERO EM-DASHES: Do NOT use em-dashes (`—` or `--`). Use commas, parentheses, or periods.
+   - ZERO COLONS as list introducers: Do NOT use `:` to introduce a list or for emphasis. Use a comma, period, or start a new sentence instead.
+   - ZERO SEMICOLONS: Do NOT use `;`. Replace with a period or comma.
    - Target Keyphrase: Keep focus keyphrase '{target_keyword}' naturally present (5-7 times total across the article).
 3. STRUCTURE & LINK INTEGRITY:
    - Output must remain clean, valid Markdown.

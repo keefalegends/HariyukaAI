@@ -345,6 +345,8 @@ Output valid JSON matching this schema:
 🚨 ULTRA HUMANIZER & ANTI-AI DETECTOR DIRECTIVES (TARGET: 0-15% AI SCORE):
 1. FORBIDDEN PUNCTUATION:
    - DO NOT USE EM-DASHES (`—` or `--`). Real Indonesian writers use commas, parentheses, or start fresh sentences.
+   - DO NOT USE COLONS (`:`) to introduce lists or emphasize a point. Replace with a comma, period, or start a new sentence.
+   - DO NOT USE SEMICOLONS (`;`). Replace with a period or comma.
 2. BANNED AI RHETORICAL ARCHETYPES (DO NOT USE):
    - "Ini bukan sekadar X, ini soal Y..." / "Ini bukan soal gengsi..."
    - "A, bahkan B saat C..."
@@ -441,6 +443,8 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
             humanizer_polish = """
 7. ANTI-AI DETECTOR SANITIZATION PASS:
    - Eliminate ALL em-dashes (`—` and `--`). Replace with commas or clean periods.
+   - Eliminate ALL colons (`:`) used to introduce lists or emphasize. Replace with a comma, period, or new sentence. Do NOT touch colons inside URLs (https://...).
+   - Eliminate ALL semicolons (`;`). Replace with a period or comma.
    - Break any remaining formulaic AI transitions ('Ini bukan sekadar...', 'Hal yang perlu dipahami...', 'Berikut lima tips...', 'Merupakan langkah krusial...').
    - Infuse native Indonesian conversational ease ('kan', 'sih', 'lho', 'nih', 'Gimana solusinya?') so AI detector gives < 15% score.
    - Ensure the prose reads 100% natural and passes both Yoast SEO and PlagiarismDetector.
