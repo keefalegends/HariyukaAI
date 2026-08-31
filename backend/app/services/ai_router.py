@@ -215,7 +215,10 @@ Total: ~550 words (strictly 500-599 words)
             f"1. 🎯 LASER TOPICAL FOCUS: Every heading, sub-heading, and key point MUST strictly revolve around '{target_keyword}'. ZERO OFF-TOPIC DRIFT. Do NOT introduce unrelated buying/generic advice unless the keyword specifically asks for it.\n"
             "2. ONLY use H2 and H3 levels. NEVER output H1.\n"
             f"3. Total word count must strictly target {exact_target} words ({'1500-1599 words' if article_type == 'pillar' else '500-599 words'}).\n"
-            f"4. Include '{target_keyword}' in at least 1 or 2 subheadings naturally to satisfy Yoast SEO.\n"
+            f"4. KEYWORD BALANCE IN HEADINGS & CONTENT (MANDATORY):\n"
+            f"   - Every H2 heading MUST contain '{target_keyword}' or a close LSI variant (e.g. synonyms, related phrases from SERP data) — NOT verbatim spam, but naturally embedded.\n"
+            f"   - Every H3 sub-heading MUST contain a relevant LSI keyword or partial variation of '{target_keyword}'.\n"
+            f"   - The `keywords_to_include` list for each section MUST always contain '{target_keyword}' or at least 1 LSI synonym relevant to that section.\n"
             f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'."
         )
 
@@ -373,6 +376,11 @@ Output valid JSON matching this schema:
 2. NEVER wander into unrelated philosophical musings, generic kitchen/life analogies, or tangential subtopics that do not directly answer '{target_keyword}'. The reader searched specifically for '{target_keyword}' — give them dense, direct, practical, and highly useful insights immediately!
 3. DENSE ACTIONABLE WRITING: Avoid generic filler or repetitive restatements. Deliver real-world techniques, tangible steps, cause-and-effect reasoning, and practical criteria.
 
+🔑 KEYWORD BALANCE IN HEADING & CONTENT (MANDATORY):
+4. The H2/H3 HEADING for this section MUST contain '{target_keyword}' or a natural LSI variant — not keyword stuffed, but clearly embedded so Yoast detects it.
+5. The CONTENT under this heading MUST mention '{target_keyword}' or an LSI synonym at least ONCE in the first paragraph and at least ONCE more in subsequent paragraphs.
+6. Do NOT over-stuff: Max 2 exact-match occurrences of '{target_keyword}' per section. Use pronouns ('alat ini', 'langkah tersebut') for remaining references.
+
 🚨 STRICT PARAGRAPH & SENTENCE STRUCTURE SOP (SALNA EDITORIAL RULES):
 1. MINIMUM 2 PARAGRAPHS PER SUBHEADING: Under EVERY H2 and H3 heading, you MUST write at least 2 distinct paragraphs separated by a double newline (`\\n\\n`). Single-paragraph sections are STRICTLY FORBIDDEN.
 2. MINIMUM 3 SENTENCES PER PARAGRAPH: Every single paragraph MUST contain at least 3 well-crafted, substantive sentences (each ending with a period, question mark, or exclamation mark). Never write a paragraph with only 1 or 2 sentences.
@@ -381,8 +389,7 @@ Output valid JSON matching this schema:
    - Paragraph 2+: Concrete actionable steps, practical field application, and direct tangible benefit for the reader.
 4. HEADINGS: ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
 5. WORD COUNT: Target ~{target_word_count} words for this section.
-6. KEYPHRASE DENSITY: Mention the exact focus keyphrase '{target_keyword}' AT MOST 1 or 2 times in this section. Use natural pronouns ('alat ini', 'langkah tersebut') elsewhere.
-7. If this is Section 1, mention keyphrase in the very first sentence.
+6. If this is Section 1, mention keyphrase in the very first sentence.
 """
 
         user_prompt = f"""
