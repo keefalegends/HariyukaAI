@@ -219,7 +219,8 @@ Total: ~550 words (strictly 500-599 words)
             f"   - Every H2 heading MUST contain '{target_keyword}' or a close LSI variant (e.g. synonyms, related phrases from SERP data) — NOT verbatim spam, but naturally embedded.\n"
             f"   - Every H3 sub-heading MUST contain a relevant LSI keyword or partial variation of '{target_keyword}'.\n"
             f"   - The `keywords_to_include` list for each section MUST always contain '{target_keyword}' or at least 1 LSI synonym relevant to that section.\n"
-            f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'."
+            f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'.\n"
+            f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain {target_keyword} or an LSI keyword naturally."
         )
 
         user_prompt = f"""
@@ -238,42 +239,103 @@ SERP & Intent Context:
 - Search Intent: {serp_analysis.get('search_intent')}
 - LSI Keywords: {', '.join(serp_analysis.get('lsi_keywords', []))}
 
-Output valid JSON matching this schema:
+CRITICAL H3 SUBSECTION RULE:
+Every H2 content section (NOT the opening intro and NOT the conclusion) MUST contain EXACTLY 3 H3 sub-headings inside its `subsections` array.
+Each H3 subsection must:
+- Have a heading that contains the focus keyphrase or a relevant LSI variant naturally.
+- Have 2-3 key_points that are specific and actionable.
+- Have a target_word_count proportional to the parent H2's total word count divided by 3.
+
+Output valid JSON matching this schema exactly:
 {{
   "title": "{title}",
   "estimated_total_words": {exact_target},
   "sections": [
     {{
       "id": "section-1",
-      "heading": "...",
+      "heading": "H2 Pembuka yang Mengandung {target_keyword}",
       "level": "h2",
-      "target_word_count": 120,
-      "key_points": ["Hook reader", "Introduce {target_keyword} in first 2 sentences"],
-      "keywords_to_include": ["{target_keyword}"]
+      "target_word_count": {"120" if article_type != "pillar" else "250"},
+      "key_points": ["Hook reader with urgent problem", "Introduce {target_keyword} in first 2 sentences"],
+      "keywords_to_include": ["{target_keyword}"],
+      "subsections": []
     }},
     {{
       "id": "section-2",
-      "heading": "5 Alasan Pentingnya {target_keyword}",
+      "heading": "H2 Panduan/Cara [LSI variant of {target_keyword}]",
       "level": "h2",
-      "target_word_count": 280,
-      "key_points": ["Point 1", "Point 2", "Point 3", "Point 4", "Point 5"],
-      "keywords_to_include": ["{target_keyword}"]
+      "target_word_count": {"280" if article_type != "pillar" else "450"},
+      "key_points": ["Main point 1", "Main point 2", "Main point 3"],
+      "keywords_to_include": ["{target_keyword}"],
+      "subsections": [
+        {{
+          "id": "section-2-1",
+          "heading": "H3 Sub-topik 1 Terkait {target_keyword}",
+          "level": "h3",
+          "target_word_count": {"93" if article_type != "pillar" else "150"},
+          "key_points": ["Specific actionable point A", "Specific actionable point B"],
+          "keywords_to_include": ["{target_keyword}"]
+        }},
+        {{
+          "id": "section-2-2",
+          "heading": "H3 Sub-topik 2 Terkait [LSI]",
+          "level": "h3",
+          "target_word_count": {"93" if article_type != "pillar" else "150"},
+          "key_points": ["Specific actionable point C", "Specific actionable point D"],
+          "keywords_to_include": ["{target_keyword}"]
+        }},
+        {{
+          "id": "section-2-3",
+          "heading": "H3 Sub-topik 3 Terkait [LSI]",
+          "level": "h3",
+          "target_word_count": {"94" if article_type != "pillar" else "150"},
+          "key_points": ["Specific actionable point E", "Specific actionable point F"],
+          "keywords_to_include": ["{target_keyword}"]
+        }}
+      ]
     }},
     {{
       "id": "section-3",
-      "heading": "...",
+      "heading": "H2 Tips/Optimasi [LSI variant of {target_keyword}]",
       "level": "h2",
-      "target_word_count": 100,
-      "key_points": ["..."],
-      "keywords_to_include": []
+      "target_word_count": {"100" if article_type != "pillar" else "400"},
+      "key_points": ["Efficiency tip or common mistake related to {target_keyword}"],
+      "keywords_to_include": ["{target_keyword}"],
+      "subsections": {"[]" if article_type != "pillar" else '''[
+        {{
+          "id": "section-3-1",
+          "heading": "H3 Best Practice 1 Terkait {target_keyword}",
+          "level": "h3",
+          "target_word_count": 133,
+          "key_points": ["Best practice detail A", "Best practice detail B"],
+          "keywords_to_include": ["{target_keyword}"]
+        }},
+        {{
+          "id": "section-3-2",
+          "heading": "H3 Best Practice 2 [LSI]",
+          "level": "h3",
+          "target_word_count": 133,
+          "key_points": ["Tip C", "Tip D"],
+          "keywords_to_include": ["{target_keyword}"]
+        }},
+        {{
+          "id": "section-3-3",
+          "heading": "H3 Kesalahan yang Sering Terjadi pada {target_keyword}",
+          "level": "h3",
+          "target_word_count": 134,
+          "key_points": ["Common mistake E", "How to avoid F"],
+          "keywords_to_include": ["{target_keyword}"]
+        }}
+      ]'''}
     }},
     {{
       "id": "section-4",
       "heading": "Kesimpulan {target_keyword}",
       "level": "h2",
-      "target_word_count": 70,
-      "key_points": ["Summary", "Actionable takeaway"],
-      "keywords_to_include": ["{target_keyword}"]
+      "target_word_count": {"70" if article_type != "pillar" else "150"},
+      "key_points": ["Summary of main insights", "Actionable takeaway for reader"],
+      "keywords_to_include": ["{target_keyword}"],
+      "subsections": []
     }}
   ]
 }}
