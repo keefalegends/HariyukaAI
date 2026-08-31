@@ -325,11 +325,19 @@ Output valid JSON matching this schema:
         link_instructions = ""
         if link_1_url and (is_first_section or section_index == 2):
             anchor = link_1_anchor or target_keyword
-            link_instructions += f"\n- CONTEXTUAL LINK: Naturally wrap `[{anchor}]({link_1_url})` into the body text."
+            link_instructions += (
+                f"\n- CONTEXTUAL KEYWORD LINK: Naturally embed the link `[{anchor}]({link_1_url})` inside 2-4 words taken directly from the focus keyphrase or a close LSI variant."
+                f" The anchor text MUST read like a natural phrase (e.g. 'mesin pembuat mie', 'cara membuat mie', 'alat cetak mie') — NOT a full sentence or generic 'klik di sini'."
+                f" Place this link within the paragraph body, not at the start or end of a sentence."
+            )
 
         if link_2_url and is_last_section:
             anchor = link_2_anchor or (product_name or "Official Website")
-            link_instructions += f"\n- BRAND/PRODUCT LINK: In this conclusion, naturally mention `[{anchor}]({link_2_url})`."
+            link_instructions += (
+                f"\n- BRAND/PRODUCT LINK: In the conclusion, naturally mention `[{anchor}]({link_2_url})`."
+                f" The anchor text MUST be the company/brand name only (max 2 words, e.g. 'Rumah Mesin', 'Tokopedia Resmi') — short, clean, brand-focused."
+                f" Do NOT use generic anchors like 'klik di sini' or full sentences."
+            )
 
         product_instruction = ""
         if article_type == "backlink_product" and product_name:
