@@ -385,20 +385,22 @@ Output valid JSON matching this schema exactly:
         is_last_section = (section_index == total_sections)
 
         link_instructions = ""
-        if link_1_url and (is_first_section or section_index == 2):
+        # STRICT: Link 1 appears ONLY in section 2 (exactly once, never repeated)
+        if link_1_url and section_index == 2:
             anchor = link_1_anchor or target_keyword
             link_instructions += (
-                f"\n- CONTEXTUAL KEYWORD LINK: Naturally embed the link `[{anchor}]({link_1_url})` inside 2-4 words taken directly from the focus keyphrase or a close LSI variant."
-                f" The anchor text MUST read like a natural phrase (e.g. 'mesin pembuat mie', 'cara membuat mie', 'alat cetak mie') — NOT a full sentence or generic 'klik di sini'."
-                f" Place this link within the paragraph body, not at the start or end of a sentence."
+                f"\n- CONTEXTUAL KEYWORD LINK (ONCE ONLY): Naturally embed the link `[{anchor}]({link_1_url})` EXACTLY ONE TIME inside 2-4 words taken from the focus keyphrase or a close LSI variant."
+                f" The anchor text MUST read like a natural phrase (e.g. 'mesin pembuat mie', 'cara membuat mie') — NOT a full sentence or generic 'klik di sini'."
+                f" Place this link within the paragraph body. DO NOT repeat this URL anywhere else."
             )
 
+        # STRICT: Link 2 appears ONLY in the last/conclusion section (exactly once, never repeated)
         if link_2_url and is_last_section:
             anchor = link_2_anchor or (product_name or "Official Website")
             link_instructions += (
-                f"\n- BRAND/PRODUCT LINK: In the conclusion, naturally mention `[{anchor}]({link_2_url})`."
-                f" The anchor text MUST be the company/brand name only (max 2 words, e.g. 'Rumah Mesin', 'Tokopedia Resmi') — short, clean, brand-focused."
-                f" Do NOT use generic anchors like 'klik di sini' or full sentences."
+                f"\n- BRAND LINK (ONCE ONLY): In this conclusion, naturally mention `[{anchor}]({link_2_url})` EXACTLY ONE TIME."
+                f" The anchor text MUST be the brand/company name only (max 2 words, e.g. 'Rumah Mesin') — short, clean, brand-focused."
+                f" Do NOT use generic anchors. DO NOT repeat this URL anywhere else."
             )
 
         product_instruction = ""
@@ -552,7 +554,9 @@ CALIBRATION REQUIREMENTS (SALNA EDITORIAL & YOAST SOP):
    If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
 6. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
 7. IMAGE RULE: {image_rule}
-8. Preserve all markdown links `[anchor](url)`.
+8. LINK DEDUPLICATION (STRICT): Each URL must appear EXACTLY ONCE across the entire article.
+   - If the same URL appears more than once (in different sections), remove all duplicate occurrences and keep only the FIRST one.
+   - The final article must have a maximum of 2 links total (1 keyword/product link + 1 brand link). Do NOT add new links.
 {humanizer_polish}
 Output only the final polished article in Markdown.
 """
