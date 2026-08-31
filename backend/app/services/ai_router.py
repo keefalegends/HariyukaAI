@@ -373,6 +373,10 @@ Output valid JSON matching this schema:
 4. EXTREME SENTENCE BURSTINESS:
    - Mix ultra-short 3-5 word sentences ("Jangan buru-buru beli.", "Kuncinya ada di sini.", "Simpel tapi krusial.") with natural compound sentences.
    - Break monotonous Subject-Verb-Object patterns.
+5. ACTIVE VOICE MANDATE (MIN 80%):
+   - Write in active voice. The subject must PERFORM the action, not receive it.
+   - FORBIDDEN passive constructions: 'dapat digunakan', 'telah dilakukan', 'akan diberikan', 'perlu diperhatikan', 'harus dipahami', 'bisa didapatkan', 'sering digunakan'.
+   - Instead use: 'gunakan', 'kamu bisa pakai', 'langkah ini memberikan', 'cara ini membantu', 'alat ini menghasilkan'.
 """
         else:
             humanizer_directives = ""
@@ -463,6 +467,10 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
    - Break any remaining formulaic AI transitions ('Ini bukan sekadar...', 'Hal yang perlu dipahami...', 'Berikut lima tips...', 'Merupakan langkah krusial...').
    - Infuse native Indonesian conversational ease ('kan', 'sih', 'lho', 'nih', 'Gimana solusinya?') so AI detector gives < 15% score.
    - Ensure the prose reads 100% natural and passes both Yoast SEO and PlagiarismDetector.
+8. ACTIVE VOICE CONVERSION PASS (MIN 80% ACTIVE):
+   - Scan for passive constructions and rewrite them in active voice.
+   - Convert: 'dapat digunakan' → 'bisa kamu gunakan', 'perlu diperhatikan' → 'perhatikan', 'sering digunakan' → 'banyak orang pakai', 'telah dilakukan' → 'sudah dilakukan oleh'.
+   - Ensure the subject clearly performs the action in every sentence.
 """
         else:
             humanizer_polish = ""

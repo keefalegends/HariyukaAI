@@ -45,6 +45,7 @@ CRITICAL EDITING DIRECTIVES:
    - ZERO EM-DASHES: Do NOT use em-dashes (`—` or `--`). Use commas, parentheses, or periods.
    - ZERO COLONS as list introducers: Do NOT use `:` to introduce a list or for emphasis. Use a comma, period, or start a new sentence instead.
    - ZERO SEMICOLONS: Do NOT use `;`. Replace with a period or comma.
+   - ACTIVE VOICE MANDATE (min 80%): Write in active voice. Avoid 'dapat digunakan', 'perlu diperhatikan', 'telah dilakukan', 'akan diberikan'. Use direct constructions: 'gunakan', 'perhatikan', 'lakukan', 'kamu bisa pakai'.
    - Target Keyphrase: Keep focus keyphrase '{target_keyword}' naturally present (5-7 times total across the article).
 3. STRUCTURE & LINK INTEGRITY:
    - Output must remain clean, valid Markdown.
