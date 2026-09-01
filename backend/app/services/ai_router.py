@@ -444,10 +444,21 @@ Output valid JSON matching this schema exactly:
 4. EXTREME SENTENCE BURSTINESS:
    - Mix ultra-short 3-5 word sentences ("Jangan buru-buru beli.", "Kuncinya ada di sini.", "Simpel tapi krusial.") with natural compound sentences.
    - Break monotonous Subject-Verb-Object patterns.
-5. ACTIVE VOICE MANDATE (MIN 80%):
-   - Write in active voice. The subject must PERFORM the action, not receive it.
-   - FORBIDDEN passive constructions: 'dapat digunakan', 'telah dilakukan', 'akan diberikan', 'perlu diperhatikan', 'harus dipahami', 'bisa didapatkan', 'sering digunakan'.
-   - Instead use: 'gunakan', 'kamu bisa pakai', 'langkah ini memberikan', 'cara ini membantu', 'alat ini menghasilkan'.
+5. ACTIVE VOICE MANDATE (MIN 80% — ZERO TOLERANCE FOR PASSIVE):
+   - Write in active voice. The SUBJECT must PERFORM the action, not receive it.
+   - FORBIDDEN PASSIVE CONSTRUCTIONS (never write these):
+     'dapat digunakan' → use 'bisa kamu gunakan' / 'gunakan'
+     'telah dilakukan' → use 'sudah dikerjakan oleh' / 'mereka lakukan'
+     'akan diberikan' → use 'akan memberikan' / 'kamu akan dapat'
+     'perlu diperhatikan' → use 'perhatikan' / 'kamu perlu memperhatikan'
+     'harus dipahami' → use 'pahami' / 'kamu harus memahami'
+     'bisa didapatkan' → use 'kamu bisa dapatkan' / 'tersedia di'
+     'sering digunakan' → use 'banyak orang pakai' / 'petani sering pakai'
+     'dapat membantu' → use 'membantu kamu' / 'alat ini membantu'
+     'perlu dilakukan' → use 'lakukan' / 'kamu perlu melakukan'
+     'harus diperhatikan' → use 'perhatikan baik-baik' / 'pastikan kamu memperhatikan'
+   - ACTIVE SENTENCE STRUCTURE: Subject → Verb → Object. Always.
+   - If you catch yourself writing a passive, REWRITE it in active voice immediately.
 """
         else:
             humanizer_directives = ""
@@ -507,6 +518,26 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         # Post-clean any remaining em-dashes
         if humanize_writing:
             raw_output = raw_output.replace(" — ", ", ").replace("—", ", ")
+
+            # Post-process: auto-replace most common passive constructions → active
+            passive_replacements = [
+                ("dapat digunakan", "bisa kamu gunakan"),
+                ("Dapat digunakan", "Bisa kamu gunakan"),
+                ("perlu diperhatikan", "perlu kamu perhatikan"),
+                ("Perlu diperhatikan", "Perlu kamu perhatikan"),
+                ("harus diperhatikan", "harus kamu perhatikan"),
+                ("Harus diperhatikan", "Harus kamu perhatikan"),
+                ("perlu dilakukan", "perlu kamu lakukan"),
+                ("Perlu dilakukan", "Perlu kamu lakukan"),
+                ("harus dipahami", "perlu kamu pahami"),
+                ("Harus dipahami", "Perlu kamu pahami"),
+                ("bisa didapatkan", "bisa kamu dapatkan"),
+                ("Bisa didapatkan", "Bisa kamu dapatkan"),
+                ("sering digunakan", "banyak orang pakai"),
+                ("Sering digunakan", "Banyak orang pakai"),
+            ]
+            for passive, active in passive_replacements:
+                raw_output = raw_output.replace(passive, active)
 
         return raw_output
 
