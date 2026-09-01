@@ -141,7 +141,10 @@ class AIRouterService:
         system_prompt = (
             "You are an Elite SEO Strategist and Search Intent Classifier for Indonesian/Global SERPs. "
             "Analyze the target keyword and competitive landscape to extract search intent, "
-            "crucial semantic entities (LSI), People Also Ask (PAA) questions, and content gaps."
+            "crucial semantic entities (LSI), People Also Ask (PAA) questions, and content gaps.\n"
+            "TITLE RULE: The `suggested_title` MUST NOT use counting list formats like '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...', etc. "
+            "These are FORBIDDEN because the writer cannot guarantee the exact count will match. "
+            "Use descriptive, keyword-rich titles instead, e.g. 'Keunggulan Combine Harvester yang Perlu Kamu Ketahui' or 'Tips Memilih Rice Cooker yang Tepat dan Hemat'."
         )
 
         user_prompt = f"""
@@ -220,7 +223,9 @@ Total: ~550 words (strictly 500-599 words)
             f"   - Every H3 sub-heading MUST contain a relevant LSI keyword or partial variation of '{target_keyword}'.\n"
             f"   - The `keywords_to_include` list for each section MUST always contain '{target_keyword}' or at least 1 LSI synonym relevant to that section.\n"
             f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'.\n"
-            f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain {target_keyword} or an LSI keyword naturally."
+            f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain {target_keyword} or an LSI keyword naturally.\n"
+            f"7. NO COUNTING-LIST HEADINGS (STRICT): NEVER use headings that promise a specific count of items, such as '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...'. "
+            f"These are FORBIDDEN because the writer cannot guarantee the exact count in the body. Use descriptive headings instead, e.g. 'Keunggulan {target_keyword} yang Nyata di Lapangan' or 'Tips Efektif Menggunakan {target_keyword}'."
         )
 
         user_prompt = f"""
