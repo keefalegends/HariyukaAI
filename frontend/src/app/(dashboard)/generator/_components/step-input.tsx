@@ -259,7 +259,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
           </button>
 
           {showLinkSettings && (
-            <div className="p-4 pt-1 space-y-4 border-t t-border bg-black/10">
+            <div className="p-4 pt-1 space-y-4 border-t t-border t-bg-card">
               {/* Product Push fields (if backlink_product or custom) */}
               {articleType === "backlink_product" && (
                 <div className="p-3 rounded-lg border border-[#d97757]/30 bg-[#d97757]/5 space-y-2.5">
@@ -289,10 +289,10 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
               {/* Link 1: Contextual Link */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-semibold text-stone-300">
+                  <label className={`text-[11px] font-semibold ${tk.textSecondary}`}>
                     Link 1: Tautan Kontekstual (Paragraf Pembuka/Body)
                   </label>
-                  <span className="text-[10px] text-stone-500">Opsional</span>
+                  <span className={`text-[10px] ${tk.textMuted}`}>Opsional</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
@@ -315,10 +315,10 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
               {/* Link 2: Brand / Product Link */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-semibold text-stone-300">
+                  <label className={`text-[11px] font-semibold ${tk.textSecondary}`}>
                     Link 2: Tautan Brand / Homepage (Paragraf Kesimpulan)
                   </label>
-                  <span className="text-[10px] text-stone-500">Opsional</span>
+                  <span className={`text-[10px] ${tk.textMuted}`}>Opsional</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
@@ -345,13 +345,13 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
                     type="checkbox"
                     checked={includeImagePlaceholder}
                     onChange={(e) => setIncludeImagePlaceholder(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-stone-700 text-[#d97757] focus:ring-[#d97757] accent-[#d97757] cursor-pointer"
+                    className="w-4 h-4 mt-0.5 rounded t-border text-[#d97757] focus:ring-[#d97757] accent-[#d97757] cursor-pointer"
                   />
                   <div>
-                    <span className="text-xs font-semibold text-stone-300">
+                    <span className={`text-xs font-semibold ${tk.textSecondary}`}>
                       Sertakan Placeholder Gambar WordPress (`[caption]`)
                     </span>
-                    <p className="text-[10px] text-stone-500 mt-0.5">
+                    <p className={`text-[10px] ${tk.textMuted} mt-0.5`}>
                       Default tidak dicentang (Fokus teks murni 500-599 kata, gambar dapat ditambahkan sendiri saat posting ke WordPress).
                     </p>
                   </div>
@@ -359,6 +359,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
               </div>
             </div>
           )}
+
         </div>
 
         {/* ─── 5. HUMANIZE WRITING (ANTI-AI DETECTOR MODE) ─── */}
@@ -367,7 +368,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
           className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
             humanizeWriting
               ? "bg-[#d97757]/10 border-[#d97757]/60 shadow-sm shadow-[#d97757]/5"
-              : "t-bg-tag t-border hover:border-stone-600"
+              : "t-bg-tag t-border hover:border-[#78716c]"
           }`}
         >
           <div className="pt-0.5">
@@ -375,17 +376,17 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
               type="checkbox"
               checked={humanizeWriting}
               onChange={(e) => setHumanizeWriting(e.target.checked)}
-              className="w-4 h-4 rounded border-stone-700 text-[#d97757] focus:ring-[#d97757] accent-[#d97757] cursor-pointer"
+              className="w-4 h-4 rounded t-border text-[#d97757] focus:ring-[#d97757] accent-[#d97757] cursor-pointer"
             />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <ShieldCheck className={`w-4 h-4 ${humanizeWriting ? "text-[#d97757]" : "text-stone-400"}`} />
-              <span className={`text-xs font-bold ${humanizeWriting ? "text-[#d97757]" : "t-text-primary"}`}>
+              <ShieldCheck className={`w-4 h-4 ${humanizeWriting ? "text-[#d97757]" : tk.textFaint}`} />
+              <span className={`text-xs font-bold ${humanizeWriting ? "text-[#d97757]" : tk.textPrimary}`}>
                 Humanize Writing (Bypass AI Detector Mode)
               </span>
-              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-semibold ${
-                humanizeWriting ? "bg-[#d97757]/20 text-[#d97757] border border-[#d97757]/30" : "bg-stone-800 text-stone-400"
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-semibold border ${
+                humanizeWriting ? "bg-[#d97757]/20 text-[#d97757] border-[#d97757]/30" : `t-bg-tag ${tk.textMuted} t-border`
               }`}>
                 Target Skor AI &lt; 30%
               </span>
