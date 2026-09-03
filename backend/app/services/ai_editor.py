@@ -7,7 +7,7 @@ import re
 import json
 import logging
 from typing import Dict, Any, List, Optional
-from app.services.ai_router import ai_router
+from app.services.ai_router import ai_router, sanitize_indonesian_symbols
 from app.services.seo_analyzer import seo_analyzer
 
 logger = logging.getLogger("hariyuka.ai_editor")
@@ -45,6 +45,8 @@ CRITICAL EDITING DIRECTIVES:
    - ZERO EM-DASHES: Do NOT use em-dashes (`—` or `--`). Use commas, parentheses, or periods.
    - ZERO COLONS as list introducers: Do NOT use `:` to introduce a list or for emphasis. Use a comma, period, or start a new sentence instead.
    - ZERO SEMICOLONS: Do NOT use `;`. Replace with a period or comma.
+   - ZERO AMPERSANDS: Do NOT use `&` (ampersand). Always write the full word `dan`.
+   - ZERO WEIRD SYMBOLS: Do NOT use `/` (use `atau`), `~`, `+`, `|`. Use natural Indonesian words.
    - ACTIVE VOICE MANDATE (min 80%): Write in active voice. Avoid 'dapat digunakan', 'perlu diperhatikan', 'telah dilakukan', 'akan diberikan'. Use direct constructions: 'gunakan', 'perhatikan', 'lakukan', 'kamu bisa pakai'.
    - Target Keyphrase: Keep focus keyphrase '{target_keyword}' naturally present (5-7 times total across the article).
 3. STRUCTURE & LINK INTEGRITY:
@@ -98,6 +100,8 @@ Please execute the modification and output the JSON with explanation and modifie
 
             # Sanitize any lingering em-dashes
             modified_markdown = modified_markdown.replace(" — ", ", ").replace("—", ", ")
+            # Sanitize ampersands & weird symbols
+            modified_markdown = sanitize_indonesian_symbols(modified_markdown)
 
             # Calculate updated SEO audit
             seo_audit = seo_analyzer.analyze(

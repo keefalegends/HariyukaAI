@@ -13,6 +13,45 @@ from app.config import settings
 logger = logging.getLogger("hariyuka.ai_router")
 
 
+def sanitize_indonesian_symbols(text: str) -> str:
+    """
+    Replaces ampersands (&, &amp;) with 'dan' and cleans unwanted symbols
+    like '/' (to 'atau' if space-separated), '~', '|', while preserving valid URLs.
+    """
+    if not text:
+        return text
+
+    # Extract and protect URLs
+    urls = []
+    def save_url(m):
+        urls.append(m.group(0))
+        return f"__PROTECTED_URL_{len(urls)-1}__"
+
+    # Protect markdown links and raw URLs
+    protected = re.sub(r'https?://[^\s)\]]+', save_url, text)
+
+    # Replace &amp; and standalone & with 'dan'
+    protected = re.sub(r'&amp;', 'dan', protected, flags=re.IGNORECASE)
+    protected = re.sub(r'\s*&\s*', ' dan ', protected)
+    protected = re.sub(r'&', ' dan ', protected)
+
+    # Replace numbers with tilde e.g. 5 ~ 10 -> 5-10
+    protected = re.sub(r'(\d+)\s*~\s*(\d+)', r'\1-\2', protected)
+    protected = protected.replace('~', '')
+
+    # Replace stray '/' surrounded by spaces with ' atau '
+    protected = re.sub(r'\s+/\s+', ' atau ', protected)
+
+    # Clean up vertical bar '|'
+    protected = protected.replace('|', ' - ')
+
+    # Restore URLs
+    for i, u in enumerate(urls):
+        protected = protected.replace(f"__PROTECTED_URL_{i}__", u)
+
+    return protected
+
+
 class AIRouterService:
     def __init__(self):
         self._init_client()
@@ -144,7 +183,8 @@ class AIRouterService:
             "crucial semantic entities (LSI), People Also Ask (PAA) questions, and content gaps.\n"
             "TITLE RULE: The `suggested_title` MUST NOT use counting list formats like '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...', etc. "
             "These are FORBIDDEN because the writer cannot guarantee the exact count will match. "
-            "Use descriptive, keyword-rich titles instead, e.g. 'Keunggulan Combine Harvester yang Perlu Kamu Ketahui' or 'Tips Memilih Rice Cooker yang Tepat dan Hemat'."
+            "Use descriptive, keyword-rich titles instead, e.g. 'Keunggulan Combine Harvester yang Perlu Kamu Ketahui' or 'Tips Memilih Rice Cooker yang Tepat dan Hemat'.\n"
+            "NO AMPERSANDS / NO WEIRD SYMBOLS: NEVER use '&' (ampersand) in suggested_title or LSI. Always write the full Indonesian word 'dan'. NEVER use '/', '~', '+', '|'."
         )
 
         user_prompt = f"""
@@ -176,7 +216,10 @@ Return a valid JSON object matching this schema exactly:
             temperature=0.3,
             response_format={"type": "json_object"},
         )
-        return self.extract_json(raw)
+        data = self.extract_json(raw)
+        if "suggested_title" in data and data["suggested_title"]:
+            data["suggested_title"] = sanitize_indonesian_symbols(data["suggested_title"])
+        return data
 
     # --------------------------------------------------------------------------
     # STEP 2: Interactive Outline Generator (Gemini 3.7) - Salna SOP
@@ -227,7 +270,8 @@ Total: ~550 words (strictly 500-599 words)
             f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'.\n"
             f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain {target_keyword} or an LSI keyword naturally.\n"
             f"7. NO COUNTING-LIST HEADINGS (STRICT): NEVER use headings that promise a specific count of items, such as '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...'. "
-            f"These are FORBIDDEN because the writer cannot guarantee the exact count in the body. Use descriptive headings instead, e.g. 'Keunggulan {target_keyword} yang Nyata di Lapangan' or 'Tips Efektif Menggunakan {target_keyword}'."
+            f"These are FORBIDDEN because the writer cannot guarantee the exact count in the body. Use descriptive headings instead, e.g. 'Keunggulan {target_keyword} yang Nyata di Lapangan' or 'Tips Efektif Menggunakan {target_keyword}'.\n"
+            f"8. NO AMPERSANDS OR WEIRD SYMBOLS (STRICT): NEVER use '&' (ampersand) anywhere in headings or outline text. Always write the full Indonesian word 'dan'. NEVER use '/', '~', '+', '|'."
         )
 
         user_prompt = f"""
@@ -358,7 +402,18 @@ Output valid JSON matching this schema exactly:
             temperature=0.4,
             response_format={"type": "json_object"},
         )
-        return self.extract_json(raw)
+        data = self.extract_json(raw)
+        if "title" in data and data["title"]:
+            data["title"] = sanitize_indonesian_symbols(data["title"])
+        if "sections" in data and isinstance(data["sections"], list):
+            for sec in data["sections"]:
+                if "heading" in sec and sec["heading"]:
+                    sec["heading"] = sanitize_indonesian_symbols(sec["heading"])
+                if "subsections" in sec and isinstance(sec["subsections"], list):
+                    for subsec in sec["subsections"]:
+                        if "heading" in subsec and subsec["heading"]:
+                            subsec["heading"] = sanitize_indonesian_symbols(subsec["heading"])
+        return data
 
     # --------------------------------------------------------------------------
     # STEP 3: Multi-Pass Section Writer (Claude 4.6) - Deep Humanizer
@@ -429,6 +484,8 @@ Output valid JSON matching this schema exactly:
    - DO NOT USE EM-DASHES (`—` or `--`). Real Indonesian writers use commas, parentheses, or start fresh sentences.
    - DO NOT USE COLONS (`:`) to introduce lists or emphasize a point. Replace with a comma, period, or start a new sentence.
    - DO NOT USE SEMICOLONS (`;`). Replace with a period or comma.
+   - DO NOT USE AMPERSANDS (`&`). Always write the full word `dan`.
+   - DO NOT USE WEIRD SYMBOLS like `/` (use `atau`), `~`, `+`, `|`, `^`, `{`, `}`. Always use standard natural Indonesian words.
 2. BANNED AI RHETORICAL ARCHETYPES (DO NOT USE):
    - "Ini bukan sekadar X, ini soal Y..." / "Ini bukan soal gengsi..."
    - "A, bahkan B saat C..."
@@ -539,6 +596,9 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
             for passive, active in passive_replacements:
                 raw_output = raw_output.replace(passive, active)
 
+        # Sanitize any remaining ampersands & unwanted symbols
+        raw_output = sanitize_indonesian_symbols(raw_output)
+
         return raw_output
 
     # --------------------------------------------------------------------------
@@ -566,6 +626,8 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
    - Eliminate ALL em-dashes (`—` and `--`). Replace with commas or clean periods.
    - Eliminate ALL colons (`:`) used to introduce lists or emphasize. Replace with a comma, period, or new sentence. Do NOT touch colons inside URLs (https://...).
    - Eliminate ALL semicolons (`;`). Replace with a period or comma.
+   - Eliminate ALL ampersands (`&` and `&amp;`). Replace with the full Indonesian word `dan`. (Do NOT touch `&` inside URL query parameters).
+   - Eliminate weird symbols like `/` (replace with `atau`), `~`, `+`, `|`. Use natural Indonesian words.
    - Break any remaining formulaic AI transitions ('Ini bukan sekadar...', 'Hal yang perlu dipahami...', 'Berikut lima tips...', 'Merupakan langkah krusial...').
    - Infuse native Indonesian conversational ease ('kan', 'sih', 'lho', 'nih', 'Gimana solusinya?') so AI detector gives < 15% score.
    - Ensure the prose reads 100% natural and passes both Yoast SEO and PlagiarismDetector.
@@ -623,6 +685,9 @@ Return the final polished markdown:
         if humanize_writing:
             polished = polished.replace(" — ", ", ").replace("—", ", ")
 
+        # Deterministic symbol sanitization (& -> dan, clean symbols)
+        polished = sanitize_indonesian_symbols(polished)
+
         return polished
 
     # --------------------------------------------------------------------------
@@ -654,10 +719,10 @@ Return the final polished markdown:
         system_prompt = f"""You are a Yoast SEO WordPress Metadata Specialist.
 Generate clean, concise, click-worthy metadata in JSON format:
 {{
-  "seo_title": "Max 60 chars, includes focus keyphrase naturally",
+  "seo_title": "Max 60 chars, includes focus keyphrase naturally. NEVER USE '&' (always write 'dan'). NO WEIRD SYMBOLS.",
   "slug": "url-friendly-slug-containing-only-keyphrase",
-  "meta_description": "130-155 characters, MUST contain primary keyphrase near the beginning, high CTR appeal without em-dashes",
-  "tags": "EXACTLY {tag_count} SHORT keyword tags (each tag MUST be only 1 to 3 words max, Indonesian), strictly separated by commas. NEVER include long sentences or repeat the full article title! (e.g. 'steamer rice cooker, inner pot keramik, wadah kukusan, hemat listrik, tips memilih, rice cooker awet, panci anti lengket, peralatan dapur')"
+  "meta_description": "130-155 characters, MUST contain primary keyphrase near the beginning, high CTR appeal without em-dashes. NEVER USE '&' (write 'dan').",
+  "tags": "EXACTLY {tag_count} SHORT keyword tags (each tag MUST be only 1 to 3 words max, Indonesian), strictly separated by commas. NO '&' (write 'dan'). NEVER include long sentences or repeat the full article title!"
 }}"""
         user_prompt = f"""
 Focus Keyphrase: "{target_keyword}"
@@ -688,18 +753,21 @@ Generate the JSON metadata:
             else:
                 tags_str = default_tags
 
+            raw_seo_title = data.get("seo_title", title)[:65]
+            raw_meta_desc = data.get("meta_description", f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini.")[:160]
+
             return {
-                "seo_title": data.get("seo_title", title)[:65],
+                "seo_title": sanitize_indonesian_symbols(raw_seo_title),
                 "slug": data.get("slug", default_slug),
-                "meta_description": data.get("meta_description", f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini.")[:160],
-                "tags": tags_str
+                "meta_description": sanitize_indonesian_symbols(raw_meta_desc),
+                "tags": sanitize_indonesian_symbols(tags_str)
             }
         except Exception:
             return {
-                "seo_title": title[:65],
+                "seo_title": sanitize_indonesian_symbols(title[:65]),
                 "slug": default_slug,
-                "meta_description": f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini.",
-                "tags": default_tags
+                "meta_description": sanitize_indonesian_symbols(f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini."),
+                "tags": sanitize_indonesian_symbols(default_tags)
             }
 
 
