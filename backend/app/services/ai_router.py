@@ -318,17 +318,22 @@ Total: ~550 words (strictly 500-599 words)
         system_prompt = (
             "You are a Senior SEO Content Architect trained on WordPress Yoast & RankMath SOP standards.\n"
             "CRITICAL RULES — READ THESE FIRST BEFORE GENERATING:\n"
-            f"1. 🔑 KEYWORD IN EVERY HEADING (HIGHEST PRIORITY):\n"
-            f"   - EVERY H2 heading MUST contain the exact focus keyphrase '{target_keyword}' or a close LSI variant naturally embedded.\n"
-            f"   - EVERY H3 sub-heading MUST contain '{target_keyword}' or a relevant LSI keyword (partial match is OK).\n"
-            f"   - CORRECT example: '## Cara Kerja Combine Harvester di Lahan Padi' (contains keyphrase).\n"
-            f"   - WRONG example: '## Tantangan Agrikultur dan Solusi Mekanisasi' (no keyphrase at all — FORBIDDEN).\n"
-            f"   - The `keywords_to_include` field for EVERY section MUST include '{target_keyword}' or its LSI variant.\n"
+            f"1. 🔑 KATA KUNCI DI SUBJUDUL (GUNAKAN BEBERAPA KATA INTI / NATURAL PARTIAL MATCH):\n"
+            f"   - Setiap subjudul H2 dan H3 HARUS mengandung BEBERAPA KATA (frasa inti 2-4 kata atau variasi LSI) dari kata kunci '{target_keyword}'.\n"
+            f"   - JANGAN memaksakan seluruh kalimat kata kunci panjang ditempel utuh ke semua subjudul karena terdengar kaku dan robotik!\n"
+            f"   - Ambil potongan atau beberapa kata kunci yang paling relevan untuk subjudul tersebut.\n"
+            f"   - Contoh jika target keyword: 'keunggulan combine harvester dibandingkan panen manual di era modern':\n"
+            f"     * H2 Bagus: '## Keunggulan Combine Harvester di Lahan Sawah' (mengambil kata 'keunggulan combine harvester')\n"
+            f"     * H2 Bagus: '## Perbandingan Biaya dengan Panen Manual' (mengambil kata 'panen manual')\n"
+            f"     * H3 Bagus: '### Efisiensi Waktu Kerja Combine Harvester' (mengambil kata 'combine harvester')\n"
+            f"     * H2 Jelek/Dilarang: '## Tantangan Pertanian' (tidak ada kata kunci sama sekali — FORBIDDEN)\n"
+            f"     * H2 Kaku/Dilarang: Menjiplak seluruh 8+ kata kunci utuh secara kaku ke semua heading.\n"
+            f"   - The `keywords_to_include` field for EVERY section MUST include '{target_keyword}' or its core phrase/LSI variant.\n"
             f"2. 🎯 LASER TOPICAL FOCUS: Every heading, sub-heading, and key point MUST strictly revolve around '{target_keyword}'. ZERO OFF-TOPIC DRIFT.\n"
             "3. ONLY use H2 and H3 levels. NEVER output H1.\n"
             f"4. Total word count must strictly target {exact_target} words ({'1500-1599 words' if article_type == 'pillar' else '500-599 words'}).\n"
             f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'.\n"
-            f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain {target_keyword} or an LSI keyword naturally.\n"
+            f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain several words from {target_keyword} or an LSI keyword naturally.\n"
             f"7. NO COUNTING-LIST HEADINGS (STRICT): NEVER use headings that promise a specific count of items, such as '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...'. "
             f"These are FORBIDDEN because the writer cannot guarantee the exact count in the body. Use descriptive headings instead, e.g. 'Keunggulan {target_keyword} yang Nyata di Lapangan' or 'Tips Efektif Menggunakan {target_keyword}'.\n"
             f"8. NO AMPERSANDS OR WEIRD SYMBOLS (STRICT): NEVER use '&' (ampersand) anywhere in headings or outline text. Always write the full Indonesian word 'dan'. NEVER use '/', '~', '+', '|'."
@@ -604,7 +609,7 @@ Output valid JSON matching this schema exactly:
 3. DENSE ACTIONABLE WRITING: Avoid generic filler or repetitive restatements. Deliver real-world techniques, tangible steps, cause-and-effect reasoning, and practical criteria.
 
 🔑 KEYWORD BALANCE IN HEADING & CONTENT (MANDATORY):
-4. The H2/H3 HEADING for this section MUST contain '{target_keyword}' or a natural LSI variant — not keyword stuffed, but clearly embedded so Yoast detects it.
+4. The H2/H3 HEADING for this section MUST contain several core words (2-4 words / natural partial match) from '{target_keyword}' or an LSI variant — do NOT stuff long 8+ word keywords verbatim; use natural, human phrasing so Yoast detects it cleanly.
 5. The CONTENT under this heading MUST mention '{target_keyword}' or an LSI synonym at least ONCE in the first paragraph and at least ONCE more in subsequent paragraphs.
 6. Do NOT over-stuff: Max 2 exact-match occurrences of '{target_keyword}' per section. Use pronouns ('alat ini', 'langkah tersebut') for remaining references.
 
