@@ -58,6 +58,9 @@ function markdownToHtml(md: string): string {
       continue;
     }
 
+    // Replace ampersands (&, &amp;) with 'dan' outside tags
+    line = line.replace(/&amp;/gi, "dan").replace(/\s+&\s+/g, " dan ");
+
     // Inline formatting (bold, italic, code, links)
     line = line
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
@@ -103,13 +106,17 @@ export function TiptapEditor({ initialContent = "", onChange, readOnly = false }
 
   const handleCopyWordPress = () => {
     if (!editor) return;
-    const html = editor.getHTML();
+    let html = editor.getHTML();
     if (!html) return;
+
+    // Clean stray ampersands outside of URLs for WordPress compatibility
+    html = html.replace(/&amp;/gi, "dan").replace(/\s+&\s+/g, " dan ");
 
     // Use ClipboardItem to write both HTML (for WordPress rich paste) and plain text fallback
     try {
       const htmlBlob = new Blob([html], { type: "text/html" });
-      const textBlob = new Blob([editor.getText()], { type: "text/plain" });
+      const text = editor.getText().replace(/&amp;/gi, "dan").replace(/\s+&\s+/g, " dan ");
+      const textBlob = new Blob([text], { type: "text/plain" });
       const item = new ClipboardItem({ "text/html": htmlBlob, "text/plain": textBlob });
       navigator.clipboard.write([item]);
     } catch {
