@@ -52,6 +52,66 @@ def sanitize_indonesian_symbols(text: str) -> str:
     return protected
 
 
+def sanitize_article_links(
+    content_markdown: str,
+    target_link_1_url: Optional[str] = None,
+    target_link_2_url: Optional[str] = None,
+) -> str:
+    """
+    Enforces strict deterministic link whitelisting:
+    1. ONLY target_link_1_url and target_link_2_url are permitted.
+    2. Any unauthorized [text](url) is stripped to plain 'text'.
+    3. Each authorized URL can only appear ONCE. Subsequent occurrences are stripped to plain 'text'.
+    4. Cleans any accidental raw URLs glued into text (e.g. 'stathttps://...').
+    """
+    if not content_markdown:
+        return content_markdown
+
+    allowed_map = {}
+    if target_link_1_url and target_link_1_url.strip():
+        u1 = target_link_1_url.strip()
+        allowed_map[u1.rstrip("/").lower()] = u1
+    if target_link_2_url and target_link_2_url.strip():
+        u2 = target_link_2_url.strip()
+        allowed_map[u2.rstrip("/").lower()] = u2
+
+    seen_urls = set()
+
+    def link_replacer(match):
+        anchor = match.group(1).strip()
+        url = match.group(2).strip()
+        norm_url = url.rstrip("/").lower()
+
+        if norm_url in allowed_map:
+            if norm_url in seen_urls:
+                # Already used once: strip hyperlink syntax, keep anchor text
+                return anchor
+            seen_urls.add(norm_url)
+            return f"[{anchor}]({allowed_map[norm_url]})"
+        else:
+            # Unauthorized / hallucinated URL (e.g. sfrtech.id, wikipedia, competitor)
+            logger.warning(f"[LinkSanitizer] Stripped unauthorized hallucinated link: [{anchor}]({url})")
+            return anchor
+
+    # 1. Replace unauthorized markdown links: [anchor](url) -> anchor
+    sanitized = re.sub(r'\[([^\]]+)\]\((https?://[^)]+)\)', link_replacer, content_markdown)
+
+    # 2. Clean glued URL glitches (e.g. "stathttps://domain.com/mat" -> "stat mat")
+    sanitized = re.sub(r'(?<=\w)https?://[^\s)\]]+(?=\w)', ' ', sanitized)
+
+    # 3. Clean any stray raw URLs in body text that do not match allowed URLs
+    def raw_url_stripper(match):
+        raw_url = match.group(0).strip()
+        norm_raw = raw_url.rstrip("/").lower()
+        if norm_raw in allowed_map:
+            return raw_url
+        return ""
+
+    sanitized = re.sub(r'(?<!\()https?://[^\s)\]]+', raw_url_stripper, sanitized)
+
+    return sanitized
+
+
 class AIRouterService:
     def __init__(self):
         self._init_client()
@@ -465,6 +525,22 @@ Output valid JSON matching this schema exactly:
                 f" Do NOT use generic anchors. DO NOT repeat this URL anywhere else."
             )
 
+        # STRICT WHITELIST PROHIBITION:
+        allowed_urls = []
+        if link_1_url:
+            allowed_urls.append(link_1_url)
+        if link_2_url:
+            allowed_urls.append(link_2_url)
+
+        if not allowed_urls:
+            link_instructions += "\n- ZERO LINKS PERMITTED: DO NOT include ANY markdown links `[text](url)` or raw URLs in this section. Output 100% plain text."
+        else:
+            link_instructions += (
+                f"\n- STRICT LINK WHITELIST (ZERO HALLUCINATION):"
+                f"\n  The ONLY authorized URLs for this entire article are: {', '.join(allowed_urls)}."
+                f"\n  STRICTLY FORBIDDEN: NEVER invent, fabricate, or link to ANY other website, domain, or competitor (e.g. NEVER make up sfrtech.id or other sites). If a URL is not in this authorized list, DO NOT write a link for it."
+            )
+
         product_instruction = ""
         if article_type == "backlink_product" and product_name:
             product_instruction = f"\n- PRODUCT SOFT-SELL: Naturally weave in **{product_name}** ({product_promotion_context or 'rekomendasi peralatan terpercaya'}) as an actionable solution."
@@ -613,12 +689,32 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         tone: str = "authoritative",
         include_image_placeholder: bool = False,
         humanize_writing: bool = True,
+        target_link_1_url: Optional[str] = None,
+        target_link_2_url: Optional[str] = None,
     ) -> str:
         target_min = 1500 if article_type == "pillar" else 510
         target_max = 1590 if article_type == "pillar" else 585
         target_range = f"{target_min} – {target_max} kata"
 
         image_rule = "Ensure no [caption] or img tags exist; output clean pure text markdown." if not include_image_placeholder else "Preserve [caption] block intact."
+
+        allowed_list = []
+        if target_link_1_url and target_link_1_url.strip():
+            allowed_list.append(target_link_1_url.strip())
+        if target_link_2_url and target_link_2_url.strip():
+            allowed_list.append(target_link_2_url.strip())
+
+        if allowed_list:
+            link_rule = f"""8. STRICT LINK WHITELIST (ZERO TOLERANCE FOR FABRICATED LINKS):
+   - The ONLY allowed URLs in this entire article are: {', '.join(allowed_list)}.
+   - If the text contains ANY other link to any domain (e.g. third-party sites, competitors, fake links, or hallucinated URLs like sfrtech.id), STRIP the markdown link syntax immediately: change `[anchor text](unauthorized_url)` to plain text `anchor text`.
+   - Each approved URL may appear at most ONCE in the entire article. If an approved URL appears multiple times, keep only the first instance and strip the link formatting from subsequent ones.
+   - NEVER invent or add any new links."""
+        else:
+            link_rule = """8. ZERO LINKS RULE (ABSOLUTE):
+   - No links were provided by the user. Therefore, this article MUST contain ZERO markdown links.
+   - If there are any `[anchor text](url)` in the draft, STRIP the link syntax completely and leave only `anchor text`.
+   - NEVER output any URL or hyperlink."""
 
         if humanize_writing:
             humanizer_polish = """
@@ -654,9 +750,7 @@ CALIBRATION REQUIREMENTS (SALNA EDITORIAL & YOAST SOP):
    If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
 6. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
 7. IMAGE RULE: {image_rule}
-8. LINK DEDUPLICATION (STRICT): Each URL must appear EXACTLY ONCE across the entire article.
-   - If the same URL appears more than once (in different sections), remove all duplicate occurrences and keep only the FIRST one.
-   - The final article must have a maximum of 2 links total (1 keyword/product link + 1 brand link). Do NOT add new links.
+{link_rule}
 {humanizer_polish}
 Output only the final polished article in Markdown.
 """
@@ -687,6 +781,9 @@ Return the final polished markdown:
 
         # Deterministic symbol sanitization (& -> dan, clean symbols)
         polished = sanitize_indonesian_symbols(polished)
+
+        # Deterministic link whitelist enforcement (100% foolproof gatekeeper)
+        polished = sanitize_article_links(polished, target_link_1_url, target_link_2_url)
 
         return polished
 

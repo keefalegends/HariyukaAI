@@ -344,6 +344,8 @@ async def ai_edit_article_endpoint(article_id: str, req: AIEditArticleRequest):
             chat_history=req.chat_history,
             model=req.model or settings.MODEL_SECTION_WRITER,
             article_type=article.get("article_type", "backlink_article"),
+            target_link_1_url=article.get("target_link_1_url"),
+            target_link_2_url=article.get("target_link_2_url"),
         )
 
         # Persist conversation to article's chat history

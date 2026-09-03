@@ -7,7 +7,7 @@ import asyncio
 import logging
 from typing import Dict, Any, List, Optional, AsyncGenerator
 from datetime import datetime
-from app.services.ai_router import ai_router
+from app.services.ai_router import ai_router, sanitize_article_links, sanitize_indonesian_symbols
 from app.services.serp_scraper import serp_scraper
 from app.services.seo_analyzer import seo_analyzer
 from app.schemas.article import ArticleOutlineSchema, OutlineSectionItem
@@ -252,7 +252,13 @@ class ArticlePipelineOrchestrator:
             tone=tone,
             include_image_placeholder=include_image_placeholder,
             humanize_writing=humanize_writing,
+            target_link_1_url=target_link_1_url,
+            target_link_2_url=target_link_2_url,
         )
+
+        # Extra safety: Ensure 100% strictly whitelisted links and zero & symbols
+        polished_markdown = sanitize_indonesian_symbols(polished_markdown)
+        polished_markdown = sanitize_article_links(polished_markdown, target_link_1_url, target_link_2_url)
 
         # ----------------------------------------------------------------------
         # Step 5: SEO Analysis Audit & Yoast Snippet Generation
@@ -271,8 +277,10 @@ class ArticlePipelineOrchestrator:
             include_image_placeholder=include_image_placeholder
         )
 
+        clean_title = sanitize_indonesian_symbols(title)
+
         seo_meta = await ai_router.generate_seo_metadata(
-            title=title,
+            title=clean_title,
             target_keyword=target_keyword,
             content_markdown=polished_markdown,
             article_type=article_type,
@@ -280,7 +288,7 @@ class ArticlePipelineOrchestrator:
 
         final_result = {
             "article_id": article_id,
-            "title": title,
+            "title": clean_title,
             "slug": seo_meta.get("slug"),
             "meta_description": seo_meta.get("meta_description"),
             "seo_title": seo_meta.get("seo_title", title),

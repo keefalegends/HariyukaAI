@@ -7,7 +7,7 @@ import re
 import json
 import logging
 from typing import Dict, Any, List, Optional
-from app.services.ai_router import ai_router, sanitize_indonesian_symbols
+from app.services.ai_router import ai_router, sanitize_indonesian_symbols, sanitize_article_links
 from app.services.seo_analyzer import seo_analyzer
 
 logger = logging.getLogger("hariyuka.ai_editor")
@@ -23,6 +23,8 @@ class AIArticleEditorService:
         chat_history: Optional[List[Dict[str, str]]] = None,
         model: Optional[str] = None,
         article_type: str = "backlink_article",
+        target_link_1_url: Optional[str] = None,
+        target_link_2_url: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Processes a conversational revision instruction on an existing article.
@@ -102,6 +104,8 @@ Please execute the modification and output the JSON with explanation and modifie
             modified_markdown = modified_markdown.replace(" — ", ", ").replace("—", ", ")
             # Sanitize ampersands & weird symbols
             modified_markdown = sanitize_indonesian_symbols(modified_markdown)
+            # Enforce strict link whitelist (prevent Copilot from injecting third-party links)
+            modified_markdown = sanitize_article_links(modified_markdown, target_link_1_url, target_link_2_url)
 
             # Calculate updated SEO audit
             seo_audit = seo_analyzer.analyze(
