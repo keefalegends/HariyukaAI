@@ -102,4 +102,4 @@ docker compose up -d
 ---
 
 ## 📄 Lisensi & Tim
-Dikelola secara privat oleh **Keefa** & tim untuk operasional konten Hariyuka AI.
+Dikelola secara privat oleh **Keefa** & **Salna** untuk operasional konten Hariyuka AI.
