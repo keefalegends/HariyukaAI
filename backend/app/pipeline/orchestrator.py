@@ -7,7 +7,7 @@ import asyncio
 import logging
 from typing import Dict, Any, List, Optional, AsyncGenerator
 from datetime import datetime
-from app.services.ai_router import ai_router, sanitize_article_links, sanitize_indonesian_symbols
+from app.services.ai_router import ai_router, sanitize_article_links, sanitize_indonesian_symbols, ensure_target_links_present
 from app.services.serp_scraper import serp_scraper
 from app.services.seo_analyzer import seo_analyzer
 from app.schemas.article import ArticleOutlineSchema, OutlineSectionItem
@@ -253,12 +253,24 @@ class ArticlePipelineOrchestrator:
             include_image_placeholder=include_image_placeholder,
             humanize_writing=humanize_writing,
             target_link_1_url=target_link_1_url,
+            target_link_1_anchor=target_link_1_anchor,
             target_link_2_url=target_link_2_url,
+            target_link_2_anchor=target_link_2_anchor,
+            product_name=product_name,
         )
 
         # Extra safety: Ensure 100% strictly whitelisted links and zero & symbols
         polished_markdown = sanitize_indonesian_symbols(polished_markdown)
         polished_markdown = sanitize_article_links(polished_markdown, target_link_1_url, target_link_2_url)
+        polished_markdown = ensure_target_links_present(
+            content_markdown=polished_markdown,
+            target_link_1_url=target_link_1_url,
+            target_link_1_anchor=target_link_1_anchor,
+            target_link_2_url=target_link_2_url,
+            target_link_2_anchor=target_link_2_anchor,
+            target_keyword=target_keyword,
+            product_name=product_name,
+        )
 
         # ----------------------------------------------------------------------
         # Step 5: SEO Analysis Audit & Yoast Snippet Generation

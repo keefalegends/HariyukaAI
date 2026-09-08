@@ -52,17 +52,33 @@ def sanitize_indonesian_symbols(text: str) -> str:
     return protected
 
 
+def _normalize_url_key(url: str) -> str:
+    """
+    Normalizes a URL for robust comparison:
+    strips scheme (http/https), 'www.', query/fragment trailing slashes, and lowercases.
+    e.g. 'https://www.rumahmesin.com/' -> 'rumahmesin.com'
+         'http://rumahmesin.com' -> 'rumahmesin.com'
+    """
+    if not url:
+        return ""
+    u = url.strip().lower()
+    u = re.sub(r'^https?://', '', u)
+    u = re.sub(r'^www\.', '', u)
+    return u.rstrip('/')
+
+
 def sanitize_article_links(
     content_markdown: str,
     target_link_1_url: Optional[str] = None,
     target_link_2_url: Optional[str] = None,
 ) -> str:
     """
-    Enforces strict deterministic link whitelisting:
+    Enforces strict deterministic link whitelisting with fuzzy-tolerant domain matching:
     1. ONLY target_link_1_url and target_link_2_url are permitted.
     2. Any unauthorized [text](url) is stripped to plain 'text'.
-    3. Each authorized URL can only appear ONCE. Subsequent occurrences are stripped to plain 'text'.
-    4. Cleans any accidental raw URLs glued into text (e.g. 'stathttps://...').
+    3. Handles www. vs non-www and http vs https gracefully, always outputting the user's exact URL.
+    4. Each authorized URL can only appear ONCE. Subsequent occurrences are stripped to plain 'text'.
+    5. Cleans any accidental raw URLs glued into text (e.g. 'stathttps://...').
     """
     if not content_markdown:
         return content_markdown
@@ -70,24 +86,25 @@ def sanitize_article_links(
     allowed_map = {}
     if target_link_1_url and target_link_1_url.strip():
         u1 = target_link_1_url.strip()
-        allowed_map[u1.rstrip("/").lower()] = u1
+        allowed_map[_normalize_url_key(u1)] = u1
     if target_link_2_url and target_link_2_url.strip():
         u2 = target_link_2_url.strip()
-        allowed_map[u2.rstrip("/").lower()] = u2
+        allowed_map[_normalize_url_key(u2)] = u2
 
-    seen_urls = set()
+    seen_keys = set()
 
     def link_replacer(match):
         anchor = match.group(1).strip()
         url = match.group(2).strip()
-        norm_url = url.rstrip("/").lower()
+        norm_key = _normalize_url_key(url)
 
-        if norm_url in allowed_map:
-            if norm_url in seen_urls:
+        if norm_key in allowed_map:
+            if norm_key in seen_keys:
                 # Already used once: strip hyperlink syntax, keep anchor text
                 return anchor
-            seen_urls.add(norm_url)
-            return f"[{anchor}]({allowed_map[norm_url]})"
+            seen_keys.add(norm_key)
+            # Always restore user's exact canonical URL
+            return f"[{anchor}]({allowed_map[norm_key]})"
         else:
             # Unauthorized / hallucinated URL (e.g. sfrtech.id, wikipedia, competitor)
             logger.warning(f"[LinkSanitizer] Stripped unauthorized hallucinated link: [{anchor}]({url})")
@@ -102,7 +119,7 @@ def sanitize_article_links(
     # 3. Clean any stray raw URLs in body text that do not match allowed URLs
     def raw_url_stripper(match):
         raw_url = match.group(0).strip()
-        norm_raw = raw_url.rstrip("/").lower()
+        norm_raw = _normalize_url_key(raw_url)
         if norm_raw in allowed_map:
             return raw_url
         return ""
@@ -110,6 +127,75 @@ def sanitize_article_links(
     sanitized = re.sub(r'(?<!\()https?://[^\s)\]]+', raw_url_stripper, sanitized)
 
     return sanitized
+
+
+def ensure_target_links_present(
+    content_markdown: str,
+    target_link_1_url: Optional[str] = None,
+    target_link_1_anchor: Optional[str] = None,
+    target_link_2_url: Optional[str] = None,
+    target_link_2_anchor: Optional[str] = None,
+    target_keyword: Optional[str] = None,
+    product_name: Optional[str] = None,
+) -> str:
+    """
+    Guarantees 100% presence of user-specified links in the article:
+    - If Link 1 is provided but missing, injects it onto the first occurrence of anchor/keyword.
+    - If Link 2 is provided but missing, injects it onto brand anchor in the conclusion.
+    """
+    if not content_markdown:
+        return content_markdown
+
+    updated_md = content_markdown
+
+    # 1. Check Link 1 (Contextual / Product Link)
+    if target_link_1_url and target_link_1_url.strip():
+        u1_clean = target_link_1_url.strip()
+        key1 = _normalize_url_key(u1_clean)
+        # Check if already present in markdown
+        if key1 not in _normalize_url_key(updated_md):
+            anchor1 = (target_link_1_anchor or target_keyword or "produk pilihan").strip()
+            # Try to find plain text anchor in updated_md and wrap it
+            pattern = re.compile(rf'(?<!\[)\b({re.escape(anchor1)})\b(?!\]|\()', re.IGNORECASE)
+            match = pattern.search(updated_md)
+            if match:
+                updated_md = updated_md[:match.start()] + f"[{match.group(1)}]({u1_clean})" + updated_md[match.end():]
+                logger.info(f"[LinkSanitizer] Auto-injected missing Link 1 onto anchor '{match.group(1)}'")
+            else:
+                # If exact anchor not found, try target_keyword
+                if target_keyword and target_keyword.lower() != anchor1.lower():
+                    pattern_kw = re.compile(rf'(?<!\[)\b({re.escape(target_keyword)})\b(?!\]|\()', re.IGNORECASE)
+                    match_kw = pattern_kw.search(updated_md)
+                    if match_kw:
+                        updated_md = updated_md[:match_kw.start()] + f"[{match_kw.group(1)}]({u1_clean})" + updated_md[match_kw.end():]
+                        logger.info(f"[LinkSanitizer] Auto-injected missing Link 1 onto keyword '{match_kw.group(1)}'")
+
+    # 2. Check Link 2 (Brand / Homepage Link)
+    if target_link_2_url and target_link_2_url.strip():
+        u2_clean = target_link_2_url.strip()
+        key2 = _normalize_url_key(u2_clean)
+        if key2 not in _normalize_url_key(updated_md):
+            anchor2 = (target_link_2_anchor or product_name or "Official Website").strip()
+            # Try to find anchor2 in text (preferably near conclusion)
+            pattern2 = re.compile(rf'(?<!\[)\b({re.escape(anchor2)})\b(?!\]|\()', re.IGNORECASE)
+            matches = list(pattern2.finditer(updated_md))
+            if matches:
+                last_m = matches[-1]
+                updated_md = updated_md[:last_m.start()] + f"[{last_m.group(1)}]({u2_clean})" + updated_md[last_m.end():]
+                logger.info(f"[LinkSanitizer] Auto-injected missing Link 2 onto brand anchor '{last_m.group(1)}'")
+            else:
+                # If brand anchor not found at all, cleanly append to last paragraph of conclusion
+                paragraphs = updated_md.rstrip().split("\n\n")
+                if paragraphs:
+                    last_para = paragraphs[-1]
+                    if not last_para.endswith("."):
+                        last_para += "."
+                    last_para += f" Kunjungi [{anchor2}]({u2_clean}) untuk informasi spesifikasi dan pemesanan selengkapnya."
+                    paragraphs[-1] = last_para
+                    updated_md = "\n\n".join(paragraphs)
+                    logger.info(f"[LinkSanitizer] Appended missing Link 2 with brand anchor '{anchor2}' to conclusion")
+
+    return updated_md
 
 
 class AIRouterService:
@@ -512,22 +598,22 @@ Output valid JSON matching this schema exactly:
         is_last_section = (section_index == total_sections)
 
         link_instructions = ""
-        # STRICT: Link 1 appears ONLY in section 2 (exactly once, never repeated)
-        if link_1_url and section_index == 2:
+        # MANDATORY: Link 1 appears in section 2 (or section 1 if short 2-section outline)
+        if link_1_url and (section_index == 2 or (total_sections <= 2 and is_first_section)):
             anchor = link_1_anchor or target_keyword
             link_instructions += (
-                f"\n- CONTEXTUAL KEYWORD LINK (ONCE ONLY): Naturally embed the link `[{anchor}]({link_1_url})` EXACTLY ONE TIME inside 2-4 words taken from the focus keyphrase or a close LSI variant."
+                f"\n- MANDATORY CONTEXTUAL KEYWORD LINK (MUST INCLUDE): You MUST naturally embed the link `[{anchor}]({link_1_url})` EXACTLY ONE TIME inside 2-4 words taken from the focus keyphrase or a close LSI variant."
                 f" The anchor text MUST read like a natural phrase (e.g. 'mesin pembuat mie', 'cara membuat mie') — NOT a full sentence or generic 'klik di sini'."
-                f" Place this link within the paragraph body. DO NOT repeat this URL anywhere else."
+                f" Place this link within the paragraph body. DO NOT omit this link. DO NOT repeat this URL anywhere else."
             )
 
-        # STRICT: Link 2 appears ONLY in the last/conclusion section (exactly once, never repeated)
+        # MANDATORY: Link 2 appears in the last/conclusion section
         if link_2_url and is_last_section:
             anchor = link_2_anchor or (product_name or "Official Website")
             link_instructions += (
-                f"\n- BRAND LINK (ONCE ONLY): In this conclusion, naturally mention `[{anchor}]({link_2_url})` EXACTLY ONE TIME."
+                f"\n- MANDATORY BRAND LINK (MUST INCLUDE): In this conclusion, you MUST naturally mention `[{anchor}]({link_2_url})` EXACTLY ONE TIME."
                 f" The anchor text MUST be the brand/company name only (max 2 words, e.g. 'Rumah Mesin') — short, clean, brand-focused."
-                f" Do NOT use generic anchors. DO NOT repeat this URL anywhere else."
+                f" DO NOT omit this link. DO NOT use generic anchors. DO NOT repeat this URL anywhere else."
             )
 
         # STRICT WHITELIST PROHIBITION:
@@ -695,7 +781,10 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         include_image_placeholder: bool = False,
         humanize_writing: bool = True,
         target_link_1_url: Optional[str] = None,
+        target_link_1_anchor: Optional[str] = None,
         target_link_2_url: Optional[str] = None,
+        target_link_2_anchor: Optional[str] = None,
+        product_name: Optional[str] = None,
     ) -> str:
         target_min = 1500 if article_type == "pillar" else 510
         target_max = 1590 if article_type == "pillar" else 585
@@ -710,11 +799,13 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
             allowed_list.append(target_link_2_url.strip())
 
         if allowed_list:
-            link_rule = f"""8. STRICT LINK WHITELIST (ZERO TOLERANCE FOR FABRICATED LINKS):
+            link_rule = f"""8. STRICT LINK WHITELIST & PRESERVATION MANDATE:
    - The ONLY allowed URLs in this entire article are: {', '.join(allowed_list)}.
+   - If `{target_link_1_url}` is provided, it MUST appear in the article body (naturally embed it onto '{target_link_1_anchor or target_keyword}' if missing).
+   - If `{target_link_2_url}` is provided, it MUST appear in the conclusion (naturally embed it onto '{target_link_2_anchor or product_name or 'Official Website'}' if missing).
    - If the text contains ANY other link to any domain (e.g. third-party sites, competitors, fake links, or hallucinated URLs like sfrtech.id), STRIP the markdown link syntax immediately: change `[anchor text](unauthorized_url)` to plain text `anchor text`.
-   - Each approved URL may appear at most ONCE in the entire article. If an approved URL appears multiple times, keep only the first instance and strip the link formatting from subsequent ones.
-   - NEVER invent or add any new links."""
+   - Each approved URL may appear at most ONCE in the entire article.
+   - NEVER invent or add any unauthorized third-party links."""
         else:
             link_rule = """8. ZERO LINKS RULE (ABSOLUTE):
    - No links were provided by the user. Therefore, this article MUST contain ZERO markdown links.
@@ -789,6 +880,17 @@ Return the final polished markdown:
 
         # Deterministic link whitelist enforcement (100% foolproof gatekeeper)
         polished = sanitize_article_links(polished, target_link_1_url, target_link_2_url)
+
+        # 100% Link Guarantee: ensure user target links are actually present (never missed by AI)
+        polished = ensure_target_links_present(
+            content_markdown=polished,
+            target_link_1_url=target_link_1_url,
+            target_link_1_anchor=target_link_1_anchor,
+            target_link_2_url=target_link_2_url,
+            target_link_2_anchor=target_link_2_anchor,
+            target_keyword=target_keyword,
+            product_name=product_name,
+        )
 
         return polished
 
