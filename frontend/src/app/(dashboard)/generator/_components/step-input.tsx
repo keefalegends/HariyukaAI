@@ -46,10 +46,10 @@ const ARTICLE_TYPES = [
   {
     id: "pillar",
     name: "Artikel Utama (Pillar)",
-    badge: "1.500 – 1.599 kata",
+    badge: "1.400 – 1.500 kata",
     desc: "Artikel pilar mendalam, komprehensif, multi-heading H2/H3 untuk dominasi SERP.",
     icon: FileText,
-    words: 1550,
+    words: 1450,
   },
 ];
 
@@ -97,7 +97,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
   const handleSelectArticleType = (type: "pillar" | "backlink_article" | "backlink_product") => {
     setArticleType(type);
     if (type === "pillar") {
-      setTargetLength(1550);
+      setTargetLength(1450);
     } else {
       setTargetLength(550);
     }
