@@ -382,14 +382,14 @@ Return a valid JSON object matching this schema exactly:
         product_name: Optional[str] = None,
     ) -> Dict[str, Any]:
         if article_type == "pillar":
-            exact_target = target_word_count if (target_word_count and 1450 <= target_word_count <= 1650) else 1550
+            exact_target = target_word_count if (target_word_count and 1400 <= target_word_count <= 1500) else 1450
             section_breakdown = f"""
-1. Section 1 (H2 Pembuka & Urgensi Topik): ~250 words - Pengenalan mendalam {target_keyword} & masalah nyata pembaca
-2. Section 2 (H2 Metode Utama & Langkah Teknis {target_keyword}): ~450 words - Panduan inti bertahap yang presisi
-3. Section 3 (H2 Best Practices & Trik Efisiensi {target_keyword}): ~400 words - Optimasi hasil & tips ahli lapangan
-4. Section 4 (H2 Kesalahan Fatal yang Harus Dihindari Terkait {target_keyword}): ~300 words - Troubleshooting & solusi antisipasi
+1. Section 1 (H2 Pembuka & Urgensi Topik): ~200 words - Pengenalan mendalam {target_keyword} & masalah nyata pembaca
+2. Section 2 (H2 Metode Utama & Langkah Teknis {target_keyword}): ~400 words - Panduan inti bertahap yang presisi
+3. Section 3 (H2 Best Practices & Trik Efisiensi {target_keyword}): ~350 words - Optimasi hasil & tips ahli lapangan
+4. Section 4 (H2 Kesalahan Fatal yang Harus Dihindari Terkait {target_keyword}): ~350 words - Troubleshooting & solusi antisipasi
 5. Section 5 (H2 Kesimpulan {target_keyword}): ~150 words - Rangkuman konseptual & aksi praktis pembaca
-Total: ~1550 words
+Total: ~1450 words (strictly 1400-1500 words)
 """
         else:
             exact_target = 550
@@ -417,7 +417,7 @@ Total: ~550 words (strictly 500-599 words)
             f"   - The `keywords_to_include` field for EVERY section MUST include '{target_keyword}' or its core phrase/LSI variant.\n"
             f"2. 🎯 LASER TOPICAL FOCUS: Every heading, sub-heading, and key point MUST strictly revolve around '{target_keyword}'. ZERO OFF-TOPIC DRIFT.\n"
             "3. ONLY use H2 and H3 levels. NEVER output H1.\n"
-            f"4. Total word count must strictly target {exact_target} words ({'1500-1599 words' if article_type == 'pillar' else '500-599 words'}).\n"
+            f"4. Total word count must strictly target {exact_target} words ({'1400-1500 words' if article_type == 'pillar' else '500-599 words'}).\n"
             f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'.\n"
             f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain several words from {target_keyword} or an LSI keyword naturally.\n"
             f"7. NO COUNTING-LIST HEADINGS (STRICT): NEVER use headings that promise a specific count of items, such as '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...'. "
@@ -786,8 +786,8 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         target_link_2_anchor: Optional[str] = None,
         product_name: Optional[str] = None,
     ) -> str:
-        target_min = 1500 if article_type == "pillar" else 510
-        target_max = 1590 if article_type == "pillar" else 585
+        target_min = 1400 if article_type == "pillar" else 510
+        target_max = 1500 if article_type == "pillar" else 585
         target_range = f"{target_min} – {target_max} kata"
 
         image_rule = "Ensure no [caption] or img tags exist; output clean pure text markdown." if not include_image_placeholder else "Preserve [caption] block intact."

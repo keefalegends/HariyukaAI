@@ -52,7 +52,7 @@ class GenerateOutlineRequest(BaseModel):
     title: Optional[str] = Field(None, description="Custom title if user already has one")
     article_type: Literal["pillar", "backlink_article", "backlink_product"] = Field(
         "backlink_article",
-        description="Type of article: 'pillar' (1500-1599 words), 'backlink_article' (500-599 words), 'backlink_product' (500-599 words + product push)"
+        description="Type of article: 'pillar' (1400-1500 words), 'backlink_article' (500-599 words), 'backlink_product' (500-599 words + product push)"
     )
     language: str = Field("id", description="Target language (e.g. 'id', 'en')")
     tone: str = Field("authoritative", description="Tone of voice")
