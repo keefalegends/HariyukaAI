@@ -489,8 +489,18 @@ Total: ~550 words (strictly 500-599 words)
             f"   - For any tutorial, procedural step, or guide section, ALL step headings and action points MUST use direct imperative active verbs.\n"
             f"   - DILARANG menggunakan kata kerja awalan 'me-' atau kata benda awalan 'pe-' pada instruksi langkah kerja!\n"
             f"   - CONTOH SALAH (DILARANG): 'Memotong Pisang dengan Rapi', 'Pemotongan Bahan', 'Menyiapkan Peralatan', 'Penyiapan Mesin', 'Membersihkan Wadah'.\n"
-            f"   - CONTOH BENAR (WAJIB): 'Potonglah Pisang dengan Rapi' / 'Potong Pisang', 'Siapkan Peralatan dan Bahan', 'Nyalakan Mesin', 'Bersihkan Wadah'."
+            f"   - CONTOH BENAR (WAJIB): 'Potonglah Pisang dengan Rapi' / 'Potong Pisang', 'Siapkan Peralatan dan Bahan', 'Nyalakan Mesin', 'Bersihkan Wadah'.\n"
+            f"10. 📋 TUTORIAL STEP NUMBERING MANDATE (PISAH LANGKAH KERJA PER POIN):\n"
+            f"   - When the article covers tutorial, cara, proses, langkah, pembuatan, penggunaan, or panduan kerja:\n"
+            f"   - In Section 2 (Panduan Inti / Langkah Teknis), the 3 H3 subsections MUST be explicitly structured and numbered as sequential steps:\n"
+            f"     * '### Langkah 1: [Kata Kerja Aktif] [Detail]' (contoh: '### Langkah 1: Siapkan Bahan dan Mesin Pemotong')\n"
+            f"     * '### Langkah 2: [Kata Kerja Aktif] [Detail]' (contoh: '### Langkah 2: Atur Kecepatan dan Ketebalan Pisau')\n"
+            f"     * '### Langkah 3: [Kata Kerja Aktif] [Detail]' (contoh: '### Langkah 3: Potonglah Pisang Secara Merata')\n"
+            f"   - JANGAN menggabungkan langkah kerja menjadi satu paragraf umum. Setiap langkah kerja WAJIB dipisah per poin secara tegas."
         )
+
+        is_tutorial = any(w in (target_keyword + " " + title).lower() for w in ["cara", "tutorial", "langkah", "panduan", "membuat", "memotong", "memasak", "menggunakan", "tips", "resep", "proses", "trik"])
+        tutorial_notice = "\n- ⚡ TUTORIAL DETECTED: Section 2 MUST name its 3 H3 subsections as 'Langkah 1: [Active Verb] ...', 'Langkah 2: ...', 'Langkah 3: ...'!" if is_tutorial else ""
 
         user_prompt = f"""
 Article Title: {title}
@@ -500,6 +510,7 @@ Target Total Words: {exact_target}
 Tone: {tone}
 Product Focus: {product_name or 'None (General SEO)'}
 Brand Voice Instructions: {brand_voice or "Clear, engaging, human-written editorial"}
+{tutorial_notice}
 
 Section Word Allocation Target:
 {section_breakdown}
@@ -782,6 +793,11 @@ Output valid JSON matching this schema exactly:
 4. HEADINGS: ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
 5. WORD COUNT: Target ~{target_word_count} words for this section.
 6. If this is Section 1, mention keyphrase in the very first sentence.
+7. TUTORIAL STEP SEPARATION MANDATE (SALNA SOP):
+   - If this section covers procedural steps or tutorials (how-to, cara, proses, pembuatan, pemotongan, penggunaan):
+   - Separate every single operational step into distinct, sequential points ('Langkah 1: ...', 'Langkah 2: ...', 'Langkah 3: ...').
+   - Each step MUST start with a direct active verb without 'me-' or 'pe-'.
+   - NEVER lump multiple steps into one vague paragraph; separate them clearly into distinct points or H3 subsections.
 """
 
         user_prompt = f"""
