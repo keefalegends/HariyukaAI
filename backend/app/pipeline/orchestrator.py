@@ -89,6 +89,8 @@ class ArticlePipelineOrchestrator:
             competitor_content=competitor_content,
             language=language
         )
+        if competitor_content:
+            serp_data["competitor_summary"] = competitor_content
 
         final_title = title or serp_data.get("suggested_title", f"Panduan Lengkap {target_keyword}")
 

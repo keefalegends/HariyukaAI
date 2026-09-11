@@ -437,9 +437,11 @@ Brand Voice Instructions: {brand_voice or "Clear, engaging, human-written editor
 Section Word Allocation Target:
 {section_breakdown}
 
-SERP & Intent Context:
+SERP & Google Page 1 Reference Context:
 - Search Intent: {serp_analysis.get('search_intent')}
 - LSI Keywords: {', '.join(serp_analysis.get('lsi_keywords', []))}
+- Competitor Page 1 Findings & Reference Angles:
+{serp_analysis.get('competitor_summary') or 'Deep Google Page 1 topical coverage.'}
 
 CRITICAL H3 SUBSECTION RULE:
 Every H2 content section (NOT the opening intro and NOT the conclusion) MUST contain EXACTLY 3 H3 sub-headings inside its `subsections` array.
