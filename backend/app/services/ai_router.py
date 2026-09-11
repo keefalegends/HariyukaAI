@@ -713,8 +713,11 @@ Output valid JSON matching this schema exactly:
             )
 
         product_instruction = ""
-        if article_type == "backlink_product" and product_name:
-            product_instruction = f"\n- PRODUCT SOFT-SELL: Naturally weave in **{product_name}** ({product_promotion_context or 'rekomendasi peralatan terpercaya'}) as an actionable solution."
+        if product_name and (article_type in ["backlink_product", "backlink_article"]):
+            product_instruction = (
+                f"\n- NATURAL BRAND MENTION (SALNA EDITORIAL STYLE): Naturally weave in **{product_name}** as a credible engineering or manufacturing reference, e.g.:"
+                f" '{product_name} merancang alat ini untuk membantu...', '{product_name} juga menjelaskan bahwa kamu dapat...'. Keep it natural and informative without pushy sales language."
+            )
 
         image_instruction = ""
         if include_image_placeholder and (section_index == 2 or (is_first_section and "pengenalan" not in section_heading.lower())):
@@ -784,12 +787,19 @@ Output valid JSON matching this schema exactly:
 5. The CONTENT under this heading MUST mention '{target_keyword}' or an LSI synonym at least ONCE in the first paragraph and at least ONCE more in subsequent paragraphs.
 6. Do NOT over-stuff: Max 2 exact-match occurrences of '{target_keyword}' per section. Use pronouns ('alat ini', 'langkah tersebut') for remaining references.
 
-🚨 STRICT PARAGRAPH & SENTENCE STRUCTURE SOP (SALNA EDITORIAL RULES):
-1. MINIMUM 2 PARAGRAPHS PER SUBHEADING: Under EVERY H2 and H3 heading, you MUST write at least 2 distinct paragraphs separated by a double newline (`\\n\\n`). Single-paragraph sections are STRICTLY FORBIDDEN.
-2. MINIMUM 3 SENTENCES PER PARAGRAPH: Every single paragraph MUST contain at least 3 well-crafted, substantive sentences (each ending with a period, question mark, or exclamation mark). Never write a paragraph with only 1 or 2 sentences.
-3. PARAGRAPH FLOW FORMULA:
-   - Paragraph 1: Specific core challenge, technical context, and why this matters for '{target_keyword}'.
-   - Paragraph 2+: Concrete actionable steps, practical field application, and direct tangible benefit for the reader.
+🚨 STRICT PARAGRAPH BREVITY & CONCISENESS SOP (SALNA EDITORIAL GOLD STANDARD):
+1. STRICTLY 3 TO 4 SENTENCES PER PARAGRAPH (SWEET SPOT: EXACTLY 3 SENTENCES):
+   - Every single paragraph MUST contain MINIMUM 3 sentences and MAXIMUM 4 sentences. NEVER write 5+ sentences!
+   - Once you have written 3 substantive, clear sentences, STOP and end the paragraph immediately.
+   - Do NOT write bloated, long-winded paragraphs. Keep each paragraph around 35–45 words.
+2. CONCISE & ACTIONABLE (ANTI-RAMBLING GUARDRAIL):
+   - Avoid endless descriptions, verbose narrative fluff, and redundant adjectives.
+   - Deliver the point cleanly:
+     * Kalimat 1: Masalah utama atau fungsi teknis secara langsung.
+     * Kalimat 2: Solusi atau cara kerja konkret.
+     * Kalimat 3: Dampak positif atau manfaat nyata bagi pengguna.
+   - Singkat, padat, jelas, dan tidak bertele-tele.
+3. SUBHEADING STRUCTURE: Under EVERY H2 and H3 heading, write exactly 2 concise paragraphs (each strictly 3 sentences).
 4. HEADINGS: ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
 5. WORD COUNT: Target ~{target_word_count} words for this section.
 6. If this is Section 1, mention keyphrase in the very first sentence.
@@ -807,7 +817,7 @@ Article Type: {article_type.upper()}
 Section Index: {section_index} of {total_sections}
 Currently Writing Section:
 - Heading: {section_heading} ({section_level.upper()})
-- Target Word Count: EXACTLY ~{target_word_count} words (Consisting of MINIMUM 2 paragraphs, each with MINIMUM 3 sentences)
+- Target Word Count: ~{target_word_count} words (Consisting of 2 tight, concise paragraphs, each strictly 3 sentences. No bloated rambling descriptions!)
 - Key Points to Cover:
 {chr(10).join(f"  * {pt}" for pt in key_points)}
 
@@ -927,8 +937,12 @@ CALIBRATION REQUIREMENTS (SALNA EDITORIAL & YOAST SOP):
    - Scan the entire article for any sentences that drift away from '{target_keyword}'.
    - If any paragraph drifts into unrelated philosophy, generic filler, or tangential topics, CUT IT OUT or REWRITE it so it strictly delivers dense, actionable, high-value insights about '{target_keyword}'.
    - Every single section must directly answer and explain '{target_keyword}'.
-2. SUBHEADING PARAGRAPH DEPTH: Every single H2 (##) and H3 (###) MUST have AT LEAST 2 distinct paragraphs under it. If any section has only 1 paragraph, split and elaborate it into 2 substantive paragraphs.
-3. PARAGRAPH SENTENCE DEPTH: Every single paragraph MUST contain AT LEAST 3 complete sentences. Never leave thin 1-sentence or 2-sentence paragraphs.
+2. SUBHEADING PARAGRAPH DEPTH: Every single H2 (##) and H3 (###) MUST have exactly 2 distinct paragraphs under it.
+3. 🚨 STRICT PARAGRAPH BREVITY & CONCISENESS (SALNA SOP ANTI-BLOAT PASS):
+   - Every single paragraph MUST contain strictly 3 sentences (maximum 4 sentences).
+   - NEVER leave bloated, long paragraphs with 5+ sentences.
+   - If any paragraph is too long or rambling, PRUNE it down to 3 crisp, tight, punchy sentences.
+   - Target ~35 to 45 words per paragraph. Minimalist, direct, and readable without dragging descriptions.
 4. STRICT WORD COUNT: Final text length MUST be between {target_range}.
    If under 500 words, expand paragraphs with helpful details and actionable real-world tips directly related to '{target_keyword}'.
 5. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
