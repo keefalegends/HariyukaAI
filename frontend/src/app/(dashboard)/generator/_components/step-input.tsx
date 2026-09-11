@@ -76,8 +76,8 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [brandVoice, setBrandVoice] = useState("");
 
-  // Salna Backlink SOP Link injection states
-  const [showLinkSettings, setShowLinkSettings] = useState(false);
+  // Salna Backlink SOP Link injection states (Open by default so 2 links are always prominent)
+  const [showLinkSettings, setShowLinkSettings] = useState(true);
   const [humanizeWriting, setHumanizeWriting] = useState(true);
   const [includeImagePlaceholder, setIncludeImagePlaceholder] = useState(false);
   const [link1Url, setLink1Url] = useState("");
@@ -250,7 +250,10 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
           >
             <div className="flex items-center gap-2">
               <Link2 className={`w-4 h-4 ${tk.accentText}`} />
-              <span>Pengaturan Link & Promosi Produk (SOP Backlink)</span>
+              <span>Pengaturan 2 Link & Promosi (SOP Backlink)</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold bg-[#d97757]/15 text-[#d97757] border border-[#d97757]/30">
+                2 Link Wajib
+              </span>
               {(link1Url || link2Url || productName) && (
                 <span className="w-2 h-2 rounded-full bg-[#d97757]" />
               )}
@@ -290,9 +293,9 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className={`text-[11px] font-semibold ${tk.textSecondary}`}>
-                    Link 1: Tautan Kontekstual (Paragraf Pembuka/Body)
+                    Link 1: Tautan Kontekstual / Artikel (Paragraf Isi / Langkah Teknis)
                   </label>
-                  <span className={`text-[10px] ${tk.textMuted}`}>Opsional</span>
+                  <span className={`text-[10px] text-[#d97757] font-semibold`}>Wajib / Dianjurkan</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
@@ -318,7 +321,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
                   <label className={`text-[11px] font-semibold ${tk.textSecondary}`}>
                     Link 2: Tautan Brand / Homepage (Paragraf Kesimpulan)
                   </label>
-                  <span className={`text-[10px] ${tk.textMuted}`}>Opsional</span>
+                  <span className={`text-[10px] text-[#d97757] font-semibold`}>Wajib / Dianjurkan</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
