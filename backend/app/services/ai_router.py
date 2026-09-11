@@ -52,6 +52,68 @@ def sanitize_indonesian_symbols(text: str) -> str:
     return protected
 
 
+def sanitize_tutorial_imperatives(text: str) -> str:
+    """
+    Enforces Salna's Editorial SOP for tutorials/guides:
+    Converts passive/nominalized 'me-' and 'pe-' forms in headings and list steps
+    into direct active imperative forms.
+    e.g. 'Memotong Pisang Dengan Rapi' -> 'Potonglah Pisang Dengan Rapi'
+         'Pembersihan Mesin' -> 'Bersihkan Mesin'
+    """
+    if not text:
+        return text
+
+    replacements = [
+        (r'\bMemotong\b', 'Potonglah'),
+        (r'\bmemotong\b', 'potonglah'),
+        (r'\bPemotongan\b', 'Potonglah'),
+        (r'\bpemotongan\b', 'potonglah'),
+        (r'\bMenyiapkan\b', 'Siapkan'),
+        (r'\bmenyiapkan\b', 'siapkan'),
+        (r'\bPenyiapan\b', 'Siapkan'),
+        (r'\bpenyiapan\b', 'siapkan'),
+        (r'\bMembersihkan\b', 'Bersihkan'),
+        (r'\bmembersihkan\b', 'bersihkan'),
+        (r'\bPembersihan\b', 'Bersihkan'),
+        (r'\bpembersihan\b', 'bersihkan'),
+        (r'\bMenyalakan\b', 'Nyalakan'),
+        (r'\bmenyalakan\b', 'nyalakan'),
+        (r'\bPenyalaan\b', 'Nyalakan'),
+        (r'\bpenyalaan\b', 'nyalakan'),
+        (r'\bMengatur\b', 'Atur'),
+        (r'\bmengatur\b', 'atur'),
+        (r'\bPengaturan\b', 'Atur'),
+        (r'\bpengaturan\b', 'atur'),
+        (r'\bMemeriksa\b', 'Periksa'),
+        (r'\bmemeriksa\b', 'periksa'),
+        (r'\bPemeriksaan\b', 'Periksa'),
+        (r'\bpemeriksaan\b', 'periksa'),
+        (r'\bMemilih\b', 'Pilihlah'),
+        (r'\bmemilih\b', 'pilihlah'),
+        (r'\bMemasukkan\b', 'Masukkan'),
+        (r'\bmemasukkan\b', 'masukkan'),
+        (r'\bPemasukan\b', 'Masukkan'),
+        (r'\bpemasukan\b', 'masukkan'),
+        (r'\bMenyimpan\b', 'Simpan'),
+        (r'\bmenyimpan\b', 'simpan'),
+        (r'\bPenyimpanan\b', 'Simpan'),
+        (r'\bpenyimpanan\b', 'simpan'),
+        (r'\bMengoleskan\b', 'Oleskan'),
+        (r'\bmengoleskan\b', 'oleskan'),
+    ]
+
+    def line_converter(match):
+        prefix = match.group(1)
+        body = match.group(2)
+        for pattern, repl in replacements:
+            body = re.sub(pattern, repl, body, count=1)
+        return f"{prefix}{body}"
+
+    # Apply to Headings (##, ###) and List Items (1., 2., -, *)
+    updated = re.sub(r'^(#{1,3}\s+|\d+\.\s+|[-*]\s+)(.*)$', line_converter, text, flags=re.MULTILINE)
+    return updated
+
+
 def _normalize_url_key(url: str) -> str:
     """
     Normalizes a URL for robust comparison:
@@ -422,7 +484,12 @@ Total: ~550 words (strictly 500-599 words)
             f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain several words from {target_keyword} or an LSI keyword naturally.\n"
             f"7. NO COUNTING-LIST HEADINGS (STRICT): NEVER use headings that promise a specific count of items, such as '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...'. "
             f"These are FORBIDDEN because the writer cannot guarantee the exact count in the body. Use descriptive headings instead, e.g. 'Keunggulan {target_keyword} yang Nyata di Lapangan' or 'Tips Efektif Menggunakan {target_keyword}'.\n"
-            f"8. NO AMPERSANDS OR WEIRD SYMBOLS (STRICT): NEVER use '&' (ampersand) anywhere in headings or outline text. Always write the full Indonesian word 'dan'. NEVER use '/', '~', '+', '|'."
+            f"8. NO AMPERSANDS OR WEIRD SYMBOLS (STRICT): NEVER use '&' (ampersand) anywhere in headings or outline text. Always write the full Indonesian word 'dan'. NEVER use '/', '~', '+', '|'.\n"
+            f"9. ⚡ TUTORIAL ACTIVE VOICE MANDATE (HINDARI IMBUHAN me- DAN pe-):\n"
+            f"   - For any tutorial, procedural step, or guide section, ALL step headings and action points MUST use direct imperative active verbs.\n"
+            f"   - DILARANG menggunakan kata kerja awalan 'me-' atau kata benda awalan 'pe-' pada instruksi langkah kerja!\n"
+            f"   - CONTOH SALAH (DILARANG): 'Memotong Pisang dengan Rapi', 'Pemotongan Bahan', 'Menyiapkan Peralatan', 'Penyiapan Mesin', 'Membersihkan Wadah'.\n"
+            f"   - CONTOH BENAR (WAJIB): 'Potonglah Pisang dengan Rapi' / 'Potong Pisang', 'Siapkan Peralatan dan Bahan', 'Nyalakan Mesin', 'Bersihkan Wadah'."
         )
 
         user_prompt = f"""
@@ -561,11 +628,11 @@ Output valid JSON matching this schema exactly:
         if "sections" in data and isinstance(data["sections"], list):
             for sec in data["sections"]:
                 if "heading" in sec and sec["heading"]:
-                    sec["heading"] = sanitize_indonesian_symbols(sec["heading"])
+                    sec["heading"] = sanitize_tutorial_imperatives(sanitize_indonesian_symbols(sec["heading"]))
                 if "subsections" in sec and isinstance(sec["subsections"], list):
                     for subsec in sec["subsections"]:
                         if "heading" in subsec and subsec["heading"]:
-                            subsec["heading"] = sanitize_indonesian_symbols(subsec["heading"])
+                            subsec["heading"] = sanitize_tutorial_imperatives(sanitize_indonesian_symbols(subsec["heading"]))
         return data
 
     # --------------------------------------------------------------------------
@@ -685,6 +752,11 @@ Output valid JSON matching this schema exactly:
      'harus diperhatikan' → use 'perhatikan baik-baik' / 'pastikan kamu memperhatikan'
    - ACTIVE SENTENCE STRUCTURE: Subject → Verb → Object. Always.
    - If you catch yourself writing a passive, REWRITE it in active voice immediately.
+6. TUTORIAL & HOW-TO IMPERATIVE ACTIVE VOICE (SALNA EDITORIAL MANDATE):
+   - When writing instructions, tutorials, or procedural steps, ALWAYS use direct imperative active verbs!
+   - STRICTLY AVOID passive/nominalized prefixes 'me-' and 'pe-' in step commands and headings!
+   - DILARANG (SALAH): 'Memotong Pisang dengan Rapi', 'Pemotongan Bahan', 'Menyiapkan Alat', 'Penyiapan Mesin', 'Membersihkan Wadah'.
+   - WAJIB (BENAR): 'Potonglah Pisang dengan Rapi' / 'Potong Pisang', 'Siapkan Alat dan Bahan', 'Nyalakan Mesin', 'Bersihkan Wadah'.
 """
         else:
             humanizer_directives = ""
@@ -879,6 +951,9 @@ Return the final polished markdown:
 
         # Deterministic symbol sanitization (& -> dan, clean symbols)
         polished = sanitize_indonesian_symbols(polished)
+
+        # Enforce tutorial active voice imperatives on step headings/lists
+        polished = sanitize_tutorial_imperatives(polished)
 
         # Deterministic link whitelist enforcement (100% foolproof gatekeeper)
         polished = sanitize_article_links(polished, target_link_1_url, target_link_2_url)

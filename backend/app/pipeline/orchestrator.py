@@ -7,7 +7,13 @@ import asyncio
 import logging
 from typing import Dict, Any, List, Optional, AsyncGenerator
 from datetime import datetime
-from app.services.ai_router import ai_router, sanitize_article_links, sanitize_indonesian_symbols, ensure_target_links_present
+from app.services.ai_router import (
+    ai_router,
+    sanitize_article_links,
+    sanitize_indonesian_symbols,
+    sanitize_tutorial_imperatives,
+    ensure_target_links_present,
+)
 from app.services.serp_scraper import serp_scraper
 from app.services.seo_analyzer import seo_analyzer
 from app.schemas.article import ArticleOutlineSchema, OutlineSectionItem
@@ -261,8 +267,9 @@ class ArticlePipelineOrchestrator:
             product_name=product_name,
         )
 
-        # Extra safety: Ensure 100% strictly whitelisted links and zero & symbols
+        # Extra safety: Ensure 100% strictly whitelisted links, active tutorial imperatives, and zero & symbols
         polished_markdown = sanitize_indonesian_symbols(polished_markdown)
+        polished_markdown = sanitize_tutorial_imperatives(polished_markdown)
         polished_markdown = sanitize_article_links(polished_markdown, target_link_1_url, target_link_2_url)
         polished_markdown = ensure_target_links_present(
             content_markdown=polished_markdown,
