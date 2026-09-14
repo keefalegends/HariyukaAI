@@ -30,18 +30,18 @@ const ARTICLE_TYPES = [
   {
     id: "backlink_article",
     name: "Backlink Artikel",
-    badge: "500 – 599 kata",
+    badge: "550 – 590 kata",
     desc: "Mendorong ranking artikel utama dengan fokus keyphrase kuat & 2 tautan kontekstual.",
     icon: Link2,
-    words: 550,
+    words: 565,
   },
   {
     id: "backlink_product",
     name: "Backlink Produk",
-    badge: "500 – 599 kata",
+    badge: "550 – 590 kata",
     desc: "Mendorong artikel produk perusahaan dengan soft-selling natural & link brand.",
     icon: ShoppingBag,
-    words: 550,
+    words: 565,
   },
   {
     id: "pillar",
@@ -71,7 +71,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("id");
   const [tone, setTone] = useState("authoritative");
-  const [targetLength, setTargetLength] = useState(550);
+  const [targetLength, setTargetLength] = useState(565);
   const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([]);
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [brandVoice, setBrandVoice] = useState("");
@@ -99,7 +99,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
     if (type === "pillar") {
       setTargetLength(1450);
     } else {
-      setTargetLength(550);
+      setTargetLength(565);
     }
     if (type === "backlink_product" || type === "backlink_article") {
       setShowLinkSettings(true);
@@ -355,7 +355,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
                       Sertakan Placeholder Gambar WordPress (`[caption]`)
                     </span>
                     <p className={`text-[10px] ${tk.textMuted} mt-0.5`}>
-                      Default tidak dicentang (Fokus teks murni 500-599 kata, gambar dapat ditambahkan sendiri saat posting ke WordPress).
+                      Default tidak dicentang (Fokus teks murni 550-590 kata, gambar dapat ditambahkan sendiri saat posting ke WordPress).
                     </p>
                   </div>
                 </label>
