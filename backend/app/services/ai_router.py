@@ -114,6 +114,41 @@ def sanitize_tutorial_imperatives(text: str) -> str:
     return updated
 
 
+def ensure_keyword_at_start_of_title(title: str, target_keyword: str) -> str:
+    """
+    Enforces Salna's SOP: The focus keyphrase MUST be at the very front of the title.
+    e.g. 'Cara Memilih Mesin Potong Padi' -> 'Mesin Potong Padi: Cara Memilih dan Panduannya'
+         'Keunggulan Combine Harvester' -> 'Combine Harvester: Keunggulan dan Tips Memilih'
+    """
+    if not title or not target_keyword:
+        return title or ""
+
+    t_clean = re.sub(r"^[\s#\"']+|[\s#\"']+$", "", title).strip()
+    kw_clean = target_keyword.strip()
+
+    # If already starts with keyword (case-insensitive)
+    if t_clean.lower().startswith(kw_clean.lower()):
+        rest = t_clean[len(kw_clean):].lstrip(" :–—-")
+        if rest:
+            return f"{kw_clean.title()}: {rest}"
+        return kw_clean.title()
+
+    # If keyword is inside title, extract and reformat to front
+    pattern = re.compile(rf'\b({re.escape(kw_clean)})\b', re.IGNORECASE)
+    match = pattern.search(t_clean)
+    if match:
+        prefix = t_clean[:match.start()].strip(" :–—-")
+        suffix = t_clean[match.end():].strip(" :–—-")
+        remainder = " ".join([p for p in [prefix, suffix] if p]).strip()
+        if remainder:
+            return f"{kw_clean.title()}: {remainder}"
+        return f"{kw_clean.title()} untuk Kebutuhan Usaha"
+
+    # If keyword is completely absent, prepend it cleanly
+    clean_prefix_title = t_clean.lstrip(" :–—-")
+    return f"{kw_clean.title()}: {clean_prefix_title}"
+
+
 def _normalize_url_key(url: str) -> str:
     """
     Normalizes a URL for robust comparison:
@@ -389,9 +424,11 @@ class AIRouterService:
             "You are an Elite SEO Strategist and Search Intent Classifier for Indonesian/Global SERPs. "
             "Analyze the target keyword and competitive landscape to extract search intent, "
             "crucial semantic entities (LSI), People Also Ask (PAA) questions, and content gaps.\n"
-            "TITLE RULE: The `suggested_title` MUST NOT use counting list formats like '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...', etc. "
+            "TITLE RULE: The `suggested_title` MUST start with the exact target keyword at the very front "
+            f"(format: '{target_keyword.title()}: [Angle / Benefit]'). NEVER place words before the target keyword. "
+            "The `suggested_title` MUST NOT use counting list formats like '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...', etc. "
             "These are FORBIDDEN because the writer cannot guarantee the exact count will match. "
-            "Use descriptive, keyword-rich titles instead, e.g. 'Keunggulan Combine Harvester yang Perlu Kamu Ketahui' or 'Tips Memilih Rice Cooker yang Tepat dan Hemat'.\n"
+            f"Use descriptive, keyword-fronted titles instead, e.g. '{target_keyword.title()}: Keunggulan dan Panduan Lengkap' or '{target_keyword.title()}: Tips Memilih yang Tepat dan Hemat'.\n"
             "NO AMPERSANDS / NO WEIRD SYMBOLS: NEVER use '&' (ampersand) in suggested_title or LSI. Always write the full Indonesian word 'dan'. NEVER use '/', '~', '+', '|'."
         )
 
@@ -426,7 +463,8 @@ Return a valid JSON object matching this schema exactly:
         )
         data = self.extract_json(raw)
         if "suggested_title" in data and data["suggested_title"]:
-            data["suggested_title"] = sanitize_indonesian_symbols(data["suggested_title"])
+            cleaned_title = sanitize_indonesian_symbols(data["suggested_title"])
+            data["suggested_title"] = ensure_keyword_at_start_of_title(cleaned_title, target_keyword)
         return data
 
     # --------------------------------------------------------------------------
@@ -1030,7 +1068,7 @@ Return the final polished markdown:
         system_prompt = f"""You are a Yoast SEO WordPress Metadata Specialist.
 Generate clean, concise, click-worthy metadata in JSON format:
 {{
-  "seo_title": "Max 60 chars, includes focus keyphrase naturally. NEVER USE '&' (always write 'dan'). NO WEIRD SYMBOLS.",
+  "seo_title": "Max 60 chars, MUST START with the focus keyphrase '{target_keyword}' at the very front (format: '{target_keyword.title()}: [Angle]'). NEVER USE '&' (always write 'dan'). NO WEIRD SYMBOLS.",
   "slug": "url-friendly-slug-containing-only-keyphrase",
   "meta_description": "130-155 characters, MUST contain primary keyphrase near the beginning, high CTR appeal without em-dashes. NEVER USE '&' (write 'dan').",
   "tags": "EXACTLY {tag_count} SHORT keyword tags (each tag MUST be only 1 to 3 words max, Indonesian), strictly separated by commas. NO '&' (write 'dan'). NEVER include long sentences or repeat the full article title!"
@@ -1065,17 +1103,19 @@ Generate the JSON metadata:
                 tags_str = default_tags
 
             raw_seo_title = data.get("seo_title", title)[:65]
+            clean_seo_title = ensure_keyword_at_start_of_title(sanitize_indonesian_symbols(raw_seo_title), target_keyword)
             raw_meta_desc = data.get("meta_description", f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini.")[:160]
 
             return {
-                "seo_title": sanitize_indonesian_symbols(raw_seo_title),
+                "seo_title": clean_seo_title[:65],
                 "slug": data.get("slug", default_slug),
                 "meta_description": sanitize_indonesian_symbols(raw_meta_desc),
                 "tags": sanitize_indonesian_symbols(tags_str)
             }
         except Exception:
+            fallback_seo_title = ensure_keyword_at_start_of_title(sanitize_indonesian_symbols(title[:65]), target_keyword)
             return {
-                "seo_title": sanitize_indonesian_symbols(title[:65]),
+                "seo_title": fallback_seo_title[:65],
                 "slug": default_slug,
                 "meta_description": sanitize_indonesian_symbols(f"Panduan lengkap {target_keyword}. Temukan tips penting, cara memilih, dan rekomendasi terbaik di sini."),
                 "tags": sanitize_indonesian_symbols(default_tags)

@@ -18,6 +18,7 @@ from app.schemas.article import (
     AIEditArticleResponse,
 )
 from app.pipeline.orchestrator import orchestrator
+from app.services.ai_router import ensure_keyword_at_start_of_title
 from app.services.seo_analyzer import seo_analyzer
 from app.services.ai_editor import ai_editor
 from app.db.storage import storage
@@ -54,7 +55,7 @@ async def generate_outline_endpoint(
         "id": article_id,
         "user_id": "default-user",
         "project_id": req.project_id,
-        "title": req.title or f"Artikel: {req.target_keyword}",
+        "title": ensure_keyword_at_start_of_title(req.title or f"{req.target_keyword.title()}: Panduan Lengkap", req.target_keyword),
         "target_keyword": req.target_keyword,
         "article_type": req.article_type,
         "secondary_keywords": req.secondary_keywords or [],

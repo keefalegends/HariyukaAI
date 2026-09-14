@@ -13,6 +13,7 @@ from app.services.ai_router import (
     sanitize_indonesian_symbols,
     sanitize_tutorial_imperatives,
     ensure_target_links_present,
+    ensure_keyword_at_start_of_title,
 )
 from app.services.serp_scraper import serp_scraper
 from app.services.seo_analyzer import seo_analyzer
@@ -98,7 +99,8 @@ class ArticlePipelineOrchestrator:
         if competitor_content:
             serp_data["competitor_summary"] = competitor_content
 
-        final_title = title or serp_data.get("suggested_title", f"Panduan Lengkap {target_keyword}")
+        raw_chosen_title = title or serp_data.get("suggested_title") or f"{target_keyword.title()}: Panduan Lengkap"
+        final_title = ensure_keyword_at_start_of_title(raw_chosen_title, target_keyword)
 
         await self.emit_event(article_id, "step_complete", {
             "step": 1,
@@ -173,6 +175,7 @@ class ArticlePipelineOrchestrator:
         sections = outline.get("sections", [])
         total_sections = len(sections)
         written_sections: List[str] = []
+        title = ensure_keyword_at_start_of_title(title, target_keyword)
         full_content_markdown = f"# {title}\n\n"
         
         # Stream the Title first
@@ -298,7 +301,7 @@ class ArticlePipelineOrchestrator:
             include_image_placeholder=include_image_placeholder
         )
 
-        clean_title = sanitize_indonesian_symbols(title)
+        clean_title = ensure_keyword_at_start_of_title(sanitize_indonesian_symbols(title), target_keyword)
 
         seo_meta = await ai_router.generate_seo_metadata(
             title=clean_title,
@@ -312,7 +315,7 @@ class ArticlePipelineOrchestrator:
             "title": clean_title,
             "slug": seo_meta.get("slug"),
             "meta_description": seo_meta.get("meta_description"),
-            "seo_title": seo_meta.get("seo_title", title),
+            "seo_title": seo_meta.get("seo_title", clean_title),
             "tags": seo_meta.get("tags"),
             "article_type": article_type,
             "content_markdown": polished_markdown,
