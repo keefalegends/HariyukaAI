@@ -61,7 +61,7 @@ async def generate_outline_endpoint(
         "secondary_keywords": req.secondary_keywords or [],
         "language": req.language,
         "tone": req.tone,
-        "target_length": req.target_length or (1450 if req.article_type == "pillar" else 550),
+        "target_length": req.target_length or (1450 if req.article_type == "pillar" else 565),
         "outline_json": None,
         "serp_data": None,
         "content_markdown": "",

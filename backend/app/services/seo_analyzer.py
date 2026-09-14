@@ -71,15 +71,18 @@ class SeoAnalyzerService:
                 score += 5
                 checklist.append({"rule": "Text Length", "passed": False, "message": f"{total_words} kata (Kurang, target Artikel Utama: 1.500 kata)"})
         else: # backlink
-            if 480 <= total_words <= 650:
+            if 540 <= total_words <= 600:
                 score += 15
-                checklist.append({"rule": "Text Length", "passed": True, "message": f"{total_words} kata (Sesuai SOP Backlink: 500–599 kata)"})
-            elif 400 <= total_words < 480:
-                score += 10
-                checklist.append({"rule": "Text Length", "passed": False, "message": f"{total_words} kata (Mendekati, target ideal: 500–599 kata)"})
+                checklist.append({"rule": "Text Length", "passed": True, "message": f"{total_words} kata (Sesuai SOP Backlink: 550–590 kata)"})
+            elif 500 <= total_words < 540 or 600 < total_words <= 620:
+                score += 12
+                checklist.append({"rule": "Text Length", "passed": True, "message": f"{total_words} kata (Mendekati, target SOP: 550–590 kata)"})
+            elif 400 <= total_words < 500:
+                score += 8
+                checklist.append({"rule": "Text Length", "passed": False, "message": f"{total_words} kata (Kurang, target SOP: 550–590 kata)"})
             else:
                 score += 5
-                checklist.append({"rule": "Text Length", "passed": False, "message": f"{total_words} kata (Target Backlink: 500–599 kata)"})
+                checklist.append({"rule": "Text Length", "passed": False, "message": f"{total_words} kata (Target Backlink: 550–590 kata)"})
 
         # Rule 2: Keyphrase in Introduction (15 pts)
         first_150_words = " ".join(words[:150]).lower()

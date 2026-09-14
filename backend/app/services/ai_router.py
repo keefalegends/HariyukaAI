@@ -492,13 +492,13 @@ Return a valid JSON object matching this schema exactly:
 Total: ~1450 words (strictly 1400-1500 words)
 """
         else:
-            exact_target = 550
+            exact_target = 565
             section_breakdown = f"""
 1. Section 1 (H2 Pembuka & Relevansi Topik): ~120 words - Mengapa {target_keyword} penting dan apa masalah yang ingin diselesaikan
 2. Section 2 (H2 Panduan Inti / Solusi Utama {target_keyword}): ~280 words - 4-5 poin konkret, langkah teknis, atau tips praktis utama
-3. Section 3 (H2 Trik Efisiensi & Hal yang Perlu Diperhatikan Terkait {target_keyword}): ~100 words - Optimasi hasil dan kesalahan yang sering terjadi
-4. Section 4 (H2 Kesimpulan {target_keyword}): ~70 words - Rekomendasi ringkas & langkah tindak lanjut langsung
-Total: ~550 words (strictly 500-599 words)
+3. Section 3 (H2 Trik Efisiensi & Hal yang Perlu Diperhatikan Terkait {target_keyword}): ~110 words - Optimasi hasil dan kesalahan yang sering terjadi
+4. Section 4 (H2 Kesimpulan {target_keyword}): ~60 words - Rekomendasi ringkas & langkah tindak lanjut langsung
+Total: ~570 words (strictly 550–590 words)
 """
 
         system_prompt = (
@@ -517,7 +517,7 @@ Total: ~550 words (strictly 500-599 words)
             f"   - The `keywords_to_include` field for EVERY section MUST include '{target_keyword}' or its core phrase/LSI variant.\n"
             f"2. 🎯 LASER TOPICAL FOCUS: Every heading, sub-heading, and key point MUST strictly revolve around '{target_keyword}'. ZERO OFF-TOPIC DRIFT.\n"
             "3. ONLY use H2 and H3 levels. NEVER output H1.\n"
-            f"4. Total word count must strictly target {exact_target} words ({'1400-1500 words' if article_type == 'pillar' else '500-599 words'}).\n"
+            f"4. Total word count must strictly target {exact_target} words ({'1400-1500 words' if article_type == 'pillar' else '550-590 words'}).\n"
             f"5. End with an actionable conclusion: 'Kesimpulan {target_keyword}'.\n"
             f"6. H3 SUBSECTION MANDATE: Every H2 content section (except the opening intro and the conclusion) MUST have EXACTLY 3 H3 sub-headings in its `subsections` array. Each H3 heading MUST contain several words from {target_keyword} or an LSI keyword naturally.\n"
             f"7. NO COUNTING-LIST HEADINGS (STRICT): NEVER use headings that promise a specific count of items, such as '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...'. "
@@ -924,8 +924,8 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         target_link_2_anchor: Optional[str] = None,
         product_name: Optional[str] = None,
     ) -> str:
-        target_min = 1400 if article_type == "pillar" else 510
-        target_max = 1500 if article_type == "pillar" else 585
+        target_min = 1400 if article_type == "pillar" else 550
+        target_max = 1500 if article_type == "pillar" else 590
         target_range = f"{target_min} – {target_max} kata"
 
         image_rule = "Ensure no [caption] or img tags exist; output clean pure text markdown." if not include_image_placeholder else "Preserve [caption] block intact."
@@ -981,8 +981,11 @@ CALIBRATION REQUIREMENTS (SALNA EDITORIAL & YOAST SOP):
    - NEVER leave bloated, long paragraphs with 5+ sentences.
    - If any paragraph is too long or rambling, PRUNE it down to 3 crisp, tight, punchy sentences.
    - Target ~35 to 45 words per paragraph. Minimalist, direct, and readable without dragging descriptions.
-4. STRICT WORD COUNT: Final text length MUST be between {target_range}.
-   If under 500 words, expand paragraphs with helpful details and actionable real-world tips directly related to '{target_keyword}'.
+4. STRICT WORD COUNT ({target_range}):
+   - Final text length MUST BE between {target_range} (optimal sweet spot: 565–575 words for backlink).
+   - MANDATORY MINIMUM: Must reach AT LEAST 550 words (never output 508 or 514 words).
+   - MANDATORY MAXIMUM: Never exceed 595 words (client strictly forbids 600+ words).
+   - If the current draft is under 550 words, EXPAND the explanation in Section 2 and Section 3 with practical, concrete operational details, examples, and user benefits until it comfortably exceeds 550 words (aim for ~565 words).
 5. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
    Count occurrences of '{target_keyword}'. It MUST appear between 5 and 7 times total across the entire article!
    If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
