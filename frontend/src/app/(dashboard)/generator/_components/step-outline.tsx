@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowUp,
   ArrowDown,
@@ -8,6 +8,8 @@ import {
   Plus,
   ChevronRight,
   ArrowLeft,
+  Timer,
+  Pause,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 
@@ -47,9 +49,24 @@ export function StepOutline({
   const tk = useTokens();
   const [outline, setOutline] = useState<ArticleOutline>(initialOutline);
   const [title, setTitle] = useState(initialOutline.title || "");
+  const [countdown, setCountdown] = useState(3);
+  const [isTimerActive, setIsTimerActive] = useState(true);
+
+  const outlineRef = useRef(outline);
+  outlineRef.current = outline;
+  const titleRef = useRef(title);
+  titleRef.current = title;
+  const onContinueRef = useRef(onContinue);
+  onContinueRef.current = onContinue;
+
+  // Cancel timer whenever user interacts or edits anything
+  const cancelTimer = () => {
+    setIsTimerActive(false);
+  };
 
   // Move Section Up/Down
   const moveSection = (index: number, direction: "up" | "down") => {
+    cancelTimer();
     const newSections = [...outline.sections];
     const targetIdx = direction === "up" ? index - 1 : index + 1;
     if (targetIdx < 0 || targetIdx >= newSections.length) return;
@@ -63,12 +80,14 @@ export function StepOutline({
 
   // Delete Section
   const deleteSection = (index: number) => {
+    cancelTimer();
     const newSections = outline.sections.filter((_, i) => i !== index);
     setOutline({ ...outline, sections: newSections });
   };
 
   // Add New H2 Section
   const addH2Section = () => {
+    cancelTimer();
     const newId = `section-${Date.now()}`;
     const newSec: OutlineSectionItem = {
       id: newId,
@@ -84,6 +103,7 @@ export function StepOutline({
 
   // Update Section Heading
   const updateSectionHeading = (index: number, newHeading: string) => {
+    cancelTimer();
     const newSections = [...outline.sections];
     newSections[index].heading = newHeading;
     setOutline({ ...outline, sections: newSections });
@@ -91,6 +111,7 @@ export function StepOutline({
 
   // Update Section Target Word Count
   const updateSectionWordCount = (index: number, count: number) => {
+    cancelTimer();
     const newSections = [...outline.sections];
     newSections[index].target_word_count = count;
     setOutline({ ...outline, sections: newSections });
@@ -103,6 +124,30 @@ export function StepOutline({
   );
 
   const hasEmptyHeadings = outline.sections.some((s) => !s.heading.trim());
+
+  // 3s Autopilot countdown: Auto-continue if no edits or interactions occur
+  useEffect(() => {
+    if (!isTimerActive || isLoading || hasEmptyHeadings || outline.sections.length === 0) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsTimerActive(false);
+          onContinueRef.current(
+            { ...outlineRef.current, title: titleRef.current },
+            titleRef.current
+          );
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isTimerActive, isLoading, hasEmptyHeadings, outline.sections.length]);
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
@@ -149,7 +194,11 @@ export function StepOutline({
         <input
           type="text"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onFocus={cancelTimer}
+          onChange={(e) => {
+            cancelTimer();
+            setTitle(e.target.value);
+          }}
           className={`w-full t-input border rounded-lg px-4 py-2.5 text-sm font-semibold t-border-focus transition-colors`}
         />
       </div>
@@ -184,6 +233,7 @@ export function StepOutline({
                 <input
                   type="text"
                   value={section.heading}
+                  onFocus={cancelTimer}
                   onChange={(e) => updateSectionHeading(idx, e.target.value)}
                   className={`flex-1 bg-transparent border-b border-transparent focus:border-[#d97757] text-sm font-semibold ${tk.textPrimary} focus:outline-none px-1 py-0.5 transition-colors`}
                 />
@@ -198,6 +248,7 @@ export function StepOutline({
                     max={1500}
                     step={50}
                     value={section.target_word_count}
+                    onFocus={cancelTimer}
                     onChange={(e) => updateSectionWordCount(idx, Number(e.target.value))}
                     className={`w-12 bg-transparent text-right font-medium ${tk.textSecondary} focus:outline-none`}
                   />
@@ -252,11 +303,33 @@ export function StepOutline({
         ))}
       </div>
 
+      {/* Auto-continue notification banner */}
+      {isTimerActive && !isLoading && !hasEmptyHeadings && outline.sections.length > 0 && (
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#d97757]/10 border border-[#d97757]/30 text-xs transition-all">
+          <div className="flex items-center gap-2.5 text-[#d97757]">
+            <Timer className="w-4 h-4 animate-pulse shrink-0" />
+            <span className="font-medium">
+              Melanjutkan otomatis dalam <strong className="font-bold underline">{countdown} detik</strong> jika tidak ada perubahan...
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={cancelTimer}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#d97757]/20 hover:bg-[#d97757]/30 text-[#d97757] font-semibold text-[11px] transition-colors cursor-pointer"
+          >
+            <Pause className="w-3 h-3" /> Jeda / Edit Kerangka
+          </button>
+        </div>
+      )}
+
       {/* Action Footer */}
       <div className="flex items-center justify-between pt-4 border-t t-border">
         <button
           type="button"
-          onClick={onBack}
+          onClick={() => {
+            cancelTimer();
+            onBack();
+          }}
           disabled={isLoading}
           className={`px-3.5 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${tk.outlineBtn}`}
         >
@@ -266,7 +339,10 @@ export function StepOutline({
         <button
           type="button"
           disabled={isLoading || outline.sections.length === 0 || hasEmptyHeadings}
-          onClick={() => onContinue({ ...outline, title }, title)}
+          onClick={() => {
+            cancelTimer();
+            onContinue({ ...outline, title }, title);
+          }}
           className={`t-accent-bg flex items-center gap-2 py-2 px-5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
           title={hasEmptyHeadings ? "Ada judul subheading yang masih kosong" : undefined}
         >
@@ -277,6 +353,11 @@ export function StepOutline({
             </>
           ) : hasEmptyHeadings ? (
             <span>Lengkapi Judul Subheading</span>
+          ) : isTimerActive ? (
+            <>
+              <span>Lanjutkan Penulisan ({countdown}s)</span>
+              <ChevronRight className="w-3.5 h-3.5 animate-pulse" />
+            </>
           ) : (
             <>
               <span>Lanjutkan Penulisan</span>
