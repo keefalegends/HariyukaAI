@@ -55,7 +55,7 @@ async def generate_outline_endpoint(
         "id": article_id,
         "user_id": "default-user",
         "project_id": req.project_id,
-        "title": ensure_keyword_at_start_of_title(req.title or f"{req.target_keyword.title()}: Panduan Lengkap", req.target_keyword),
+        "title": ensure_keyword_at_start_of_title(req.title or f"{req.target_keyword.title()} dan Panduan Lengkapnya", req.target_keyword),
         "target_keyword": req.target_keyword,
         "article_type": req.article_type,
         "secondary_keywords": req.secondary_keywords or [],

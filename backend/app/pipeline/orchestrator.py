@@ -99,7 +99,7 @@ class ArticlePipelineOrchestrator:
         if competitor_content:
             serp_data["competitor_summary"] = competitor_content
 
-        raw_chosen_title = title or serp_data.get("suggested_title") or f"{target_keyword.title()}: Panduan Lengkap"
+        raw_chosen_title = title or serp_data.get("suggested_title") or f"{target_keyword.title()} dan Panduan Lengkapnya"
         final_title = ensure_keyword_at_start_of_title(raw_chosen_title, target_keyword)
 
         await self.emit_event(article_id, "step_complete", {

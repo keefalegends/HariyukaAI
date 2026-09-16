@@ -116,24 +116,59 @@ def sanitize_tutorial_imperatives(text: str) -> str:
 
 def ensure_keyword_at_start_of_title(title: str, target_keyword: str) -> str:
     """
-    Enforces Salna's SOP: The focus keyphrase MUST be at the very front of the title.
-    e.g. 'Cara Memilih Mesin Potong Padi' -> 'Mesin Potong Padi: Cara Memilih dan Panduannya'
-         'Keunggulan Combine Harvester' -> 'Combine Harvester: Keunggulan dan Tips Memilih'
+    Enforces Salna's SOP:
+    1. The focus keyphrase MUST be at the very front of the title.
+    2. NO COLONS (':') anywhere in the title (per Salna's instruction: titles must flow naturally as a single cohesive sentence).
+    e.g. 'Cara Memilih Mesin Potong Padi' -> 'Mesin Potong Padi dan Cara Memilih yang Tepat'
+         'Mesin Potong Padi: Solusi Panen Modern' -> 'Mesin Potong Padi Solusi Panen Modern'
+         'Keunggulan Combine Harvester' -> 'Combine Harvester serta Keunggulan dan Tips Memilih'
     """
     if not title or not target_keyword:
-        return title or ""
+        return (title or "").replace(":", "")
 
-    t_clean = re.sub(r"^[\s#\"']+|[\s#\"']+$", "", title).strip()
     kw_clean = target_keyword.strip()
+    kw_title = kw_clean.title()
 
-    # If already starts with keyword (case-insensitive)
+    # Clean string: strip leading/trailing hashes, quotes, colons, dashes
+    t_clean = re.sub(r"^[\s#\"':–—]+|[\s#\"':–—]+$", "", title).strip()
+
+    # Words that flow naturally when prefixed with 'dan' or 'serta'
+    needs_dan = {"cara", "panduan", "tips", "langkah", "trik", "strategi", "rahasia", "keunggulan", "manfaat", "alasan", "faktor", "spesifikasi"}
+
+    def join_naturally(prefix_kw: str, rest: str) -> str:
+        # Strip any colons or dashes from rest
+        clean_rest = re.sub(r"^[\s:–—]+|[\s:–—]+$", "", rest).strip()
+        # Remove any internal colons
+        clean_rest = re.sub(r"\s*:\s*", " ", clean_rest).strip()
+        if not clean_rest:
+            return prefix_kw
+
+        words = clean_rest.split()
+        first_word = words[0].lower()
+
+        # If already starts with a natural conjunction or preposition
+        if first_word in {"dan", "serta", "untuk", "yang", "dalam", "sebagai", "bagi", "dengan", "tanpa", "agar", "supaya", "menjadi"}:
+            result = f"{prefix_kw} {clean_rest}"
+        elif first_word in needs_dan:
+            # Check if 'dan' already appears very soon (e.g. 'keunggulan dan manfaat') to avoid awkward double 'dan'
+            if len(words) > 2 and "dan" in [w.lower() for w in words[1:3]]:
+                result = f"{prefix_kw} serta {clean_rest}"
+            else:
+                result = f"{prefix_kw} dan {clean_rest}"
+        else:
+            # Direct flow: e.g. 'Mesin Potong Padi Terbaik untuk Usaha', 'Mesin Potong Padi Solusi Panen Cepat'
+            result = f"{prefix_kw} {clean_rest}"
+
+        # Final guarantee: ensure ZERO colons in result
+        result = result.replace(":", "")
+        return re.sub(r"\s+", " ", result).strip()
+
+    # 1. If title already starts with keyword (case-insensitive)
     if t_clean.lower().startswith(kw_clean.lower()):
-        rest = t_clean[len(kw_clean):].lstrip(" :–—-")
-        if rest:
-            return f"{kw_clean.title()}: {rest}"
-        return kw_clean.title()
+        rest = t_clean[len(kw_clean):].strip(" :–—-")
+        return join_naturally(kw_title, rest)
 
-    # If keyword is inside title, extract and reformat to front
+    # 2. If keyword is found inside the title, extract and move to front
     pattern = re.compile(rf'\b({re.escape(kw_clean)})\b', re.IGNORECASE)
     match = pattern.search(t_clean)
     if match:
@@ -141,12 +176,11 @@ def ensure_keyword_at_start_of_title(title: str, target_keyword: str) -> str:
         suffix = t_clean[match.end():].strip(" :–—-")
         remainder = " ".join([p for p in [prefix, suffix] if p]).strip()
         if remainder:
-            return f"{kw_clean.title()}: {remainder}"
-        return f"{kw_clean.title()} untuk Kebutuhan Usaha"
+            return join_naturally(kw_title, remainder)
+        return f"{kw_title} untuk Kebutuhan Usaha"
 
-    # If keyword is completely absent, prepend it cleanly
-    clean_prefix_title = t_clean.lstrip(" :–—-")
-    return f"{kw_clean.title()}: {clean_prefix_title}"
+    # 3. If keyword is completely absent, join cleanly
+    return join_naturally(kw_title, t_clean)
 
 
 def _normalize_url_key(url: str) -> str:
@@ -424,12 +458,12 @@ class AIRouterService:
             "You are an Elite SEO Strategist and Search Intent Classifier for Indonesian/Global SERPs. "
             "Analyze the target keyword and competitive landscape to extract search intent, "
             "crucial semantic entities (LSI), People Also Ask (PAA) questions, and content gaps.\n"
-            "TITLE RULE: The `suggested_title` MUST start with the exact target keyword at the very front "
-            f"(format: '{target_keyword.title()}: [Angle / Benefit]'). NEVER place words before the target keyword. "
-            "The `suggested_title` MUST NOT use counting list formats like '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...', etc. "
-            "These are FORBIDDEN because the writer cannot guarantee the exact count will match. "
-            f"Use descriptive, keyword-fronted titles instead, e.g. '{target_keyword.title()}: Keunggulan dan Panduan Lengkap' or '{target_keyword.title()}: Tips Memilih yang Tepat dan Hemat'.\n"
-            "NO AMPERSANDS / NO WEIRD SYMBOLS: NEVER use '&' (ampersand) in suggested_title or LSI. Always write the full Indonesian word 'dan'. NEVER use '/', '~', '+', '|'."
+            "TITLE RULE (SALNA SEO SOP): The `suggested_title` MUST start with the exact target keyword at the very front "
+            f"as the subject of an engaging, natural, flowing sentence (e.g. '{target_keyword.title()} Terbaik untuk Panen Modern' or '{target_keyword.title()} dan Cara Memilih yang Tepat').\n"
+            "NO COLONS (':') IN TITLES (STRICT): NEVER use a colon (':') in `suggested_title`! Colons are strictly FORBIDDEN because they look artificial and robotic. The title must read as a single cohesive sentence.\n"
+            "NO COUNTING LIST TITLES: The `suggested_title` MUST NOT use counting list formats like '7 Keunggulan...', '5 Tips...', '3 Cara...', '10 Alasan...', etc. "
+            "These are FORBIDDEN because the writer cannot guarantee the exact count will match.\n"
+            "NO AMPERSANDS / NO WEIRD SYMBOLS: NEVER use '&' (ampersand) or ':' (colon) in suggested_title or LSI. Always write the full Indonesian word 'dan'. NEVER use '/', '~', '+', '|'."
         )
 
         user_prompt = f"""
@@ -1071,7 +1105,7 @@ Return the final polished markdown:
         system_prompt = f"""You are a Yoast SEO WordPress Metadata Specialist.
 Generate clean, concise, click-worthy metadata in JSON format:
 {{
-  "seo_title": "Max 60 chars, MUST START with the focus keyphrase '{target_keyword}' at the very front (format: '{target_keyword.title()}: [Angle]'). NEVER USE '&' (always write 'dan'). NO WEIRD SYMBOLS.",
+  "seo_title": "Max 60 chars, MUST START with the focus keyphrase '{target_keyword}' at the very front as a natural flowing sentence without colons. NEVER USE COLONS (':') or '&' (always write 'dan'). NO WEIRD SYMBOLS.",
   "slug": "url-friendly-slug-containing-only-keyphrase",
   "meta_description": "130-155 characters, MUST contain primary keyphrase near the beginning, high CTR appeal without em-dashes. NEVER USE '&' (write 'dan').",
   "tags": "EXACTLY {tag_count} SHORT keyword tags (each tag MUST be only 1 to 3 words max, Indonesian), strictly separated by commas. NO '&' (write 'dan'). NEVER include long sentences or repeat the full article title!"
