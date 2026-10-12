@@ -2,8 +2,6 @@
 
 [![Next.js 14](https://img.shields.io/badge/Next.js-14_App_Router-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Claude 4.6](https://img.shields.io/badge/Writer-Claude_4.6_Opus_Thinking-d97757?style=flat-square)](https://anthropic.com)
-[![Gemini 3.7](https://img.shields.io/badge/SERP_/_Outline-Gemini_3.7_Flash-4285F4?style=flat-square&logo=google)](https://deepmind.google)
 [![ZeroGPT](https://img.shields.io/badge/AI_Detector-0%25_AI_(Human)-emerald?style=flat-square)](https://zerogpt.com)
 [![Yoast SEO](https://img.shields.io/badge/Yoast_WordPress-100%2F100_Score-green?style=flat-square)](https://yoast.com)
 
