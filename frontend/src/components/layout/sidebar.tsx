@@ -208,7 +208,7 @@ export function Sidebar() {
               <div className={`p-3 rounded-xl border space-y-1 ${tk.tagBg}`}>
                 <div className={`text-[10px] font-semibold uppercase tracking-widest ${tk.textFaint}`}>Teknologi</div>
                 <p className={`text-[11px] ${tk.textMuted}`}>
-                  Next.js 14 · FastAPI · Claude 4.6 · Gemini 3.7 · 9Router Proxy · Supabase
+                  Next.js 14 · FastAPI · Antigravity Provider · 9Router Proxy · Supabase
                 </p>
               </div>
 
