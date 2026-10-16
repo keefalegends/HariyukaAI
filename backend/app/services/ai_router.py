@@ -114,6 +114,42 @@ def sanitize_tutorial_imperatives(text: str) -> str:
     return updated
 
 
+def sanitize_narrative_flow(text: str) -> str:
+    """
+    Eliminates robotic template prefixes like 'Langkah 1,', 'Langkah 2,', 'Langkah 3,' or
+    '### Langkah 1:' from headings and paragraph bodies.
+    Enforces Salna's natural editorial narrative flow.
+    e.g. 'Langkah 1, sortir dan bersihkan daun tembakau.' -> 'Sortir dan bersihkan daun tembakau.'
+         '### Langkah 1: Atur Ketebalan Pisau' -> '### Atur Ketebalan Pisau'
+    """
+    if not text:
+        return text
+
+    # 1. Clean headings: ### Langkah \d+[:,\s-]* Judul -> ### Judul
+    def heading_cleaner(match):
+        hashes = match.group(1)
+        rest = match.group(2).strip()
+        cleaned_rest = re.sub(r'^(?:Langkah|Step|Tahap)\s*\d+[:,\s–—-]*', '', rest, flags=re.IGNORECASE).strip()
+        if cleaned_rest:
+            cleaned_rest = cleaned_rest[0].upper() + cleaned_rest[1:]
+        return f"{hashes} {cleaned_rest}"
+
+    cleaned = re.sub(r'^(#{1,3})\s+(.*)$', heading_cleaner, text, flags=re.MULTILINE)
+
+    # 2. Clean paragraph starts: 'Langkah 1, atur...' -> 'Atur...'
+    def paragraph_cleaner(match):
+        prefix = match.group(1) or ""
+        body = match.group(2)
+        cleaned_body = re.sub(r'^(?:Langkah|Step|Tahap)\s*\d+[:,\s–—-]*', '', body, flags=re.IGNORECASE).strip()
+        if cleaned_body:
+            cleaned_body = cleaned_body[0].upper() + cleaned_body[1:]
+        return f"{prefix}{cleaned_body}"
+
+    cleaned = re.sub(r'^(\s*(?:[-*]|\d+\.)\s*)?((?:Langkah|Step|Tahap)\s*\d+[:,\s–—-].*)$', paragraph_cleaner, cleaned, flags=re.MULTILINE | re.IGNORECASE)
+
+    return cleaned
+
+
 def ensure_keyword_at_start_of_title(title: str, target_keyword: str) -> str:
     """
     Enforces Salna's SOP:
@@ -562,17 +598,11 @@ Total: ~570 words (strictly 550–590 words)
             f"   - DILARANG menggunakan kata kerja awalan 'me-' atau kata benda awalan 'pe-' pada instruksi langkah kerja!\n"
             f"   - CONTOH SALAH (DILARANG): 'Memotong Pisang dengan Rapi', 'Pemotongan Bahan', 'Menyiapkan Peralatan', 'Penyiapan Mesin', 'Membersihkan Wadah'.\n"
             f"   - CONTOH BENAR (WAJIB): 'Potonglah Pisang dengan Rapi' / 'Potong Pisang', 'Siapkan Peralatan dan Bahan', 'Nyalakan Mesin', 'Bersihkan Wadah'.\n"
-            f"10. 📋 TUTORIAL STEP NUMBERING MANDATE (PISAH LANGKAH KERJA PER POIN):\n"
-            f"   - When the article covers tutorial, cara, proses, langkah, pembuatan, penggunaan, or panduan kerja:\n"
-            f"   - In Section 2 (Panduan Inti / Langkah Teknis), the 3 H3 subsections MUST be explicitly structured and numbered as sequential steps:\n"
-            f"     * '### Langkah 1: [Kata Kerja Aktif] [Detail]' (contoh: '### Langkah 1: Siapkan Bahan dan Mesin Pemotong')\n"
-            f"     * '### Langkah 2: [Kata Kerja Aktif] [Detail]' (contoh: '### Langkah 2: Atur Kecepatan dan Ketebalan Pisau')\n"
-            f"     * '### Langkah 3: [Kata Kerja Aktif] [Detail]' (contoh: '### Langkah 3: Potonglah Pisang Secara Merata')\n"
-            f"   - JANGAN menggabungkan langkah kerja menjadi satu paragraf umum. Setiap langkah kerja WAJIB dipisah per poin secara tegas."
+            "10. 🌊 NATURAL EDITORIAL NARRATIVE FLOW (DILARANG MENGGUNAKAN 'Langkah 1, 2, 3'):\n"
+            "   - NEVER use robotic template prefixes like 'Langkah 1:', 'Langkah 2:', 'Langkah 3:', 'Step 1', or 'Tahap 1' anywhere in headings or outline text!\n"
+            "   - Every heading and subheading MUST be natural, descriptive, and engaging (e.g. 'Sortir dan Bersihkan Bahan Baku', 'Pengaturan Ketebalan Pisau Perajang', 'Proses Pengeringan yang Merata').\n"
+            "   - Present ideas, techniques, and procedures as a cohesive, professional editorial narrative that flows organically."
         )
-
-        is_tutorial = any(w in (target_keyword + " " + title).lower() for w in ["cara", "tutorial", "langkah", "panduan", "membuat", "memotong", "memasak", "menggunakan", "tips", "resep", "proses", "trik"])
-        tutorial_notice = "\n- ⚡ TUTORIAL DETECTED: Section 2 MUST name its 3 H3 subsections as 'Langkah 1: [Active Verb] ...', 'Langkah 2: ...', 'Langkah 3: ...'!" if is_tutorial else ""
 
         user_prompt = f"""
 Article Title: {title}
@@ -582,7 +612,6 @@ Target Total Words: {exact_target}
 Tone: {tone}
 Product Focus: {product_name or 'None (General SEO)'}
 Brand Voice Instructions: {brand_voice or "Clear, engaging, human-written editorial"}
-{tutorial_notice}
 
 Section Word Allocation Target:
 {section_breakdown}
@@ -711,11 +740,11 @@ Output valid JSON matching this schema exactly:
         if "sections" in data and isinstance(data["sections"], list):
             for sec in data["sections"]:
                 if "heading" in sec and sec["heading"]:
-                    sec["heading"] = sanitize_tutorial_imperatives(sanitize_indonesian_symbols(sec["heading"]))
+                    sec["heading"] = sanitize_narrative_flow(sanitize_tutorial_imperatives(sanitize_indonesian_symbols(sec["heading"])))
                 if "subsections" in sec and isinstance(sec["subsections"], list):
                     for subsec in sec["subsections"]:
                         if "heading" in subsec and subsec["heading"]:
-                            subsec["heading"] = sanitize_tutorial_imperatives(sanitize_indonesian_symbols(subsec["heading"]))
+                            subsec["heading"] = sanitize_narrative_flow(sanitize_tutorial_imperatives(sanitize_indonesian_symbols(subsec["heading"])))
         return data
 
     # --------------------------------------------------------------------------
@@ -875,11 +904,10 @@ Output valid JSON matching this schema exactly:
 4. HEADINGS: ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
 5. WORD COUNT: Target ~{target_word_count} words for this section.
 6. If this is Section 1, mention keyphrase in the very first sentence.
-7. TUTORIAL STEP SEPARATION MANDATE (SALNA SOP):
-   - If this section covers procedural steps or tutorials (how-to, cara, proses, pembuatan, pemotongan, penggunaan):
-   - Separate every single operational step into distinct, sequential points ('Langkah 1: ...', 'Langkah 2: ...', 'Langkah 3: ...').
-   - Each step MUST start with a direct active verb without 'me-' or 'pe-'.
-   - NEVER lump multiple steps into one vague paragraph; separate them clearly into distinct points or H3 subsections.
+7. 🌊 NATURAL EDITORIAL NARRATIVE FLOW (FORBIDDEN: 'Langkah 1, 2, 3'):
+   - DILARANG KERAS menempelkan kata 'Langkah 1,', 'Langkah 2,', 'Langkah 3,', 'Step 1,', 'Tahap 1,' di awal kalimat atau paragraf! Ini membuat artikel terdengar kaku, aneh, dan seperti robot.
+   - Sajikan seluruh penjelasan, tips, dan prosedur secara naratif yang mengalir alami, luwes, dan berbobot sebagai artikel blog profesional.
+   - Gunakan kalimat aktif langsung dengan subjek yang jelas tanpa embel-embel nomor/langkah kaku di awal paragraf.
 """
 
         user_prompt = f"""
@@ -937,6 +965,9 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
 
         # Sanitize any remaining ampersands & unwanted symbols
         raw_output = sanitize_indonesian_symbols(raw_output)
+
+        # Eliminate robotic "Langkah 1," prefixes to ensure natural narrative flow
+        raw_output = sanitize_narrative_flow(raw_output)
 
         return raw_output
 
@@ -1025,6 +1056,9 @@ CALIBRATION REQUIREMENTS (SALNA EDITORIAL & YOAST SOP):
    If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
 6. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
 7. IMAGE RULE: {image_rule}
+8. 🌊 ELIMINATE ROBOTIC 'LANGKAH 1, 2, 3' PREFIXES:
+   - DILARANG membiarkan paragraf yang diawali 'Langkah 1,', 'Langkah 2,', 'Langkah 3,', 'Step 1,', 'Tahap 1,'.
+   - Hapus kata-kata awalan tersebut dan biarkan kalimat mengalir secara naratif yang menyatu, alami, dan profesional.
 {link_rule}
 {humanizer_polish}
 Output only the final polished article in Markdown.
@@ -1059,6 +1093,9 @@ Return the final polished markdown:
 
         # Enforce tutorial active voice imperatives on step headings/lists
         polished = sanitize_tutorial_imperatives(polished)
+
+        # Eliminate robotic "Langkah 1," prefixes to ensure natural narrative flow
+        polished = sanitize_narrative_flow(polished)
 
         # Deterministic link whitelist enforcement (100% foolproof gatekeeper)
         polished = sanitize_article_links(polished, target_link_1_url, target_link_2_url)

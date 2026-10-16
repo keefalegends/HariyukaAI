@@ -12,6 +12,7 @@ from app.services.ai_router import (
     sanitize_article_links,
     sanitize_indonesian_symbols,
     sanitize_tutorial_imperatives,
+    sanitize_narrative_flow,
     ensure_target_links_present,
     ensure_keyword_at_start_of_title,
 )
@@ -270,9 +271,10 @@ class ArticlePipelineOrchestrator:
             product_name=product_name,
         )
 
-        # Extra safety: Ensure 100% strictly whitelisted links, active tutorial imperatives, and zero & symbols
+        # Extra safety: Ensure 100% strictly whitelisted links, active tutorial imperatives, zero & symbols, and natural narrative flow
         polished_markdown = sanitize_indonesian_symbols(polished_markdown)
         polished_markdown = sanitize_tutorial_imperatives(polished_markdown)
+        polished_markdown = sanitize_narrative_flow(polished_markdown)
         polished_markdown = sanitize_article_links(polished_markdown, target_link_1_url, target_link_2_url)
         polished_markdown = ensure_target_links_present(
             content_markdown=polished_markdown,
