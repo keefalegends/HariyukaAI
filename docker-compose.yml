@@ -15,7 +15,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 180M
+          memory: 250M
 
   # ─── NEXT.JS 14 FRONTEND (Standalone Multi-stage) ───
   hariyuka_frontend:
@@ -28,6 +28,7 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - NEXT_PUBLIC_API_URL=https://hariyuka.my.id/api/v1
+      - NODE_OPTIONS=--max-old-space-size=512
     networks:
       - web_proxy
     depends_on:
@@ -35,7 +36,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 180M
+          memory: 600M
 
 networks:
   web_proxy:
