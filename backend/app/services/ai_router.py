@@ -392,18 +392,123 @@ class AIRouterService:
         return m
 
     def _init_client(self):
-        self.base_url = settings.NINEROUTER_BASE_URL.rstrip("/")
-        self.api_key = settings.NINEROUTER_API_KEY
+        # ─── Dual Gateways (API 1 & API 2) ───
+        # API 1 (9Router / Default Proxy)
+        api_1_url = (settings.API_1_BASE_URL or settings.NINEROUTER_BASE_URL or "").rstrip("/")
+        api_1_key = settings.API_1_API_KEY or settings.NINEROUTER_API_KEY or ""
+        self.client_1 = AsyncOpenAI(base_url=api_1_url, api_key=api_1_key) if (api_1_url and api_1_key) else None
+
+        # API 2 (Re:Link Gateway / OpenRouter / Custom Gateway)
+        api_2_url = (settings.API_2_BASE_URL or settings.PRIMARY_AI_BASE_URL or "").rstrip("/")
+        api_2_key = settings.API_2_API_KEY or settings.PRIMARY_AI_API_KEY or ""
+        self.client_2 = AsyncOpenAI(base_url=api_2_url, api_key=api_2_key) if (api_2_url and api_2_key) else None
+
+        # Fallback default client
+        self.client = self.client_1 or self.client_2
+        self.base_url = api_1_url
+        self.api_key = api_1_key
+
+        # ─── Routing Configurations ───
         self.model_serp = settings.MODEL_SERP_EXTRACTOR
         self.model_outline = settings.MODEL_OUTLINE_GENERATOR
-        self.model_writer = self._normalize_model(settings.MODEL_SECTION_WRITER)
-        self.model_seo = self._normalize_model(settings.MODEL_SEO_POLISHER)
+        self.serp_provider = settings.SERP_PROVIDER
+        self.serp_fallback_enabled = settings.SERP_FALLBACK_ENABLED
+        self.serp_fallback_model = settings.SERP_FALLBACK_MODEL
+        self.serp_fallback_provider = settings.SERP_FALLBACK_PROVIDER
 
-        self.client = AsyncOpenAI(
-            base_url=self.base_url,
-            api_key=self.api_key,
+        self.model_writer = settings.MODEL_SECTION_WRITER
+        self.model_seo = settings.MODEL_SEO_POLISHER
+        self.writer_provider = settings.WRITER_PROVIDER
+        self.writer_fallback_enabled = settings.WRITER_FALLBACK_ENABLED
+        self.writer_fallback_model = settings.WRITER_FALLBACK_MODEL
+        self.writer_fallback_provider = settings.WRITER_FALLBACK_PROVIDER
+
+        logger.info(
+            f"Initialized Dual AI Gateways -> API 1: {'Configured' if self.client_1 else 'None'} | "
+            f"API 2: {'Configured' if self.client_2 else 'None'} | "
+            f"SERP: {self.model_serp} ({self.serp_provider}) | "
+            f"Writer: {self.model_writer} ({self.writer_provider})"
         )
-        logger.info(f"Initialized 9Router Client -> Base URL: {self.base_url} | Writer: {self.model_writer}")
+
+    def get_client_for(self, provider: Optional[str], model: str):
+        """
+        Returns (client, provider_label) based on explicit provider setting
+        or automatic heuristic detection.
+        """
+        if provider == "api_2" and self.client_2:
+            return self.client_2, "API 2"
+        if provider == "api_1" and self.client_1:
+            return self.client_1, "API 1"
+
+        # Heuristic detection if provider is not explicitly set:
+        # Models prefixed with 'ag/' belong to 9Router (API 1)
+        if model.startswith("ag/") and self.client_1:
+            return self.client_1, "API 1"
+        if self.client_2:
+            return self.client_2, "API 2"
+        return (self.client_1 or self.client), "API 1"
+
+    async def execute_task(
+        self,
+        messages: List[Dict[str, str]],
+        model: str,
+        provider: Optional[str] = None,
+        fallback_enabled: bool = False,
+        fallback_model: Optional[str] = None,
+        fallback_provider: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        response_format: Optional[Dict[str, str]] = None,
+        stage_name: str = "AI Stage",
+    ) -> str:
+        """
+        Executes a prompt against the assigned provider & model.
+        If fallback_enabled is True and the primary call fails, automatically
+        and seamlessly switches to the designated fallback model & provider.
+        """
+        client, prov_name = self.get_client_for(provider, model)
+        target_model = self._normalize_model(model) if prov_name == "API 1" else model
+
+        try:
+            logger.info(f"[{stage_name}] Calling Main Model '{target_model}' on {prov_name}...")
+            kwargs: Dict[str, Any] = {
+                "model": target_model,
+                "messages": messages,
+                "temperature": temperature,
+            }
+            if max_tokens:
+                kwargs["max_tokens"] = max_tokens
+            if response_format:
+                kwargs["response_format"] = response_format
+
+            response = await client.chat.completions.create(**kwargs)
+            return response.choices[0].message.content or ""
+        except Exception as e:
+            logger.warning(f"[{stage_name}] Main model '{target_model}' on {prov_name} failed: {str(e)}")
+            if not fallback_enabled or not fallback_model:
+                raise e
+
+        # Fallback execution
+        fb_client, fb_prov_name = self.get_client_for(fallback_provider, fallback_model)
+        target_fb_model = self._normalize_model(fallback_model) if fb_prov_name == "API 1" else fallback_model
+        logger.info(f"[{stage_name}] [FALLBACK TRIGGERED] Switching to '{target_fb_model}' on {fb_prov_name}...")
+        try:
+            kwargs = {
+                "model": target_fb_model,
+                "messages": messages,
+                "temperature": temperature,
+            }
+            if max_tokens:
+                kwargs["max_tokens"] = max_tokens
+            if response_format:
+                kwargs["response_format"] = response_format
+
+            response = await fb_client.chat.completions.create(**kwargs)
+            logger.info(f"[{stage_name}] Fallback successfully completed via {fb_prov_name} ({target_fb_model})")
+            return response.choices[0].message.content or ""
+        except Exception as fb_err:
+            logger.error(f"[{stage_name}] Fallback also failed on {fb_prov_name}: {str(fb_err)}")
+            raise fb_err
 
     async def complete(
         self,
@@ -525,11 +630,16 @@ Return a valid JSON object matching this schema exactly:
             {"role": "user", "content": user_prompt},
         ]
 
-        raw = await self.complete(
-            model=self.model_serp,
+        raw = await self.execute_task(
             messages=messages,
+            model=self.model_serp,
+            provider=self.serp_provider,
+            fallback_enabled=self.serp_fallback_enabled,
+            fallback_model=self.serp_fallback_model,
+            fallback_provider=self.serp_fallback_provider,
             temperature=0.3,
             response_format={"type": "json_object"},
+            stage_name="SERP & Intent Analysis",
         )
         data = self.extract_json(raw)
         if "suggested_title" in data and data["suggested_title"]:
@@ -728,11 +838,16 @@ Output valid JSON matching this schema exactly:
             {"role": "user", "content": user_prompt},
         ]
 
-        raw = await self.complete(
-            model=self.model_outline,
+        raw = await self.execute_task(
             messages=messages,
+            model=self.model_outline,
+            provider=self.serp_provider,
+            fallback_enabled=self.serp_fallback_enabled,
+            fallback_model=self.serp_fallback_model,
+            fallback_provider=self.serp_fallback_provider,
             temperature=0.4,
             response_format={"type": "json_object"},
+            stage_name="Outline Generation",
         )
         data = self.extract_json(raw)
         if "title" in data and data["title"]:
@@ -933,10 +1048,15 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
             {"role": "user", "content": user_prompt},
         ]
 
-        raw_output = await self.complete(
-            model=self.model_writer,
+        raw_output = await self.execute_task(
             messages=messages,
+            model=self.model_writer,
+            provider=self.writer_provider,
+            fallback_enabled=self.writer_fallback_enabled,
+            fallback_model=self.writer_fallback_model,
+            fallback_provider=self.writer_fallback_provider,
             temperature=0.42 if humanize_writing else 0.35,
+            stage_name=f"Section {section_index}/{total_sections} Writer",
         )
 
         # Post-clean any remaining em-dashes
@@ -1078,10 +1198,15 @@ Return the final polished markdown:
             {"role": "user", "content": user_prompt},
         ]
 
-        polished = await self.complete(
-            model=self.model_seo,
+        polished = await self.execute_task(
             messages=messages,
+            model=self.model_seo,
+            provider=self.writer_provider,
+            fallback_enabled=self.writer_fallback_enabled,
+            fallback_model=self.writer_fallback_model,
+            fallback_provider=self.writer_fallback_provider,
             temperature=0.30 if humanize_writing else 0.20,
+            stage_name="SEO Polish & Sanitizer",
         )
 
         # Final pass: Strip any lingering em-dashes
@@ -1156,14 +1281,19 @@ Content Sample:
 Generate the JSON metadata:
 """
         try:
-            raw = await self.complete(
-                model=self.model_outline,
+            raw = await self.execute_task(
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
+                model=self.model_outline,
+                provider=self.serp_provider,
+                fallback_enabled=self.serp_fallback_enabled,
+                fallback_model=self.serp_fallback_model,
+                fallback_provider=self.serp_fallback_provider,
                 temperature=0.3,
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
+                stage_name="Yoast Metadata Generation",
             )
             data = self.extract_json(raw)
             raw_tags = data.get("tags")

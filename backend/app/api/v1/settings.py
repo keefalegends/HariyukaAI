@@ -21,10 +21,30 @@ class TestConnectionRequest(BaseModel):
 
 
 class SaveSettingsRequest(BaseModel):
+    # API 1
+    api_1_base_url: Optional[str] = None
+    api_1_api_key: Optional[str] = None
+    # API 2
+    api_2_base_url: Optional[str] = None
+    api_2_api_key: Optional[str] = None
+
+    # Pipeline Model 1: SERP & Outline
+    model_serp: Optional[str] = None
+    serp_provider: Optional[str] = "api_1"
+    serp_fallback_enabled: Optional[bool] = False
+    serp_fallback_model: Optional[str] = None
+    serp_fallback_provider: Optional[str] = "api_2"
+
+    # Pipeline Model 2: Section Writer & SEO Polish
+    model_writer: Optional[str] = None
+    writer_provider: Optional[str] = "api_2"
+    writer_fallback_enabled: Optional[bool] = False
+    writer_fallback_model: Optional[str] = None
+    writer_fallback_provider: Optional[str] = "api_1"
+
+    # Legacy support
     base_url: Optional[str] = None
     api_key: Optional[str] = None
-    model_serp: Optional[str] = None
-    model_writer: Optional[str] = None
 
 
 @router.post("/test-9router")
@@ -97,13 +117,22 @@ async def test_9router_connection(req: TestConnectionRequest):
             "models": []
         }
     except Exception as e:
-        logger.error(f"Error testing 9Router connection: {e}")
+        logger.error(f"Error testing AI Gateway connection: {e}")
         return {
             "success": False,
             "status_code": 500,
             "error": f"Koneksi gagal: {str(e)}",
             "models": []
         }
+
+
+@router.post("/test-gateway")
+async def test_generic_gateway(req: TestConnectionRequest):
+    """
+    Generic tester for ANY OpenAI-compatible Gateway (Re:Link, OpenRouter, LiteLLM, 9Router, etc.).
+    Validates API key and returns available models list.
+    """
+    return await test_9router_connection(req)
 
 
 @router.get("/models")
@@ -123,44 +152,64 @@ async def fetch_available_models():
 @router.post("/save")
 async def save_settings(req: SaveSettingsRequest):
     """
-    Save active model routing and API configurations.
+    Save active dual-gateway credentials and per-box routing & fallback configurations.
     """
-    if req.base_url:
-        settings.NINEROUTER_BASE_URL = req.base_url
-    if req.api_key:
-        settings.NINEROUTER_API_KEY = req.api_key
+    # 1. API 1
+    api_1_url = req.api_1_base_url or req.base_url
+    if api_1_url is not None:
+        settings.API_1_BASE_URL = api_1_url.strip()
+        settings.NINEROUTER_BASE_URL = api_1_url.strip()
+    api_1_key = req.api_1_api_key or req.api_key
+    if api_1_key is not None and api_1_key.strip():
+        settings.API_1_API_KEY = api_1_key.strip()
+        settings.NINEROUTER_API_KEY = api_1_key.strip()
+
+    # 2. API 2
+    if req.api_2_base_url is not None:
+        settings.API_2_BASE_URL = req.api_2_base_url.strip() or None
+        settings.PRIMARY_AI_BASE_URL = settings.API_2_BASE_URL
+    if req.api_2_api_key is not None and req.api_2_api_key.strip():
+        settings.API_2_API_KEY = req.api_2_api_key.strip() or None
+        settings.PRIMARY_AI_API_KEY = settings.API_2_API_KEY
+
+    # 3. Box 1: SERP & Outline
     if req.model_serp:
-        settings.MODEL_SERP_EXTRACTOR = req.model_serp
-        settings.MODEL_OUTLINE_GENERATOR = req.model_serp
+        settings.MODEL_SERP_EXTRACTOR = req.model_serp.strip()
+        settings.MODEL_OUTLINE_GENERATOR = req.model_serp.strip()
+    if req.serp_provider:
+        settings.SERP_PROVIDER = req.serp_provider
+    if req.serp_fallback_enabled is not None:
+        settings.SERP_FALLBACK_ENABLED = req.serp_fallback_enabled
+    if req.serp_fallback_model is not None:
+        settings.SERP_FALLBACK_MODEL = req.serp_fallback_model.strip() or None
+    if req.serp_fallback_provider:
+        settings.SERP_FALLBACK_PROVIDER = req.serp_fallback_provider
+
+    # 4. Box 2: Section Writer & SEO Polish
     if req.model_writer:
-        settings.MODEL_SECTION_WRITER = req.model_writer
-        settings.MODEL_SEO_POLISHER = req.model_writer
+        settings.MODEL_SECTION_WRITER = req.model_writer.strip()
+        settings.MODEL_SEO_POLISHER = req.model_writer.strip()
+    if req.writer_provider:
+        settings.WRITER_PROVIDER = req.writer_provider
+    if req.writer_fallback_enabled is not None:
+        settings.WRITER_FALLBACK_ENABLED = req.writer_fallback_enabled
+    if req.writer_fallback_model is not None:
+        settings.WRITER_FALLBACK_MODEL = req.writer_fallback_model.strip() or None
+    if req.writer_fallback_provider:
+        settings.WRITER_FALLBACK_PROVIDER = req.writer_fallback_provider
 
     # Re-initialize AI Router singleton client
     from app.services.ai_router import ai_router
-    if req.model_writer:
-        norm_writer = ai_router._normalize_model(req.model_writer)
-        settings.MODEL_SECTION_WRITER = norm_writer
-        settings.MODEL_SEO_POLISHER = norm_writer
-
-    ai_router.base_url = settings.NINEROUTER_BASE_URL
-    ai_router.api_key = settings.NINEROUTER_API_KEY
-    ai_router.model_serp = settings.MODEL_SERP_EXTRACTOR
-    ai_router.model_outline = settings.MODEL_OUTLINE_GENERATOR
-    ai_router.model_writer = ai_router._normalize_model(settings.MODEL_SECTION_WRITER)
-    ai_router.model_seo = ai_router._normalize_model(settings.MODEL_SEO_POLISHER)
-    ai_router.client = AsyncOpenAI(
-        base_url=settings.NINEROUTER_BASE_URL,
-        api_key=settings.NINEROUTER_API_KEY
-    )
+    ai_router._init_client()
 
     return {
         "success": True,
-        "message": "Pengaturan model dan gateway berhasil disimpan!",
+        "message": "Pengaturan model dan dual gateway berhasil disimpan!",
         "current_config": {
-            "base_url": settings.NINEROUTER_BASE_URL,
+            "api_1_base_url": settings.API_1_BASE_URL,
+            "api_2_base_url": settings.API_2_BASE_URL,
             "serp_model": settings.MODEL_SERP_EXTRACTOR,
-            "writer_model": settings.MODEL_SECTION_WRITER
+            "writer_model": settings.MODEL_SECTION_WRITER,
         }
     }
 
@@ -168,12 +217,29 @@ async def save_settings(req: SaveSettingsRequest):
 @router.get("/current")
 async def get_current_settings():
     """Get currently active settings from environment/memory."""
-    from app.services.ai_router import ai_router
     return {
-        "base_url": settings.NINEROUTER_BASE_URL,
-        "api_key_set": bool(settings.NINEROUTER_API_KEY and settings.NINEROUTER_API_KEY != "your_9router_api_key_here"),
+        # API 1
+        "api_1_base_url": settings.API_1_BASE_URL or settings.NINEROUTER_BASE_URL or "",
+        "api_1_api_key_set": bool(settings.API_1_API_KEY and settings.API_1_API_KEY != "your_api_1_key_here"),
+        "base_url": settings.API_1_BASE_URL or settings.NINEROUTER_BASE_URL or "",
+
+        # API 2
+        "api_2_base_url": settings.API_2_BASE_URL or settings.PRIMARY_AI_BASE_URL or "",
+        "api_2_api_key_set": bool(settings.API_2_API_KEY or settings.PRIMARY_AI_API_KEY),
+
+        # Box 1: SERP & Outline
         "model_serp": settings.MODEL_SERP_EXTRACTOR,
-        "model_writer": ai_router._normalize_model(settings.MODEL_SECTION_WRITER),
+        "serp_provider": settings.SERP_PROVIDER,
+        "serp_fallback_enabled": settings.SERP_FALLBACK_ENABLED,
+        "serp_fallback_model": settings.SERP_FALLBACK_MODEL or "",
+        "serp_fallback_provider": settings.SERP_FALLBACK_PROVIDER or "api_2",
+
+        # Box 2: Section Writer & SEO Polish
+        "model_writer": settings.MODEL_SECTION_WRITER,
+        "writer_provider": settings.WRITER_PROVIDER,
+        "writer_fallback_enabled": settings.WRITER_FALLBACK_ENABLED,
+        "writer_fallback_model": settings.WRITER_FALLBACK_MODEL or "",
+        "writer_fallback_provider": settings.WRITER_FALLBACK_PROVIDER or "api_1",
     }
 
 
