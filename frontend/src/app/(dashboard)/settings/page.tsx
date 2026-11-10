@@ -14,6 +14,8 @@ import {
   Check,
   Zap,
   ShieldAlert,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useTokens } from "@/lib/use-tokens";
 import { getApiUrl } from "@/lib/api-config";
@@ -30,18 +32,20 @@ export default function SettingsPage() {
   // ─── Slot 1: API 1 Gateway (e.g. 9Router) ───
   const [api1BaseUrl, setApi1BaseUrl] = useState("");
   const [api1ApiKey, setApi1ApiKey] = useState("");
+  const [showApi1Key, setShowApi1Key] = useState(false);
   const [isTestingApi1, setIsTestingApi1] = useState(false);
 
   // ─── Slot 2: API 2 Gateway (e.g. Re:Link Gateway / OpenRouter) ───
   const [api2BaseUrl, setApi2BaseUrl] = useState("");
   const [api2ApiKey, setApi2ApiKey] = useState("");
+  const [showApi2Key, setShowApi2Key] = useState(false);
   const [isTestingApi2, setIsTestingApi2] = useState(false);
 
   // ─── Box 1: SERP & Outline Pipeline ───
   const [serpModel, setSerpModel] = useState("ag/gemini-3.7-flash-high");
   const [serpProvider, setSerpProvider] = useState<"api_1" | "api_2">("api_1");
-  const [serpFallbackEnabled, setSerpFallbackEnabled] = useState(false);
-  const [serpFallbackModel, setSerpFallbackModel] = useState("");
+  const [serpFallbackEnabled, setSerpFallbackEnabled] = useState(true);
+  const [serpFallbackModel, setSerpFallbackModel] = useState("gemini-4-argon");
   const [serpFallbackProvider, setSerpFallbackProvider] = useState<"api_1" | "api_2">("api_2");
 
   // ─── Box 2: Section Writer & SEO Polish Pipeline ───
@@ -68,8 +72,17 @@ export default function SettingsPage() {
   } | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // Load active settings from backend
+  // Load active settings from localStorage (immediate) & backend
   useEffect(() => {
+    // 1. Instant load from localStorage to eliminate tab-switch blank state
+    if (typeof window !== "undefined") {
+      const cachedApi1Key = localStorage.getItem("hariyuka_api1_key");
+      const cachedApi2Key = localStorage.getItem("hariyuka_api2_key");
+      if (cachedApi1Key) setApi1ApiKey(cachedApi1Key);
+      if (cachedApi2Key) setApi2ApiKey(cachedApi2Key);
+    }
+
+    // 2. Fetch from backend
     const loadSettings = async () => {
       try {
         const res = await fetch(getApiUrl("/api/v1/settings/current"));
@@ -77,8 +90,21 @@ export default function SettingsPage() {
           const data = await res.json();
           // API 1
           if (data.api_1_base_url) setApi1BaseUrl(data.api_1_base_url);
+          if (data.api_1_api_key) {
+            setApi1ApiKey(data.api_1_api_key);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("hariyuka_api1_key", data.api_1_api_key);
+            }
+          }
+
           // API 2
           if (data.api_2_base_url) setApi2BaseUrl(data.api_2_base_url);
+          if (data.api_2_api_key) {
+            setApi2ApiKey(data.api_2_api_key);
+            if (typeof window !== "undefined") {
+              localStorage.setItem("hariyuka_api2_key", data.api_2_api_key);
+            }
+          }
 
           // Box 1 (SERP)
           if (data.model_serp) setSerpModel(data.model_serp);
@@ -213,8 +239,14 @@ export default function SettingsPage() {
     setIsTestingApi2(false);
   };
 
-  // 3. Save Settings
+  // 3. Save Settings & Cache Locally
   const handleSave = async () => {
+    // Update local storage cache immediately
+    if (typeof window !== "undefined") {
+      if (api1ApiKey.trim()) localStorage.setItem("hariyuka_api1_key", api1ApiKey.trim());
+      if (api2ApiKey.trim()) localStorage.setItem("hariyuka_api2_key", api2ApiKey.trim());
+    }
+
     try {
       await fetch(getApiUrl("/api/v1/settings/save"), {
         method: "POST",
@@ -336,7 +368,7 @@ export default function SettingsPage() {
                   type="text"
                   value={api1BaseUrl}
                   onChange={(e) => setApi1BaseUrl(e.target.value)}
-                  placeholder="http://host:20128/v1"
+                  placeholder="http://localhost:20128/v1"
                   className={`w-full t-input border rounded-lg pl-8 pr-3 py-1.5 text-xs font-mono t-border-focus`}
                 />
               </div>
@@ -349,12 +381,19 @@ export default function SettingsPage() {
               <div className="relative">
                 <Key className={`w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 ${tk.textFaint}`} />
                 <input
-                  type="password"
+                  type={showApi1Key ? "text" : "password"}
                   value={api1ApiKey}
                   onChange={(e) => setApi1ApiKey(e.target.value)}
                   placeholder="sk-..."
-                  className={`w-full t-input border rounded-lg pl-8 pr-3 py-1.5 text-xs font-mono t-border-focus`}
+                  className={`w-full t-input border rounded-lg pl-8 pr-9 py-1.5 text-xs font-mono t-border-focus`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowApi1Key(!showApi1Key)}
+                  className={`absolute right-2.5 top-1/2 -translate-y-1/2 ${tk.textFaint} hover:text-stone-300`}
+                >
+                  {showApi1Key ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
               </div>
             </div>
           </div>
@@ -395,7 +434,7 @@ export default function SettingsPage() {
                   type="text"
                   value={api2BaseUrl}
                   onChange={(e) => setApi2BaseUrl(e.target.value)}
-                  placeholder="https://api.relink-gateway.biz.id/v1"
+                  placeholder="https://api.your-gateway.com/v1"
                   className={`w-full t-input border rounded-lg pl-8 pr-3 py-1.5 text-xs font-mono t-border-focus`}
                 />
               </div>
@@ -408,12 +447,19 @@ export default function SettingsPage() {
               <div className="relative">
                 <Key className={`w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 ${tk.textFaint}`} />
                 <input
-                  type="password"
+                  type={showApi2Key ? "text" : "password"}
                   value={api2ApiKey}
                   onChange={(e) => setApi2ApiKey(e.target.value)}
                   placeholder="sk-..."
-                  className={`w-full t-input border rounded-lg pl-8 pr-3 py-1.5 text-xs font-mono t-border-focus`}
+                  className={`w-full t-input border rounded-lg pl-8 pr-9 py-1.5 text-xs font-mono t-border-focus`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowApi2Key(!showApi2Key)}
+                  className={`absolute right-2.5 top-1/2 -translate-y-1/2 ${tk.textFaint} hover:text-stone-300`}
+                >
+                  {showApi2Key ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
               </div>
             </div>
           </div>
@@ -455,7 +501,7 @@ export default function SettingsPage() {
                 type="text"
                 value={serpModel}
                 onChange={(e) => setSerpModel(e.target.value)}
-                placeholder="misal: ag/gemini-3.7-flash-high"
+                placeholder="misal: ag/gemini-2.5-flash atau gemini-4-argon"
                 className={`w-full t-input border rounded-lg px-3 py-1.5 text-xs font-mono t-border-focus`}
               />
               <p className={`text-[11px] mt-1 ${tk.textMuted}`}>

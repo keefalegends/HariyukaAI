@@ -17,9 +17,9 @@ class Settings(BaseSettings):
     # ─── Dual AI API Gateways ───
     # API 1 Gateway (e.g. 9Router Proxy or any OpenAI-compatible gateway)
     API_1_BASE_URL: str = "http://localhost:20128/v1"
-    API_1_API_KEY: str = "your_9router_api_key_here"
+    API_1_API_KEY: str = "your_api_1_key_here"
     NINEROUTER_BASE_URL: str = "http://localhost:20128/v1"
-    NINEROUTER_API_KEY: str = "your_9router_api_key_here"
+    NINEROUTER_API_KEY: str = "your_api_1_key_here"
 
     # API 2 Gateway (e.g. Re:Link Gateway / OpenRouter / custom gateway)
     API_2_BASE_URL: Optional[str] = None
@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     MODEL_SERP_EXTRACTOR: str = "ag/gemini-3.7-flash-high"
     MODEL_OUTLINE_GENERATOR: str = "ag/gemini-3.7-flash-high"
     SERP_PROVIDER: str = "api_1"
-    SERP_FALLBACK_ENABLED: bool = False
-    SERP_FALLBACK_MODEL: Optional[str] = None
+    SERP_FALLBACK_ENABLED: bool = True
+    SERP_FALLBACK_MODEL: Optional[str] = "gemini-4-argon"
     SERP_FALLBACK_PROVIDER: Optional[str] = "api_2"
 
     # 2. Section Writer & SEO Polish
