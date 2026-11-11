@@ -1194,6 +1194,12 @@ Output valid JSON matching this schema exactly:
 8. OUTPUT FORMAT: Output clean Markdown prose only (no code fences, no preamble/closing meta remarks).
 """
 
+        brand_voice_block = (
+            f"\n- BRAND VOICE GUIDELINE (FOLLOW TONE): {brand_voice.strip()}"
+            if brand_voice and brand_voice.strip()
+            else ""
+        )
+
         user_prompt = f"""
 Article Title: {article_title}
 Target Primary Keyword: "{target_keyword}"
@@ -1205,7 +1211,7 @@ Currently Writing Section:
 - Key Points to Cover:
 {chr(10).join(f"  * {pt}" for pt in key_points)}
 {subsections_block}
-Special Section Requirements:{link_instructions}{product_instruction}{image_instruction}
+Special Section Requirements:{link_instructions}{product_instruction}{image_instruction}{brand_voice_block}
 
 Context from Previous Sections:
 {previous_sections_summary or "Opening section."}

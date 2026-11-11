@@ -52,12 +52,19 @@ async def generate_outline_endpoint(
     job_id = str(uuid.uuid4())
 
     creator_account = req.created_by.strip() if req.created_by and req.created_by.strip() else "default-user"
+    project_obj = storage.projects.get(req.project_id) if req.project_id else None
+    resolved_project_name = project_obj.get("name") if project_obj else None
+    req_bv = req.brand_voice_instructions.strip() if req.brand_voice_instructions and req.brand_voice_instructions.strip() else None
+    proj_bv = project_obj.get("brand_voice_instructions") if project_obj else None
+    resolved_brand_voice = req_bv or (proj_bv.strip() if isinstance(proj_bv, str) and proj_bv.strip() else None)
 
     article_record = {
         "id": article_id,
         "user_id": creator_account,
         "created_by": creator_account,
         "project_id": req.project_id,
+        "project_name": resolved_project_name,
+        "brand_voice_instructions": resolved_brand_voice,
         "title": ensure_keyword_at_start_of_title(req.title or f"{req.target_keyword.title()} dan Panduan Lengkapnya", req.target_keyword),
         "target_keyword": req.target_keyword,
         "article_type": req.article_type,
@@ -112,7 +119,7 @@ async def generate_outline_endpoint(
                 language=req.language,
                 tone=req.tone,
                 target_length=req.target_length,
-                brand_voice=req.brand_voice_instructions,
+                brand_voice=resolved_brand_voice,
                 competitor_urls=req.competitor_urls,
                 product_name=req.product_name
             )
@@ -193,6 +200,14 @@ async def continue_writing_endpoint(
     art_type = req.article_type or article.get("article_type", "backlink_article")
     include_image = req.include_image_placeholder if req.include_image_placeholder is not None else article.get("include_image_placeholder", False)
     humanize = req.humanize_writing if req.humanize_writing is not None else article.get("humanize_writing", True)
+    proj_fallback_bv = (
+        storage.projects.get(article["project_id"], {}).get("brand_voice_instructions")
+        if article.get("project_id")
+        else None
+    )
+    resolved_brand_voice = req.brand_voice_instructions or article.get("brand_voice_instructions") or proj_fallback_bv
+    if req.brand_voice_instructions is not None:
+        article["brand_voice_instructions"] = req.brand_voice_instructions
 
     storage.save_articles()
 
@@ -205,7 +220,7 @@ async def continue_writing_endpoint(
                 outline=req.outline.model_dump(),
                 article_type=art_type,
                 tone=req.tone or article["tone"],
-                brand_voice=req.brand_voice_instructions or article.get("brand_voice_instructions"),
+                brand_voice=resolved_brand_voice,
                 secondary_keywords=article.get("secondary_keywords", []),
                 humanize_writing=humanize,
                 include_image_placeholder=include_image,

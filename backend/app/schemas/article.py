@@ -99,6 +99,8 @@ class ArticleResponse(BaseModel):
     user_id: Optional[str] = None
     created_by: Optional[str] = None
     project_id: Optional[str] = None
+    project_name: Optional[str] = None
+    brand_voice_instructions: Optional[str] = None
     title: str
     target_keyword: str
     article_type: Optional[str] = "backlink_article"

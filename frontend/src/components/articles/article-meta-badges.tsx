@@ -1,6 +1,6 @@
 "use client";
 
-import { Layers, ShoppingBag, FileText, User } from "lucide-react";
+import { Layers, ShoppingBag, FileText, User, FolderKanban } from "lucide-react";
 
 const ARTICLE_TYPE_META: Record<
   string,
@@ -38,12 +38,14 @@ interface ArticleMetaBadgesProps {
   articleType?: string | null;
   createdBy?: string | null;
   userId?: string | null;
+  projectName?: string | null;
 }
 
 export function ArticleMetaBadges({
   articleType,
   createdBy,
   userId,
+  projectName,
 }: ArticleMetaBadgesProps) {
   const typeConfig =
     ARTICLE_TYPE_META[articleType || "backlink_article"] || ARTICLE_TYPE_META.backlink_article;
@@ -73,6 +75,16 @@ export function ArticleMetaBadges({
         <User className="w-3 h-3" />
         <span>@{author}</span>
       </span>
+
+      {projectName && (
+        <span
+          className="px-2 py-0.5 rounded-md border t-border t-bg-tag text-[11px] font-medium text-[var(--text-muted)] inline-flex items-center gap-1"
+          title={`Proyek Website: ${projectName}`}
+        >
+          <FolderKanban className="w-3 h-3 text-[#d97757]" />
+          <span>{projectName}</span>
+        </span>
+      )}
     </>
   );
 }

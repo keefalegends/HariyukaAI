@@ -37,6 +37,8 @@ interface ArticleItem {
   id: string;
   user_id?: string;
   created_by?: string;
+  project_id?: string;
+  project_name?: string;
   article_type?: string;
   title: string;
   target_keyword?: string;
@@ -233,6 +235,7 @@ export default function CopilotHubPage() {
                       articleType={article.article_type}
                       createdBy={article.created_by}
                       userId={article.user_id}
+                      projectName={article.project_name}
                     />
 
                     {/* Word Count Badge */}

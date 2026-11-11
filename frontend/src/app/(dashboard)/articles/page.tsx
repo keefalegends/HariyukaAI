@@ -26,6 +26,8 @@ interface ArticleItem {
   id: string;
   user_id?: string;
   created_by?: string;
+  project_id?: string;
+  project_name?: string;
   title: string;
   target_keyword: string;
   article_type?: string;
@@ -327,6 +329,7 @@ export default function ArticlesPage() {
                     articleType={art.article_type}
                     createdBy={art.created_by}
                     userId={art.user_id}
+                    projectName={art.project_name}
                   />
 
                   <span className={`px-2 py-0.5 rounded-md border t-border t-bg-tag text-[11px] font-mono ${tk.textMuted}`}>

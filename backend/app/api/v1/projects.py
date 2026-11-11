@@ -19,6 +19,13 @@ class ProjectCreateRequest(BaseModel):
     default_language: str = "id"
 
 
+class ProjectUpdateRequest(BaseModel):
+    name: Optional[str] = Field(None, min_length=2)
+    target_domain: Optional[str] = None
+    brand_voice_instructions: Optional[str] = None
+    default_language: Optional[str] = None
+
+
 class ProjectResponse(BaseModel):
     id: str
     name: str
@@ -57,6 +64,36 @@ async def get_project(project_id: str):
     if project_id not in storage.projects:
         raise HTTPException(status_code=404, detail="Proyek tidak ditemukan")
     return storage.projects[project_id]
+
+
+@router.put("/{project_id}", response_model=ProjectResponse)
+async def update_project(project_id: str, req: ProjectUpdateRequest):
+    if project_id not in storage.projects:
+        raise HTTPException(status_code=404, detail="Proyek tidak ditemukan")
+
+    project = storage.projects[project_id]
+    update_data = req.model_dump(exclude_unset=True)
+
+    if "name" in update_data:
+        name = (update_data["name"] or "").strip()
+        if len(name) < 2:
+            raise HTTPException(status_code=400, detail="Nama proyek minimal 2 karakter")
+        project["name"] = name
+
+    if "target_domain" in update_data:
+        val = update_data["target_domain"]
+        project["target_domain"] = val.strip() or None if isinstance(val, str) else None
+
+    if "brand_voice_instructions" in update_data:
+        val = update_data["brand_voice_instructions"]
+        project["brand_voice_instructions"] = val.strip() or None if isinstance(val, str) else None
+
+    if "default_language" in update_data and update_data["default_language"]:
+        project["default_language"] = update_data["default_language"]
+
+    project["updated_at"] = datetime.utcnow()
+    storage.save_projects()
+    return project
 
 
 @router.delete("/{project_id}")
