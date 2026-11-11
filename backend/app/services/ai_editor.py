@@ -30,9 +30,10 @@ class AIArticleEditorService:
         Processes a conversational revision instruction on an existing article.
         Returns the modified markdown article and a friendly explanation in Bahasa Indonesia.
         """
-        selected_model = model or "ag/claude-opus-4-6-thinking"
+        selected_model = model or ai_router.model_writer
+        selected_provider = None if model else ai_router.writer_provider
 
-        system_prompt = f"""You are an Expert Indonesian SEO Editor and Copywriting Copilot powered by Claude 4.6 Opus.
+        system_prompt = f"""You are an Expert Indonesian SEO Editor and Copywriting Copilot.
 Your task is to modify the provided article strictly according to the user's instructions while preserving editorial quality and SEO integrity.
 
 CRITICAL EDITING DIRECTIVES:
@@ -90,11 +91,16 @@ Please execute the modification and output the JSON with explanation and modifie
         ]
 
         try:
-            raw = await ai_router.complete(
-                model=selected_model,
+            raw = await ai_router.execute_task(
                 messages=messages,
+                model=selected_model,
+                provider=selected_provider,
+                fallback_enabled=ai_router.writer_fallback_enabled if not model else False,
+                fallback_model=ai_router.writer_fallback_model if not model else None,
+                fallback_provider=ai_router.writer_fallback_provider if not model else None,
                 temperature=0.35,
                 response_format={"type": "json_object"},
+                stage_name="Copilot Article Edit",
             )
             data = ai_router.extract_json(raw)
             modified_markdown = data.get("modified_content_markdown") or current_content_markdown

@@ -273,7 +273,7 @@ class ArticlePipelineOrchestrator:
 
         # Extra safety: Ensure 100% strictly whitelisted links, active tutorial imperatives, zero & symbols, and natural narrative flow
         polished_markdown = sanitize_indonesian_symbols(polished_markdown)
-        polished_markdown = sanitize_tutorial_imperatives(polished_markdown)
+        polished_markdown = sanitize_tutorial_imperatives(polished_markdown, target_keyword=target_keyword)
         polished_markdown = sanitize_narrative_flow(polished_markdown)
         polished_markdown = sanitize_article_links(polished_markdown, target_link_1_url, target_link_2_url)
         polished_markdown = ensure_target_links_present(

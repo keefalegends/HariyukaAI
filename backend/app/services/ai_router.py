@@ -13,6 +13,48 @@ from app.config import settings
 logger = logging.getLogger("hariyuka.ai_router")
 
 
+def _strip_thinking_tags(text: str) -> str:
+    """
+    Removes <think>...</think> and <thinking>...</thinking> blocks emitted by
+    reasoning/thinking models so internal reasoning never leaks into JSON or articles.
+    """
+    if not text:
+        return ""
+    cleaned = re.sub(r"<think>[\s\S]*?</think>", "", text, flags=re.IGNORECASE)
+    cleaned = re.sub(r"<thinking>[\s\S]*?</thinking>", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"^[\s\S]*?</(?:think|thinking)>", "", cleaned, flags=re.IGNORECASE)
+    return cleaned.strip()
+
+
+def _strip_markdown_fences(text: str) -> str:
+    """
+    Unwraps outer ```markdown ... ``` code fences and trims any chatty assistant preamble
+    before the first Markdown heading when models wrap prose in code blocks.
+    """
+    if not text:
+        return ""
+    cleaned = _strip_thinking_tags(text).strip()
+
+    lines = cleaned.splitlines()
+    if len(lines) > 1 and not lines[0].lstrip().startswith(("#", "```")):
+        first_lower = lines[0].strip().lower()
+        preamble_starters = (
+            "berikut", "tentu", "baik,", "baiklah", "oke,", "siap,",
+            "ini dia", "here is", "here's", "sure,", "certainly"
+        )
+        if first_lower.startswith(preamble_starters):
+            for idx, line in enumerate(lines[1:6], start=1):
+                if line.lstrip().startswith(("#", "```")):
+                    cleaned = "\n".join(lines[idx:]).strip()
+                    break
+
+    fence_match = re.match(r"^```(?:markdown|md)?\s*\n([\s\S]*?)\n```\s*$", cleaned, flags=re.IGNORECASE)
+    if fence_match:
+        cleaned = fence_match.group(1).strip()
+
+    return cleaned
+
+
 def sanitize_indonesian_symbols(text: str) -> str:
     """
     Replaces ampersands (&, &amp;) with 'dan' and cleans unwanted symbols
@@ -52,65 +94,75 @@ def sanitize_indonesian_symbols(text: str) -> str:
     return protected
 
 
-def sanitize_tutorial_imperatives(text: str) -> str:
+def sanitize_tutorial_imperatives(text: str, target_keyword: Optional[str] = None) -> str:
     """
     Enforces Salna's Editorial SOP for tutorials/guides:
-    Converts passive/nominalized 'me-' and 'pe-' forms in headings and list steps
-    into direct active imperative forms.
-    e.g. 'Memotong Pisang Dengan Rapi' -> 'Potonglah Pisang Dengan Rapi'
-         'Pembersihan Mesin' -> 'Bersihkan Mesin'
+    Converts passive/nominalized 'me-' and 'pe-' forms ONLY when they appear at the
+    very start of an action heading or list step into direct active imperative forms.
+    e.g. '### Memotong Pisang Dengan Rapi' -> '### Potonglah Pisang Dengan Rapi'
+         '1. Pembersihan Mesin' -> '1. Bersihkan Mesin'
+    Preserves mid-phrase grammar (e.g. 'Panduan Memilih...', 'Cara Membersihkan...')
+    and never mutates an exact target keyphrase.
     """
     if not text:
         return text
 
     replacements = [
-        (r'\bMemotong\b', 'Potonglah'),
-        (r'\bmemotong\b', 'potonglah'),
-        (r'\bPemotongan\b', 'Potonglah'),
-        (r'\bpemotongan\b', 'potonglah'),
-        (r'\bMenyiapkan\b', 'Siapkan'),
-        (r'\bmenyiapkan\b', 'siapkan'),
-        (r'\bPenyiapan\b', 'Siapkan'),
-        (r'\bpenyiapan\b', 'siapkan'),
-        (r'\bMembersihkan\b', 'Bersihkan'),
-        (r'\bmembersihkan\b', 'bersihkan'),
-        (r'\bPembersihan\b', 'Bersihkan'),
-        (r'\bpembersihan\b', 'bersihkan'),
-        (r'\bMenyalakan\b', 'Nyalakan'),
-        (r'\bmenyalakan\b', 'nyalakan'),
-        (r'\bPenyalaan\b', 'Nyalakan'),
-        (r'\bpenyalaan\b', 'nyalakan'),
-        (r'\bMengatur\b', 'Atur'),
-        (r'\bmengatur\b', 'atur'),
-        (r'\bPengaturan\b', 'Atur'),
-        (r'\bpengaturan\b', 'atur'),
-        (r'\bMemeriksa\b', 'Periksa'),
-        (r'\bmemeriksa\b', 'periksa'),
-        (r'\bPemeriksaan\b', 'Periksa'),
-        (r'\bpemeriksaan\b', 'periksa'),
-        (r'\bMemilih\b', 'Pilihlah'),
-        (r'\bmemilih\b', 'pilihlah'),
-        (r'\bMemasukkan\b', 'Masukkan'),
-        (r'\bmemasukkan\b', 'masukkan'),
-        (r'\bPemasukan\b', 'Masukkan'),
-        (r'\bpemasukan\b', 'masukkan'),
-        (r'\bMenyimpan\b', 'Simpan'),
-        (r'\bmenyimpan\b', 'simpan'),
-        (r'\bPenyimpanan\b', 'Simpan'),
-        (r'\bpenyimpanan\b', 'simpan'),
-        (r'\bMengoleskan\b', 'Oleskan'),
-        (r'\bmengoleskan\b', 'oleskan'),
+        ("Memotong", "Potonglah"),
+        ("memotong", "potonglah"),
+        ("Pemotongan", "Potonglah"),
+        ("pemotongan", "potonglah"),
+        ("Menyiapkan", "Siapkan"),
+        ("menyiapkan", "siapkan"),
+        ("Penyiapan", "Siapkan"),
+        ("penyiapan", "siapkan"),
+        ("Membersihkan", "Bersihkan"),
+        ("membersihkan", "bersihkan"),
+        ("Pembersihan", "Bersihkan"),
+        ("pembersihan", "bersihkan"),
+        ("Menyalakan", "Nyalakan"),
+        ("menyalakan", "nyalakan"),
+        ("Penyalaan", "Nyalakan"),
+        ("penyalaan", "nyalakan"),
+        ("Mengatur", "Atur"),
+        ("mengatur", "atur"),
+        ("Pengaturan", "Atur"),
+        ("pengaturan", "atur"),
+        ("Memeriksa", "Periksa"),
+        ("memeriksa", "periksa"),
+        ("Pemeriksaan", "Periksa"),
+        ("pemeriksaan", "periksa"),
+        ("Memilih", "Pilihlah"),
+        ("memilih", "pilihlah"),
+        ("Memasukkan", "Masukkan"),
+        ("memasukkan", "masukkan"),
+        ("Pemasukan", "Masukkan"),
+        ("pemasukan", "masukkan"),
+        ("Menyimpan", "Simpan"),
+        ("menyimpan", "simpan"),
+        ("Penyimpanan", "Simpan"),
+        ("penyimpanan", "simpan"),
+        ("Mengoleskan", "Oleskan"),
+        ("mengoleskan", "oleskan"),
     ]
+
+    kw_lower = (target_keyword or "").strip().lower()
 
     def line_converter(match):
         prefix = match.group(1)
         body = match.group(2)
-        for pattern, repl in replacements:
-            body = re.sub(pattern, repl, body, count=1)
+        if kw_lower and body.strip().lower().startswith(kw_lower):
+            return f"{prefix}{body}"
+
+        for word, repl in replacements:
+            pattern = rf"^(\*{{0,2}}){word}\b"
+            if re.match(pattern, body):
+                body = re.sub(pattern, rf"\1{repl}", body, count=1)
+                break
         return f"{prefix}{body}"
 
-    # Apply to Headings (##, ###) and List Items (1., 2., -, *)
-    updated = re.sub(r'^(#{1,3}\s+|\d+\.\s+|[-*]\s+)(.*)$', line_converter, text, flags=re.MULTILINE)
+    # Apply strictly to H2/H3 step headings and List Items (1., 2., -, *)
+    updated = re.sub(r"^(#{2,3}\s+|\d+\.\s+|[-*]\s+)(.*)$", line_converter, text, flags=re.MULTILINE)
     return updated
 
 
@@ -448,6 +500,58 @@ class AIRouterService:
             return self.client_2, "API 2"
         return (self.client_1 or self.client), "API 1"
 
+    async def _call_chat_completion(
+        self,
+        client: AsyncOpenAI,
+        model: str,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        response_format: Optional[Dict[str, str]] = None,
+    ) -> str:
+        """
+        Executes chat completion against a client and strips <think> blocks.
+        Automatically retries without response_format (or temperature) if a gateway/model
+        rejects optional parameters with a 400 unsupported-parameter error.
+        """
+        kwargs: Dict[str, Any] = {
+            "model": model,
+            "messages": messages,
+            "temperature": temperature,
+        }
+        if max_tokens:
+            kwargs["max_tokens"] = max_tokens
+        if response_format:
+            kwargs["response_format"] = response_format
+
+        try:
+            response = await client.chat.completions.create(**kwargs)
+            return _strip_thinking_tags(response.choices[0].message.content or "")
+        except Exception as err:
+            err_lower = str(err).lower()
+            is_param_error = any(
+                kw in err_lower
+                for kw in ("response_format", "json_object", "temperature", "unsupported value", "unsupported parameter")
+            )
+            if not is_param_error:
+                raise err
+
+            retry_kwargs = dict(kwargs)
+            changed = False
+            if response_format and any(k in err_lower for k in ("response_format", "json_object", "unsupported")):
+                retry_kwargs.pop("response_format", None)
+                changed = True
+            if "temperature" in err_lower:
+                retry_kwargs.pop("temperature", None)
+                changed = True
+
+            if not changed:
+                raise err
+
+            logger.info(f"[ParamCompat] Retrying model '{model}' without unsupported parameter...")
+            response = await client.chat.completions.create(**retry_kwargs)
+            return _strip_thinking_tags(response.choices[0].message.content or "")
+
     async def execute_task(
         self,
         messages: List[Dict[str, str]],
@@ -471,18 +575,14 @@ class AIRouterService:
 
         try:
             logger.info(f"[{stage_name}] Calling Main Model '{target_model}' on {prov_name}...")
-            kwargs: Dict[str, Any] = {
-                "model": target_model,
-                "messages": messages,
-                "temperature": temperature,
-            }
-            if max_tokens:
-                kwargs["max_tokens"] = max_tokens
-            if response_format:
-                kwargs["response_format"] = response_format
-
-            response = await client.chat.completions.create(**kwargs)
-            return response.choices[0].message.content or ""
+            return await self._call_chat_completion(
+                client=client,
+                model=target_model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                response_format=response_format,
+            )
         except Exception as e:
             logger.warning(f"[{stage_name}] Main model '{target_model}' on {prov_name} failed: {str(e)}")
             if not fallback_enabled or not fallback_model:
@@ -493,19 +593,16 @@ class AIRouterService:
         target_fb_model = self._normalize_model(fallback_model) if fb_prov_name == "API 1" else fallback_model
         logger.info(f"[{stage_name}] [FALLBACK TRIGGERED] Switching to '{target_fb_model}' on {fb_prov_name}...")
         try:
-            kwargs = {
-                "model": target_fb_model,
-                "messages": messages,
-                "temperature": temperature,
-            }
-            if max_tokens:
-                kwargs["max_tokens"] = max_tokens
-            if response_format:
-                kwargs["response_format"] = response_format
-
-            response = await fb_client.chat.completions.create(**kwargs)
+            result = await self._call_chat_completion(
+                client=fb_client,
+                model=target_fb_model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                response_format=response_format,
+            )
             logger.info(f"[{stage_name}] Fallback successfully completed via {fb_prov_name} ({target_fb_model})")
-            return response.choices[0].message.content or ""
+            return result
         except Exception as fb_err:
             logger.error(f"[{stage_name}] Fallback also failed on {fb_prov_name}: {str(fb_err)}")
             raise fb_err
@@ -518,22 +615,19 @@ class AIRouterService:
         max_tokens: Optional[int] = None,
         response_format: Optional[Dict[str, str]] = None,
     ) -> str:
-        model = self._normalize_model(model)
+        client, prov_name = self.get_client_for(None, model)
+        target_model = self._normalize_model(model) if prov_name == "API 1" else model
         try:
-            kwargs: Dict[str, Any] = {
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-            }
-            if max_tokens:
-                kwargs["max_tokens"] = max_tokens
-            if response_format:
-                kwargs["response_format"] = response_format
-
-            response = await self.client.chat.completions.create(**kwargs)
-            return response.choices[0].message.content or ""
+            return await self._call_chat_completion(
+                client=client,
+                model=target_model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                response_format=response_format,
+            )
         except Exception as e:
-            logger.error(f"[9Router Error] Failed completion for model {model}: {str(e)}")
+            logger.error(f"[Gateway Error] Failed completion for model {target_model} ({prov_name}): {str(e)}")
             raise e
 
     async def stream_completion(
@@ -543,10 +637,11 @@ class AIRouterService:
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
     ) -> AsyncGenerator[str, None]:
-        model = self._normalize_model(model)
+        client, prov_name = self.get_client_for(None, model)
+        target_model = self._normalize_model(model) if prov_name == "API 1" else model
         try:
             kwargs: Dict[str, Any] = {
-                "model": model,
+                "model": target_model,
                 "messages": messages,
                 "temperature": temperature,
                 "stream": True,
@@ -554,19 +649,19 @@ class AIRouterService:
             if max_tokens:
                 kwargs["max_tokens"] = max_tokens
 
-            stream = await self.client.chat.completions.create(**kwargs)
+            stream = await client.chat.completions.create(**kwargs)
             async for chunk in stream:
                 if chunk.choices and len(chunk.choices) > 0:
                     delta = chunk.choices[0].delta.content
                     if delta:
                         yield delta
         except Exception as e:
-            logger.error(f"[9Router Stream Error] Model {model}: {str(e)}")
+            logger.error(f"[Gateway Stream Error] Model {target_model} ({prov_name}): {str(e)}")
             raise e
 
     @staticmethod
     def extract_json(raw_text: str) -> Dict[str, Any]:
-        text = raw_text.strip()
+        text = _strip_thinking_tags(raw_text).strip()
         
         # 1. Check for markdown code fences
         match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
@@ -855,15 +950,54 @@ Output valid JSON matching this schema exactly:
         if "sections" in data and isinstance(data["sections"], list):
             for sec in data["sections"]:
                 if "heading" in sec and sec["heading"]:
-                    sec["heading"] = sanitize_narrative_flow(sanitize_tutorial_imperatives(sanitize_indonesian_symbols(sec["heading"])))
+                    sec["heading"] = sanitize_narrative_flow(
+                        sanitize_tutorial_imperatives(sanitize_indonesian_symbols(sec["heading"]), target_keyword=target_keyword)
+                    )
                 if "subsections" in sec and isinstance(sec["subsections"], list):
                     for subsec in sec["subsections"]:
                         if "heading" in subsec and subsec["heading"]:
-                            subsec["heading"] = sanitize_narrative_flow(sanitize_tutorial_imperatives(sanitize_indonesian_symbols(subsec["heading"])))
+                            subsec["heading"] = sanitize_narrative_flow(
+                                sanitize_tutorial_imperatives(sanitize_indonesian_symbols(subsec["heading"]), target_keyword=target_keyword)
+                            )
         return data
 
+    def _post_process_prose(
+        self,
+        text: str,
+        humanize_writing: bool = True,
+        target_keyword: Optional[str] = None,
+    ) -> str:
+        """Shared deterministic editorial and anti-AI sanitization pass for generated Markdown."""
+        cleaned = _strip_markdown_fences(text)
+
+        if humanize_writing:
+            cleaned = cleaned.replace(" — ", ", ").replace("—", ", ")
+            passive_replacements = [
+                ("dapat digunakan", "bisa kamu gunakan"),
+                ("Dapat digunakan", "Bisa kamu gunakan"),
+                ("perlu diperhatikan", "perlu kamu perhatikan"),
+                ("Perlu diperhatikan", "Perlu kamu perhatikan"),
+                ("harus diperhatikan", "harus kamu perhatikan"),
+                ("Harus diperhatikan", "Harus kamu perhatikan"),
+                ("perlu dilakukan", "perlu kamu lakukan"),
+                ("Perlu dilakukan", "Perlu kamu lakukan"),
+                ("harus dipahami", "perlu kamu pahami"),
+                ("Harus dipahami", "Perlu kamu pahami"),
+                ("bisa didapatkan", "bisa kamu dapatkan"),
+                ("Bisa didapatkan", "Bisa kamu dapatkan"),
+                ("sering digunakan", "banyak orang pakai"),
+                ("Sering digunakan", "Banyak orang pakai"),
+            ]
+            for passive, active in passive_replacements:
+                cleaned = cleaned.replace(passive, active)
+
+        cleaned = sanitize_indonesian_symbols(cleaned)
+        cleaned = sanitize_tutorial_imperatives(cleaned, target_keyword=target_keyword)
+        cleaned = sanitize_narrative_flow(cleaned)
+        return cleaned
+
     # --------------------------------------------------------------------------
-    # STEP 3: Multi-Pass Section Writer (Claude 4.6) - Deep Humanizer
+    # STEP 3: Multi-Pass Section Writer (Claude & Multi-Model Compatible)
     # --------------------------------------------------------------------------
     async def write_section(
         self,
@@ -892,6 +1026,8 @@ Output valid JSON matching this schema exactly:
     ) -> str:
         is_first_section = (section_index == 1)
         is_last_section = (section_index == total_sections)
+        has_subsections = bool(subsections_info and len(subsections_info) > 0)
+        heading_prefix = "###" if section_level.lower() == "h3" else "##"
 
         link_instructions = ""
         # MANDATORY: Link 1 appears in section 2 (or section 1 if short 2-section outline)
@@ -938,9 +1074,41 @@ Output valid JSON matching this schema exactly:
         image_instruction = ""
         if include_image_placeholder and (section_index == 2 or (is_first_section and "pengenalan" not in section_heading.lower())):
             image_instruction = f"""
-- WORDPRESS IMAGE EMBED: Right under `{section_level.upper()} {section_heading}`, include:
+- WORDPRESS IMAGE EMBED: Right under `{heading_prefix} {section_heading}`, include:
 [caption id="attachment_8609" align="alignnone" width="885"]<img class="wp-image-8609" src="https://placehold.co/885x590/292524/d97757?text={target_keyword.replace(' ', '+')}" alt="{target_keyword}" width="885" height="590" /> {target_keyword}[/caption]
 """
+
+        # Build explicit H3 subsections block if defined in outline
+        subsections_block = ""
+        if has_subsections:
+            sub_lines = []
+            for s_idx, sub in enumerate(subsections_info, 1):
+                sub_h = (sub.get("heading") or "").strip()
+                sub_words = sub.get("target_word_count") or max(65, target_word_count // max(1, len(subsections_info)))
+                sub_pts = sub.get("key_points") or []
+                sub_kws = sub.get("keywords_to_include") or []
+                pts_rendered = "\n".join(f"     * {pt}" for pt in sub_pts)
+                sub_lines.append(
+                    f"  {s_idx}. `### {sub_h}` (~{sub_words} words, write 2 concise paragraphs)\n"
+                    f"     Keywords: {', '.join(sub_kws) if sub_kws else target_keyword}\n"
+                    f"{pts_rendered}"
+                )
+            subsections_block = (
+                "\n- MANDATORY H3 SUBSECTIONS (YOU MUST INCLUDE ALL OF THESE `###` SUBHEADINGS IN EXACT ORDER):\n"
+                + "\n".join(sub_lines)
+            )
+            intro_paras_note = "2 short opening paragraphs (~30-35 words each)" if target_word_count >= 330 else "1 concise bridging intro paragraph (~35-45 words)"
+            structure_instruction = (
+                f"Write `{heading_prefix} {section_heading}` with {intro_paras_note}, then write ALL {len(subsections_info)} `###` subsections listed below, "
+                f"each containing 2 concise paragraphs (3 crisp sentences per paragraph) so total words for this entire section stay around ~{target_word_count} words."
+            )
+            subheading_rule = (
+                f"3. SUBHEADING STRUCTURE: Under `{heading_prefix} {section_heading}`, write {intro_paras_note}, "
+                f"then under EVERY `###` subsection write 2 concise paragraphs (each strictly 3 sentences)."
+            )
+        else:
+            structure_instruction = "Consisting of 2 tight, concise paragraphs, each strictly 3 sentences. No bloated rambling descriptions!"
+            subheading_rule = "3. SUBHEADING STRUCTURE: Under EVERY H2 and H3 heading, write exactly 2 concise paragraphs (each strictly 3 sentences)."
 
         # Deep Humanizer Rules to bypass AI Detectors (<15% AI Score)
         if humanize_writing:
@@ -984,14 +1152,14 @@ Output valid JSON matching this schema exactly:
    - If you catch yourself writing a passive, REWRITE it in active voice immediately.
 6. TUTORIAL & HOW-TO IMPERATIVE ACTIVE VOICE (SALNA EDITORIAL MANDATE):
    - When writing instructions, tutorials, or procedural steps, ALWAYS use direct imperative active verbs!
-   - STRICTLY AVOID passive/nominalized prefixes 'me-' and 'pe-' in step commands and headings!
+   - STRICTLY AVOID passive/nominalized prefixes 'me-' and 'pe-' in standalone step headings!
    - DILARANG (SALAH): 'Memotong Pisang dengan Rapi', 'Pemotongan Bahan', 'Menyiapkan Alat', 'Penyiapan Mesin', 'Membersihkan Wadah'.
    - WAJIB (BENAR): 'Potonglah Pisang dengan Rapi' / 'Potong Pisang', 'Siapkan Alat dan Bahan', 'Nyalakan Mesin', 'Bersihkan Wadah'.
 """
         else:
             humanizer_directives = ""
 
-        system_prompt = f"""You are an Authentic Indonesian SEO Writer crafting high-ranking, human-written editorial content using Claude 4.6 Opus.
+        system_prompt = f"""You are an Authentic Indonesian SEO Writer and Veteran Blogger crafting high-ranking, human-written editorial content.
 {humanizer_directives}
 🎯 CRITICAL LASER TOPICAL FOCUS & ANTI-DRIFT GUARDRAIL (STRICT):
 1. ZERO TOPICAL DRIFT: Every single sentence in this section MUST strictly explain, solve, or elaborate on '{target_keyword}'.
@@ -1015,7 +1183,7 @@ Output valid JSON matching this schema exactly:
      * Kalimat 2: Solusi atau cara kerja konkret.
      * Kalimat 3: Dampak positif atau manfaat nyata bagi pengguna.
    - Singkat, padat, jelas, dan tidak bertele-tele.
-3. SUBHEADING STRUCTURE: Under EVERY H2 and H3 heading, write exactly 2 concise paragraphs (each strictly 3 sentences).
+{subheading_rule}
 4. HEADINGS: ONLY use H2 (##) or H3 (###). NEVER output H1 (#).
 5. WORD COUNT: Target ~{target_word_count} words for this section.
 6. If this is Section 1, mention keyphrase in the very first sentence.
@@ -1023,6 +1191,7 @@ Output valid JSON matching this schema exactly:
    - DILARANG KERAS menempelkan kata 'Langkah 1,', 'Langkah 2,', 'Langkah 3,', 'Step 1,', 'Tahap 1,' di awal kalimat atau paragraf! Ini membuat artikel terdengar kaku, aneh, dan seperti robot.
    - Sajikan seluruh penjelasan, tips, dan prosedur secara naratif yang mengalir alami, luwes, dan berbobot sebagai artikel blog profesional.
    - Gunakan kalimat aktif langsung dengan subjek yang jelas tanpa embel-embel nomor/langkah kaku di awal paragraf.
+8. OUTPUT FORMAT: Output clean Markdown prose only (no code fences, no preamble/closing meta remarks).
 """
 
         user_prompt = f"""
@@ -1031,17 +1200,17 @@ Target Primary Keyword: "{target_keyword}"
 Article Type: {article_type.upper()}
 Section Index: {section_index} of {total_sections}
 Currently Writing Section:
-- Heading: {section_heading} ({section_level.upper()})
-- Target Word Count: ~{target_word_count} words (Consisting of 2 tight, concise paragraphs, each strictly 3 sentences. No bloated rambling descriptions!)
+- Heading: {heading_prefix} {section_heading}
+- Target Word Count: ~{target_word_count} words ({structure_instruction})
 - Key Points to Cover:
 {chr(10).join(f"  * {pt}" for pt in key_points)}
-
+{subsections_block}
 Special Section Requirements:{link_instructions}{product_instruction}{image_instruction}
 
 Context from Previous Sections:
 {previous_sections_summary or "Opening section."}
 
-Output the section in Markdown starting with `{section_level.upper()} {section_heading}`:
+Output the section in clean Markdown starting directly with `{heading_prefix} {section_heading}`:
 """
         messages = [
             {"role": "system", "content": system_prompt},
@@ -1059,40 +1228,10 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
             stage_name=f"Section {section_index}/{total_sections} Writer",
         )
 
-        # Post-clean any remaining em-dashes
-        if humanize_writing:
-            raw_output = raw_output.replace(" — ", ", ").replace("—", ", ")
-
-            # Post-process: auto-replace most common passive constructions → active
-            passive_replacements = [
-                ("dapat digunakan", "bisa kamu gunakan"),
-                ("Dapat digunakan", "Bisa kamu gunakan"),
-                ("perlu diperhatikan", "perlu kamu perhatikan"),
-                ("Perlu diperhatikan", "Perlu kamu perhatikan"),
-                ("harus diperhatikan", "harus kamu perhatikan"),
-                ("Harus diperhatikan", "Harus kamu perhatikan"),
-                ("perlu dilakukan", "perlu kamu lakukan"),
-                ("Perlu dilakukan", "Perlu kamu lakukan"),
-                ("harus dipahami", "perlu kamu pahami"),
-                ("Harus dipahami", "Perlu kamu pahami"),
-                ("bisa didapatkan", "bisa kamu dapatkan"),
-                ("Bisa didapatkan", "Bisa kamu dapatkan"),
-                ("sering digunakan", "banyak orang pakai"),
-                ("Sering digunakan", "Banyak orang pakai"),
-            ]
-            for passive, active in passive_replacements:
-                raw_output = raw_output.replace(passive, active)
-
-        # Sanitize any remaining ampersands & unwanted symbols
-        raw_output = sanitize_indonesian_symbols(raw_output)
-
-        # Eliminate robotic "Langkah 1," prefixes to ensure natural narrative flow
-        raw_output = sanitize_narrative_flow(raw_output)
-
-        return raw_output
+        return self._post_process_prose(raw_output, humanize_writing=humanize_writing, target_keyword=target_keyword)
 
     # --------------------------------------------------------------------------
-    # STEP 4: Final SEO Polish & Anti-AI Sanitizer (Claude 4.6 Opus)
+    # STEP 4: Final SEO Polish, Word Count Calibration & Anti-AI Sanitizer
     # --------------------------------------------------------------------------
     async def polish_and_optimize_seo(
         self,
@@ -1109,8 +1248,12 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         target_link_2_anchor: Optional[str] = None,
         product_name: Optional[str] = None,
     ) -> str:
-        target_min = 1400 if article_type == "pillar" else 550
-        target_max = 1500 if article_type == "pillar" else 590
+        from app.services.seo_analyzer import seo_analyzer
+
+        is_pillar = (article_type == "pillar")
+        target_min = 1400 if is_pillar else 550
+        target_max = 1500 if is_pillar else 590
+        optimal_sweet = "1440–1480" if is_pillar else "565–575"
         target_range = f"{target_min} – {target_max} kata"
 
         image_rule = "Ensure no [caption] or img tags exist; output clean pure text markdown." if not include_image_placeholder else "Preserve [caption] block intact."
@@ -1122,7 +1265,7 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
             allowed_list.append(target_link_2_url.strip())
 
         if allowed_list:
-            link_rule = f"""8. STRICT LINK WHITELIST & PRESERVATION MANDATE:
+            link_rule = f"""9. STRICT LINK WHITELIST & PRESERVATION MANDATE:
    - The ONLY allowed URLs in this entire article are: {', '.join(allowed_list)}.
    - If `{target_link_1_url}` is provided, it MUST appear in the article body (naturally embed it onto '{target_link_1_anchor or target_keyword}' if missing).
    - If `{target_link_2_url}` is provided, it MUST appear in the conclusion (naturally embed it onto '{target_link_2_anchor or product_name or 'Official Website'}' if missing).
@@ -1130,14 +1273,14 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
    - Each approved URL may appear at most ONCE in the entire article.
    - NEVER invent or add any unauthorized third-party links."""
         else:
-            link_rule = """8. ZERO LINKS RULE (ABSOLUTE):
+            link_rule = """9. ZERO LINKS RULE (ABSOLUTE):
    - No links were provided by the user. Therefore, this article MUST contain ZERO markdown links.
    - If there are any `[anchor text](url)` in the draft, STRIP the link syntax completely and leave only `anchor text`.
    - NEVER output any URL or hyperlink."""
 
         if humanize_writing:
             humanizer_polish = """
-7. ANTI-AI DETECTOR SANITIZATION PASS:
+10. ANTI-AI DETECTOR SANITIZATION PASS:
    - Eliminate ALL em-dashes (`—` and `--`). Replace with commas or clean periods.
    - Eliminate ALL colons (`:`) used to introduce lists or emphasize. Replace with a comma, period, or new sentence. Do NOT touch colons inside URLs (https://...).
    - Eliminate ALL semicolons (`;`). Replace with a period or comma.
@@ -1146,7 +1289,7 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
    - Break any remaining formulaic AI transitions ('Ini bukan sekadar...', 'Hal yang perlu dipahami...', 'Berikut lima tips...', 'Merupakan langkah krusial...').
    - Infuse native Indonesian conversational ease ('kan', 'sih', 'lho', 'nih', 'Gimana solusinya?') so AI detector gives < 15% score.
    - Ensure the prose reads 100% natural and passes both Yoast SEO and PlagiarismDetector.
-8. ACTIVE VOICE CONVERSION PASS (MIN 80% ACTIVE):
+11. ACTIVE VOICE CONVERSION PASS (MIN 80% ACTIVE):
    - Scan for passive constructions and rewrite them in active voice.
    - Convert: 'dapat digunakan' → 'bisa kamu gunakan', 'perlu diperhatikan' → 'perhatikan', 'sering digunakan' → 'banyak orang pakai', 'telah dilakukan' → 'sudah dilakukan oleh'.
    - Ensure the subject clearly performs the action in every sentence.
@@ -1154,39 +1297,42 @@ Output the section in Markdown starting with `{section_level.upper()} {section_h
         else:
             humanizer_polish = ""
 
-        system_prompt = f"""You are a Master Indonesian Editor and Anti-AI SEO Specialist using Claude 4.6 Opus.
+        system_prompt = f"""You are a Master Indonesian Editor and Anti-AI SEO Specialist.
 CALIBRATION REQUIREMENTS (SALNA EDITORIAL & YOAST SOP):
 1. 🎯 LASER TOPICAL PRUNING (ELIMINATE OFF-TOPIC RAMBLING):
    - Scan the entire article for any sentences that drift away from '{target_keyword}'.
    - If any paragraph drifts into unrelated philosophy, generic filler, or tangential topics, CUT IT OUT or REWRITE it so it strictly delivers dense, actionable, high-value insights about '{target_keyword}'.
    - Every single section must directly answer and explain '{target_keyword}'.
-2. SUBHEADING PARAGRAPH DEPTH: Every single H2 (##) and H3 (###) MUST have exactly 2 distinct paragraphs under it.
+2. PRESERVE H2/H3 STRUCTURE & PARAGRAPH DEPTH:
+   - Preserve ALL existing `## H2` and `### H3` subheadings from the draft intact — NEVER delete `### H3` subheadings!
+   - Ensure every standalone `## H2` and every `### H3` heading has 2 concise, distinct paragraphs under it (parent `## H2` headings that immediately introduce `### H3` subsections may have 1-2 short bridging paragraphs so total words stay within budget).
 3. 🚨 STRICT PARAGRAPH BREVITY & CONCISENESS (SALNA SOP ANTI-BLOAT PASS):
    - Every single paragraph MUST contain strictly 3 sentences (maximum 4 sentences).
    - NEVER leave bloated, long paragraphs with 5+ sentences.
    - If any paragraph is too long or rambling, PRUNE it down to 3 crisp, tight, punchy sentences.
    - Target ~35 to 45 words per paragraph. Minimalist, direct, and readable without dragging descriptions.
 4. STRICT WORD COUNT ({target_range}):
-   - Final text length MUST BE between {target_range} (optimal sweet spot: 565–575 words for backlink).
-   - MANDATORY MINIMUM: Must reach AT LEAST 550 words (never output 508 or 514 words).
-   - MANDATORY MAXIMUM: Never exceed 595 words (client strictly forbids 600+ words).
-   - If the current draft is under 550 words, EXPAND the explanation in Section 2 and Section 3 with practical, concrete operational details, examples, and user benefits until it comfortably exceeds 550 words (aim for ~565 words).
+   - Final text length MUST BE between {target_range} (optimal sweet spot: {optimal_sweet} kata).
+   - MANDATORY MINIMUM: Must reach AT LEAST {target_min} words.
+   - MANDATORY MAXIMUM: Never exceed {target_max + 5} words.
+   - If the current draft is under {target_min} words, EXPAND the explanation in the main body sections with practical, concrete operational details, examples, and user benefits until it comfortably exceeds {target_min} words.
+   - If the current draft exceeds {target_max} words, tighten redundant filler words while preserving all H2/H3 headings and substantive points.
 5. STRICT KEYPHRASE FREQUENCY (5 TO 7 TIMES ONLY):
-   Count occurrences of '{target_keyword}'. It MUST appear between 5 and 7 times total across the entire article!
+   Count occurrences of '{target_keyword}' (or its core phrase when the keyword is very long). Maintain natural SEO presence (5-7 occurrences total when natural; never over-stuff).
    If it appears > 7 times, replace repetitive instances with natural pronouns ('alat ini', 'langkah ini', 'perangkat tersebut').
-6. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3.
+6. SINGLE H1 RULE: Body MUST only contain ## H2 and ### H3 (keep only the single `# Title` H1 at the very top).
 7. IMAGE RULE: {image_rule}
 8. 🌊 ELIMINATE ROBOTIC 'LANGKAH 1, 2, 3' PREFIXES:
    - DILARANG membiarkan paragraf yang diawali 'Langkah 1,', 'Langkah 2,', 'Langkah 3,', 'Step 1,', 'Tahap 1,'.
    - Hapus kata-kata awalan tersebut dan biarkan kalimat mengalir secara naratif yang menyatu, alami, dan profesional.
 {link_rule}
 {humanizer_polish}
-Output only the final polished article in Markdown.
+Output ONLY the final polished article in pure Markdown (no code fences, no commentary).
 """
 
         user_prompt = f"""
 Target Keyphrase: "{target_keyword}"
-Target Word Count: {target_range}
+Target Word Count: {target_range} (Sweet Spot: {optimal_sweet} kata)
 
 Full Draft to Polish:
 {full_article_markdown}
@@ -1198,7 +1344,7 @@ Return the final polished markdown:
             {"role": "user", "content": user_prompt},
         ]
 
-        polished = await self.execute_task(
+        raw_polished = await self.execute_task(
             messages=messages,
             model=self.model_seo,
             provider=self.writer_provider,
@@ -1209,32 +1355,79 @@ Return the final polished markdown:
             stage_name="SEO Polish & Sanitizer",
         )
 
-        # Final pass: Strip any lingering em-dashes
-        if humanize_writing:
-            polished = polished.replace(" — ", ", ").replace("—", ", ")
+        def finalize_candidate(raw_text: str) -> str:
+            text = self._post_process_prose(raw_text, humanize_writing=humanize_writing, target_keyword=target_keyword)
+            text = sanitize_article_links(text, target_link_1_url, target_link_2_url)
+            text = ensure_target_links_present(
+                content_markdown=text,
+                target_link_1_url=target_link_1_url,
+                target_link_1_anchor=target_link_1_anchor,
+                target_link_2_url=target_link_2_url,
+                target_link_2_anchor=target_link_2_anchor,
+                target_keyword=target_keyword,
+                product_name=product_name,
+            )
+            return text
 
-        # Deterministic symbol sanitization (& -> dan, clean symbols)
-        polished = sanitize_indonesian_symbols(polished)
+        polished = finalize_candidate(raw_polished)
 
-        # Enforce tutorial active voice imperatives on step headings/lists
-        polished = sanitize_tutorial_imperatives(polished)
+        # ── Deterministic Word Count Guard (Zero overhead when already in range) ──
+        cal_min = 1400 if is_pillar else 550
+        cal_max = 1550 if is_pillar else 595
+        cal_ideal = 1455 if is_pillar else 568
+        current_words = seo_analyzer.count_words(polished)
 
-        # Eliminate robotic "Langkah 1," prefixes to ensure natural narrative flow
-        polished = sanitize_narrative_flow(polished)
+        if current_words < cal_min or current_words > cal_max:
+            diff = abs(cal_ideal - current_words)
+            if current_words < cal_min:
+                cal_action = (
+                    f"Artikel saat ini terhitung HANYA {current_words} kata (kurang {cal_min - current_words} kata dari batas minimal {cal_min} kata). "
+                    f"TAMBAHKAN sekitar {diff} kata berupa detail teknis praktis, contoh lapangan, atau manfaat konkret pada paragraf isi bagian tengah sehingga total kata menjadi sekitar {cal_ideal} kata (wajib {cal_min}–{cal_max} kata)."
+                )
+            else:
+                cal_action = (
+                    f"Artikel saat ini terhitung {current_words} kata (melebihi batas maksimal {cal_max} kata). "
+                    f"PADATKAN dan kurangi sekitar {diff} kata dari kalimat pengisi yang berulang sehingga total kata turun ke sekitar {cal_ideal} kata (wajib {cal_min}–{cal_max} kata)."
+                )
 
-        # Deterministic link whitelist enforcement (100% foolproof gatekeeper)
-        polished = sanitize_article_links(polished, target_link_1_url, target_link_2_url)
+            logger.info(
+                f"[WordCountGuard] Count={current_words} outside [{cal_min}-{cal_max}]. Running 1 calibration pass toward {cal_ideal} words..."
+            )
+            cal_messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an expert Indonesian SEO copy editor performing strict word-count calibration.\n"
+                        f"{cal_action}\n"
+                        "STRICT PRESERVATION RULES:\n"
+                        "- Keep ALL existing #, ##, and ### headings completely intact.\n"
+                        "- Keep ALL markdown links [anchor](url) and image captions completely intact.\n"
+                        "- Keep 3 to 4 crisp sentences per paragraph, active voice, natural Indonesian tone, ZERO colons/em-dashes/semicolons/&.\n"
+                        "- Output ONLY the full calibrated Markdown article without commentary or code fences."
+                    ),
+                },
+                {"role": "user", "content": polished},
+            ]
 
-        # 100% Link Guarantee: ensure user target links are actually present (never missed by AI)
-        polished = ensure_target_links_present(
-            content_markdown=polished,
-            target_link_1_url=target_link_1_url,
-            target_link_1_anchor=target_link_1_anchor,
-            target_link_2_url=target_link_2_url,
-            target_link_2_anchor=target_link_2_anchor,
-            target_keyword=target_keyword,
-            product_name=product_name,
-        )
+            try:
+                raw_calibrated = await self.execute_task(
+                    messages=cal_messages,
+                    model=self.model_seo,
+                    provider=self.writer_provider,
+                    fallback_enabled=self.writer_fallback_enabled,
+                    fallback_model=self.writer_fallback_model,
+                    fallback_provider=self.writer_fallback_provider,
+                    temperature=0.25,
+                    stage_name="Word Count Calibration",
+                )
+                calibrated = finalize_candidate(raw_calibrated)
+                calibrated_words = seo_analyzer.count_words(calibrated)
+                logger.info(f"[WordCountGuard] Calibration result: {current_words} -> {calibrated_words} words")
+
+                if len(calibrated.strip()) > 200 and abs(calibrated_words - cal_ideal) < abs(current_words - cal_ideal):
+                    polished = calibrated
+            except Exception as cal_err:
+                logger.warning(f"[WordCountGuard] Calibration pass skipped due to error: {cal_err}")
 
         return polished
 
