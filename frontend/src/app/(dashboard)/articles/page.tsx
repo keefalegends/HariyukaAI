@@ -20,9 +20,12 @@ import {
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
 import { getApiUrl } from "@/lib/api-config";
+import { ArticleMetaBadges } from "@/components/articles/article-meta-badges";
 
 interface ArticleItem {
   id: string;
+  user_id?: string;
+  created_by?: string;
   title: string;
   target_keyword: string;
   article_type?: string;
@@ -319,6 +322,12 @@ export default function ArticlesPage() {
                 {/* Meta Badges */}
                 <div className="flex items-center gap-2 flex-wrap text-xs">
                   {getStatusBadge(art.status)}
+
+                  <ArticleMetaBadges
+                    articleType={art.article_type}
+                    createdBy={art.created_by}
+                    userId={art.user_id}
+                  />
 
                   <span className={`px-2 py-0.5 rounded-md border t-border t-bg-tag text-[11px] font-mono ${tk.textMuted}`}>
                     {art.word_count > 0 ? `${formatNumber(art.word_count)} kata` : "0 kata"}

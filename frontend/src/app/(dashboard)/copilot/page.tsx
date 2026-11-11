@@ -31,8 +31,13 @@ function formatDate(dateStr?: string): string {
   }
 }
 
+import { ArticleMetaBadges } from "@/components/articles/article-meta-badges";
+
 interface ArticleItem {
   id: string;
+  user_id?: string;
+  created_by?: string;
+  article_type?: string;
   title: string;
   target_keyword?: string;
   status: string;
@@ -223,6 +228,12 @@ export default function CopilotHubPage() {
                         <span>Siap Direvisi</span>
                       </span>
                     )}
+
+                    <ArticleMetaBadges
+                      articleType={article.article_type}
+                      createdBy={article.created_by}
+                      userId={article.user_id}
+                    />
 
                     {/* Word Count Badge */}
                     <span className={`px-2 py-0.5 rounded-md border t-border t-bg-tag text-[11px] font-mono ${tk.textMuted}`}>

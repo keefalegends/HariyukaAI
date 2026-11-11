@@ -51,9 +51,12 @@ async def generate_outline_endpoint(
     article_id = str(uuid.uuid4())
     job_id = str(uuid.uuid4())
 
+    creator_account = req.created_by.strip() if req.created_by and req.created_by.strip() else "default-user"
+
     article_record = {
         "id": article_id,
-        "user_id": "default-user",
+        "user_id": creator_account,
+        "created_by": creator_account,
         "project_id": req.project_id,
         "title": ensure_keyword_at_start_of_title(req.title or f"{req.target_keyword.title()} dan Panduan Lengkapnya", req.target_keyword),
         "target_keyword": req.target_keyword,

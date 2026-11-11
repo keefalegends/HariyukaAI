@@ -59,6 +59,7 @@ class GenerateOutlineRequest(BaseModel):
     target_length: Optional[int] = Field(None, description="Target word count (auto-adjusted based on article_type)")
     secondary_keywords: Optional[List[str]] = Field(default_factory=list)
     project_id: Optional[str] = None
+    created_by: Optional[str] = Field(None, description="Operator account username creating the article")
     brand_voice_instructions: Optional[str] = None
     competitor_urls: Optional[List[str]] = Field(default_factory=list)
 
@@ -96,6 +97,7 @@ class ContinueWritingRequest(BaseModel):
 class ArticleResponse(BaseModel):
     id: str
     user_id: Optional[str] = None
+    created_by: Optional[str] = None
     project_id: Optional[str] = None
     title: str
     target_keyword: str
