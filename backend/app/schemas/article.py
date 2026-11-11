@@ -123,6 +123,7 @@ class ArticleResponse(BaseModel):
     target_link_2_url: Optional[str] = None
     target_link_2_anchor: Optional[str] = None
     product_name: Optional[str] = None
+    copilot_chat_history: Optional[List[Dict[str, Any]]] = None
     created_at: datetime
     updated_at: datetime
 

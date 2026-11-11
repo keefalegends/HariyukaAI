@@ -340,6 +340,7 @@ async def get_dashboard_stats():
             "total_words": 0,
             "average_seo_score": 0,
             "completed_articles": 0,
+            "active_chat_sessions": 0,
             "recent_articles": []
         }
 
@@ -347,6 +348,10 @@ async def get_dashboard_stats():
     scores = [a.get("seo_score", 0) for a in articles if a.get("seo_score", 0) > 0]
     avg_score = round(sum(scores) / len(scores), 1) if scores else 0
     completed = len([a for a in articles if a.get("status") == "completed"])
+    active_chats = len([
+        a for a in articles
+        if isinstance(a.get("copilot_chat_history"), list) and len(a["copilot_chat_history"]) > 0
+    ])
     
     sorted_recent = sorted(articles, key=lambda x: str(x.get("created_at") or ""), reverse=True)[:5]
 
@@ -355,5 +360,6 @@ async def get_dashboard_stats():
         "total_words": total_words,
         "average_seo_score": avg_score,
         "completed_articles": completed,
+        "active_chat_sessions": active_chats,
         "recent_articles": sorted_recent
     }
