@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   Globe,
@@ -17,9 +18,19 @@ import {
   FileText,
   BookmarkCheck,
   ShieldCheck,
+  FolderKanban,
 } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useTokens } from "@/lib/use-tokens";
+import { getApiUrl } from "@/lib/api-config";
+
+interface ProjectPreset {
+  id: string;
+  name: string;
+  target_domain?: string;
+  brand_voice_instructions?: string;
+  default_language: string;
+}
 
 interface StepInputProps {
   onSubmit: (formData: any) => void;
@@ -75,6 +86,9 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
   const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([]);
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [brandVoice, setBrandVoice] = useState("");
+  const [projects, setProjects] = useState<ProjectPreset[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [lastAutoBrandVoice, setLastAutoBrandVoice] = useState("");
 
   // Salna Backlink SOP Link injection states (Open by default so 2 links are always prominent)
   const [showLinkSettings, setShowLinkSettings] = useState(true);
@@ -87,11 +101,65 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
   const [productName, setProductName] = useState("");
   const [productPromoContext, setProductPromoContext] = useState("");
 
+  const applyProjectPreset = (projId: string, projectList: ProjectPreset[]) => {
+    setSelectedProjectId(projId);
+    if (!projId) {
+      if (brandVoice === lastAutoBrandVoice) {
+        setBrandVoice("");
+      }
+      setLastAutoBrandVoice("");
+      return;
+    }
+
+    const found = projectList.find((p) => p.id === projId);
+    if (!found) return;
+
+    if (found.default_language) {
+      setLanguage(found.default_language);
+    }
+    const bv = found.brand_voice_instructions || "";
+    setBrandVoice(bv);
+    setLastAutoBrandVoice(bv);
+  };
+
   useEffect(() => {
     const kwParam = searchParams.get("keyword");
     if (kwParam) {
       setKeyword(kwParam);
     }
+  }, [searchParams]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadProjects = async () => {
+      try {
+        const res = await fetch(getApiUrl("/api/v1/projects"));
+        if (!isMounted || !res.ok) return;
+        const data: ProjectPreset[] = await res.json();
+        const list = Array.isArray(data) ? data : [];
+        setProjects(list);
+
+        const paramProjId = searchParams.get("project_id");
+        if (paramProjId) {
+          const matched = list.find((p) => p.id === paramProjId);
+          if (matched) {
+            setSelectedProjectId(matched.id);
+            if (matched.default_language) setLanguage(matched.default_language);
+            const bv = matched.brand_voice_instructions || "";
+            if (bv) {
+              setBrandVoice(bv);
+              setLastAutoBrandVoice(bv);
+            }
+          }
+        }
+      } catch {
+        // Non-fatal if projects service is unreachable
+      }
+    };
+    loadProjects();
+    return () => {
+      isMounted = false;
+    };
   }, [searchParams]);
 
   const handleSelectArticleType = (type: "pillar" | "backlink_article" | "backlink_product") => {
@@ -128,6 +196,7 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
       tone,
       target_length: Number(targetLength),
       secondary_keywords: secondaryKeywords,
+      project_id: selectedProjectId || undefined,
       brand_voice_instructions: brandVoice.trim() || undefined,
       competitor_urls: [],
       humanize_writing: humanizeWriting,
@@ -206,6 +275,41 @@ export function StepInput({ onSubmit, isLoading }: StepInputProps) {
               );
             })}
           </div>
+        </div>
+
+        {/* ─── PROYEK & BRAND VOICE PRESET (OPSIONAL) ─── */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <label className={labelClass}>
+              Proyek & Brand Voice Preset <span className={`font-normal normal-case ${tk.textFaint}`}>— Opsional</span>
+            </label>
+            <Link
+              href="/projects"
+              className={`text-[11px] font-medium ${tk.accentText} hover:underline`}
+            >
+              Kelola Proyek
+            </Link>
+          </div>
+          <div className="relative">
+            <FolderKanban className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${tk.textFaint}`} />
+            <select
+              value={selectedProjectId}
+              onChange={(e) => applyProjectPreset(e.target.value, projects)}
+              className={`w-full ${inputShared} pl-9 pr-3 appearance-none cursor-pointer`}
+            >
+              <option value="">— Tanpa Proyek (Atur Manual) —</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}{p.target_domain ? ` (${p.target_domain})` : ""} · {(p.default_language || "id").toUpperCase()}
+                </option>
+              ))}
+            </select>
+          </div>
+          {selectedProjectId && (
+            <p className={`text-[11px] ${tk.textMuted}`}>
+              Bahasa default dan instruksi Brand Voice proyek otomatis diterapkan ke kolom di bawah.
+            </p>
+          )}
         </div>
 
         {/* ─── 2. TARGET KEYWORD UTAMA ─── */}

@@ -31,8 +31,15 @@ function formatDate(dateStr?: string): string {
   }
 }
 
+import { ArticleMetaBadges } from "@/components/articles/article-meta-badges";
+
 interface ArticleItem {
   id: string;
+  user_id?: string;
+  created_by?: string;
+  project_id?: string;
+  project_name?: string;
+  article_type?: string;
   title: string;
   target_keyword?: string;
   status: string;
@@ -51,20 +58,30 @@ export default function CopilotHubPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchArticles = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
       try {
         const res = await fetch(getApiUrl("/api/v1/articles"));
-        if (res.ok) {
+        if (isMounted && res.ok) {
           const data = await res.json();
           setArticles(Array.isArray(data) ? data : []);
         }
       } catch (err) {
         console.error("Failed to fetch articles:", err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
+
     fetchArticles();
+    const interval = setInterval(fetchArticles, 5000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const filteredArticles = articles.filter((a) => {
@@ -107,7 +124,7 @@ export default function CopilotHubPage() {
         </div>
 
         {/* Quick Stats Banner */}
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex items-center flex-wrap gap-2.5 text-xs">
           <div className="px-3 py-2 rounded-xl t-card border t-border flex items-center gap-2 shadow-sm">
             <FileText className="w-4 h-4 text-[#d97757]" />
             <span className={tk.textMuted}>Total Artikel:</span>
@@ -119,6 +136,14 @@ export default function CopilotHubPage() {
             <span className={tk.textMuted}>Sesi Chat Aktif:</span>
             <span className={`font-bold font-mono text-emerald-400`}>{totalWithChats}</span>
           </div>
+
+          <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl t-card border t-border text-[11px] font-mono text-emerald-400"
+            title="Data status dan sesi chat diperiksa otomatis setiap 5 detik"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Live 5d</span>
+          </span>
         </div>
       </div>
 
@@ -205,6 +230,13 @@ export default function CopilotHubPage() {
                         <span>Siap Direvisi</span>
                       </span>
                     )}
+
+                    <ArticleMetaBadges
+                      articleType={article.article_type}
+                      createdBy={article.created_by}
+                      userId={article.user_id}
+                      projectName={article.project_name}
+                    />
 
                     {/* Word Count Badge */}
                     <span className={`px-2 py-0.5 rounded-md border t-border t-bg-tag text-[11px] font-mono ${tk.textMuted}`}>

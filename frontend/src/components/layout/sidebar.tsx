@@ -54,24 +54,39 @@ export function Sidebar() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [articleCount, setArticleCount] = useState<number>(0);
+  const [activeChatCount, setActiveChatCount] = useState<number>(0);
   const [operatorName, setOperatorName] = useState<string>("keefa9");
 
   useEffect(() => {
-    // Fetch dashboard stats
-    fetch(getApiUrl("/api/v1/settings/dashboard-stats"))
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (d?.total_articles !== undefined) setArticleCount(d.total_articles);
-      })
-      .catch(() => {});
+    let isMounted = true;
+
+    const fetchStats = () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      fetch(getApiUrl("/api/v1/settings/dashboard-stats"))
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (!isMounted || !d) return;
+          if (d.total_articles !== undefined) setArticleCount(d.total_articles);
+          if (d.active_chat_sessions !== undefined) setActiveChatCount(d.active_chat_sessions);
+        })
+        .catch(() => {});
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 5000);
 
     // Fetch active logged-in operator
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (d?.operator) setOperatorName(d.operator);
+        if (isMounted && d?.operator) setOperatorName(d.operator);
       })
       .catch(() => {});
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleConfirmLogout = async () => {
@@ -369,10 +384,13 @@ export function Sidebar() {
                 </button>
               </div>
 
-              {/* Row 2: N chats / artikel | ABOUT | ⚙️ SETTINGS */}
-              <div className="flex items-center justify-between text-[11px] pt-1.5 border-t t-border font-medium">
-                <span className="t-text-faint">
-                  {articleCount} {articleCount === 1 ? "artikel" : "chats"}
+              {/* Row 2: N art · N chat | ABOUT | ⚙️ SETTINGS */}
+              <div className="flex items-center justify-between text-[11px] pt-1.5 border-t t-border font-medium gap-1">
+                <span
+                  className="t-text-faint truncate"
+                  title={`${articleCount} Artikel · ${activeChatCount} Sesi Chat Aktif (Sinkron setiap 5 detik)`}
+                >
+                  {articleCount} art · {activeChatCount} chat
                 </span>
 
                 <div className="flex items-center gap-3">

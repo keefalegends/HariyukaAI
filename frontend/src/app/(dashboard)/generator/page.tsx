@@ -29,10 +29,27 @@ function GeneratorContent() {
     logTerminal("JOB", `Target Keyphrase: "${formData.target_keyword}"`);
 
     try {
+      let creatorAccount: string | undefined = formData.created_by;
+      if (!creatorAccount) {
+        try {
+          const meRes = await fetch("/api/auth/me");
+          if (meRes.ok) {
+            const meData = await meRes.json();
+            if (meData?.operator) {
+              creatorAccount = String(meData.operator);
+            }
+          }
+        } catch {
+          // Non-fatal: fallback to backend default-user when session info is unavailable
+        }
+      }
+
+      const payload = creatorAccount ? { ...formData, created_by: creatorAccount } : formData;
+
       const res = await fetch(getApiUrl("/api/v1/articles/generate-outline"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {

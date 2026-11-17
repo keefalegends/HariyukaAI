@@ -9,6 +9,21 @@ from typing import Dict, Any, List, Optional
 
 class SeoAnalyzerService:
     @staticmethod
+    def extract_clean_words(content_markdown: str) -> List[str]:
+        """Extract clean word tokens matching WordPress/Yoast word count (ignoring shortcodes & URL syntax)."""
+        if not content_markdown:
+            return []
+        text_no_shortcodes = re.sub(r"\[caption.*?\[/caption\]", " ", content_markdown, flags=re.DOTALL)
+        text_no_links = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text_no_shortcodes)
+        text_clean = re.sub(r"[#*`_\[\]()><\"'-]", " ", text_no_links)
+        return [w for w in text_clean.split() if w.strip()]
+
+    @staticmethod
+    def count_words(content_markdown: str) -> int:
+        """Return total clean word count of a Markdown article."""
+        return len(SeoAnalyzerService.extract_clean_words(content_markdown))
+
+    @staticmethod
     def analyze(
         content_markdown: str,
         target_keyword: Optional[str] = "",
@@ -29,12 +44,7 @@ class SeoAnalyzerService:
         secondary_keywords = secondary_keywords or []
         kw_clean = (target_keyword or "").strip().lower()
 
-        # Clean text for accurate word count
-        # Strip wordpress captions, markdown links, tags
-        text_no_shortcodes = re.sub(r"\[caption.*?\[/caption\]", " ", content_markdown, flags=re.DOTALL)
-        text_no_links = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text_no_shortcodes)
-        text_clean = re.sub(r"[#*`_\[\]()><\"'-]", " ", text_no_links)
-        words = [w for w in text_clean.split() if w.strip()]
+        words = SeoAnalyzerService.extract_clean_words(content_markdown)
         total_words = len(words)
 
         if total_words == 0:
