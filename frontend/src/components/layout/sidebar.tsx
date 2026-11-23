@@ -94,7 +94,7 @@ export function Sidebar() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch {}
-    window.location.href = "/login";
+    window.location.href = "/login?logout=1";
   };
 
   return (
