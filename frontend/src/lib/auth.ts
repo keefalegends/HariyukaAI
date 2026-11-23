@@ -10,12 +10,8 @@ export const SESSION_COOKIE_NAME = "hariyuka_operator_session";
  * Format: "user1:pass1,user2:pass2"
  */
 export function getAuthorizedUsers(): Map<string, string> {
-  const envString = process.env.AUTH_USERS || "keefa9:cc,salna9:cc,admin:admin";
+  const envString = process.env.AUTH_USERS || "";
   const userMap = new Map<string, string>();
-
-  // Always pre-populate default operators
-  userMap.set("keefa9", "cc");
-  userMap.set("salna9", "cc");
 
   const pairs = envString.split(",");
   for (const pair of pairs) {

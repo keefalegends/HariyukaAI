@@ -55,7 +55,7 @@ export function Sidebar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [articleCount, setArticleCount] = useState<number>(0);
   const [activeChatCount, setActiveChatCount] = useState<number>(0);
-  const [operatorName, setOperatorName] = useState<string>("keefa9");
+  const [operatorName, setOperatorName] = useState<string>("operator");
 
   useEffect(() => {
     let isMounted = true;
