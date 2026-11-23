@@ -185,5 +185,39 @@
     ],
     "error_message": "Connection error.",
     "updated_at": "2026-08-26T06:55:43.061256"
+  },
+  "cee6cde8-5fd1-428c-954a-3fc4cf05b2e2": {
+    "id": "cee6cde8-5fd1-428c-954a-3fc4cf05b2e2",
+    "article_id": "66d968a5-c9b3-4630-ac41-e49c029b7edb",
+    "current_step": 1,
+    "total_steps": 5,
+    "step_name": "serp_analysis",
+    "progress_percentage": 10,
+    "status": "failed",
+    "logs": [
+      {
+        "time": "2026-11-10T11:36:38.563484",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": "Error code: 503 - {'error': {'message': '[antigravity/gemini-3.7-flash-high] [404]: {\\n  \"error\": {\\n    \"code\": 404,\\n    \"message\": \"Requested entity was not found.\",\\n    \"status\": \"NOT_FOUND\"\\n  }\\n}\\n (reset after 1m 54s)'}}",
+    "updated_at": "2026-11-10T11:36:47.835183"
+  },
+  "f2c53054-2e21-4d09-a98f-9af150e16060": {
+    "id": "f2c53054-2e21-4d09-a98f-9af150e16060",
+    "article_id": "3cb3b6a7-8c6f-4e0a-a85b-f4015c0fe465",
+    "current_step": 2,
+    "total_steps": 5,
+    "step_name": "outline_review",
+    "progress_percentage": 50,
+    "status": "waiting_user_input",
+    "logs": [
+      {
+        "time": "2026-11-10T11:38:09.607104",
+        "message": "Memulai analisis SERP & Intent"
+      }
+    ],
+    "error_message": null,
+    "updated_at": "2026-11-10T11:41:39.459204"
   }
 }
