@@ -24,8 +24,13 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 2. If at '/login' and already logged in, send to '/dashboard'
+  // 2. If at '/login' and logging out, clear session cookie and stay on login
   if (pathname === "/login") {
+    if (req.nextUrl.searchParams.get("logout") === "1") {
+      const response = NextResponse.next();
+      response.cookies.delete(SESSION_COOKIE_NAME);
+      return response;
+    }
     if (isAuthenticated) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }

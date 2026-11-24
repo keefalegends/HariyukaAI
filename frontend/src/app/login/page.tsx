@@ -83,9 +83,8 @@ function LoginForm() {
                 <strong className="text-white font-mono">Hariyuka AI</strong> adalah sistem SEO Article Generator berbasis multi-step agentic AI pipeline untuk operator terverifikasi.
               </p>
               <div className="p-3 rounded-lg bg-[#141210] border border-[#2c2926] font-mono text-[11px] space-y-1.5">
-                <div className="text-[#d97757]">// OPERATORS:</div>
-                <div className="text-white">• Keefa — Architect & Developer</div>
-                <div className="text-white">• Salna — Content Strategist & Helper</div>
+                <div className="text-[#d97757]">// ACCESS:</div>
+                <div className="text-white">• Authorized Operators Only</div>
                 <div className="text-[#78716c] text-[10px] mt-1">// CONFIG: Set via AUTH_USERS in .env</div>
               </div>
             </div>
